@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>6.5. QM Management &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="6.6. Some Advices for the QM" href="advices_for_qm.html" />
+    <link rel="prev" title="6.4. QM box" href="qm_box.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="qm-management">
+<span id="qm-management-page"></span><h1><span class="section-number">6.5. </span>QM Management<a class="headerlink" href="#qm-management" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#general-procedure" id="id1">General Procedure</a></p>
+<ul>
+<li><p><a class="reference internal" href="#first-call" id="id2">First call</a></p></li>
+<li><p><a class="reference internal" href="#loop-over-the-second-part" id="id3">Loop over the second part</a></p></li>
+<li><p><a class="reference internal" href="#resolution" id="id4">Resolution</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#submision-script" id="id5">Submision script</a></p>
+<ul>
+<li><p><a class="reference internal" href="#template-for-a-single-qm-calculation" id="id6">Template for a single QM calculation</a></p></li>
+<li><p><a class="reference internal" href="#template-for-a-multiple-qm-calculation" id="id7">Template for a multiple QM calculation</a></p></li>
+<li><p><a class="reference internal" href="#choose-the-scratch-directory" id="id8">Choose the scratch directory</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sans doute a reprendre et a ameliorer</p>
+</div>
+<p>In this page we will present how to manage the pool of QM calculation to perform in the numerical terms. How to launch them on the cluster? How to parralilize several QM calculation on the same servor?</p>
+<p>This page will not described at all how to required the QM claculation in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> nor they physical meaning.</p>
+<section id="general-procedure">
+<span id="qm-management-general-procedure-subpage"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink"><span class="section-number">6.5.1. </span>General Procedure</a><a class="headerlink" href="#general-procedure" title="Link to this heading">¶</a></h2>
+<p>The different <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> parameters files are QM results localisation are defined by the function dalton_manager_module.build_QM_file_localization:</p>
+<dl class="py function" id="autodoc-dalton-manager-module-build-qm-file-localization">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.dalton_manager_module.</span></span><span class="sig-name descname"><span class="pre">build_QM_file_localization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_QM_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moleculetype_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molecule_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creat_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/dalton_manager_module.html#build_QM_file_localization"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Define how the directory name is created/attributed for the QM run knowing target molecule attributes – for instance the time step or the molecule type name. Also creat the directory if needed</p>
+<p>Today, the localisation for the QM calculation of the ‘i’ molecule at the time step ‘T’ of the molecule type ‘Mol’ would be: GP.dir_torun_QM/Mol/Time_T/Molecule_i.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<section id="first-call">
+<h3><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">6.5.1.1. </span>First call</a><a class="headerlink" href="#first-call" title="Link to this heading">¶</a></h3>
+<p>Let’s say that <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> start from zero: after the reading of the parameter file, it starts it first part.</p>
+<p>Using the <a class="reference internal" href="optical_parameter.html#autodoc-opticalparameter-where-to-run-qm"><span class="std std-ref">OpticalParameter.where_to_run_QM</span></a> and <a class="reference internal" href="optical_parameter.html#autodoc-opticalparameter-selection-tool"><span class="std std-ref">OpticalParameter.selection_tool</span></a> parameters, during the first part <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> check if the molecule of each MT should undergo a QM calculation. For each time step, if a configuration should be QM treated, the directory where the input parameters are written is stored in the <a class="reference internal" href="optical_parameter.html#autodoc-opticalparameter-l-qm-todo"><span class="std std-ref">OpticalParameter.L_QM_todo</span></a>.</p>
+<p>Then, at the begining of the second part, all the <a class="reference internal" href="optical_parameter.html#autodoc-opticalparameter-l-qm-todo"><span class="std std-ref">OpticalParameter.L_QM_todo</span></a> list of each time step are merged. The resulting list of all the QM calculation to performed is stored in the file <em>GP.dir_submission_file/job_to_perform.p</em>.</p>
+<p>The total number of job to performed is distributed over several ‘’jobs’’ using the <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-nbr-job-parr-qm"><span class="std std-ref">GlobalParameter.nbr_job_parr_QM</span></a> and <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-max-submission-qm"><span class="std std-ref">GlobalParameter.max_submission_QM</span></a>. For instance, if there are 1200 QM calculation to perform, if <span class="incremental">GP.nbr_job_parr_QM=16</span> and <span class="incremental">GP.max_submission_QM=50</span>, 50 jobs of 16 QM calculation will be created. Therefore, 1200-50*16=400 jobs are left to do. Each ‘’jobs’’ used the file located at <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-file-template-script-run-qm"><span class="std std-ref">GlobalParameter.file_template_script_run_QM</span></a> as a template. See the <a class="reference internal" href="#qm-management-template-script-subpage"><span class="std std-ref">next section</span></a> for more information about the  template and how the ‘’jobs’’ are created.</p>
+<p>In order to make easier the launching of all these 50 jobs, a file has been created at <em>GP.dir_submission_file/submit_job.sh</em> .  This file will launch every ‘job’ using the commande defined in <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-command-launch-job"><span class="std std-ref">GlobalParameter.command_launch_job</span></a>. For instance, if you are using the SGE cluster manager, the command should be ‘qsub’. If you are using slurm, use <span class="incremental">GP.command_launch_job=’sbatch’</span>.</p>
+<p>Therefore, to launch in all the 50 jobs in just one time, type in the console <span class="incremental">bash GP.dir_submission_file/submit_job.sh</span> where the GP.dir_submission_file is the directory where is store this file – or go to this file to run <em>submit_job.sh</em>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Using this automatic procedure, you can very easely submite a lot of calculation to the cluster. Please think twice before running the <em>submit_job.sh</em> file!</p>
+</div>
+<p>At this point, you have numerous QM calculation running in the cluster. Before going any further, you have to wait to all the QM calculation to end.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can cancel some of the job if needed. It is not a problem since <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will check if all the job are finished or not anyway. If any QM calculation crashed or do not happened, it will be treated in the next loop, see bellow.</p>
+</div>
+<p>Once all of the jobs launched ended, you can run again <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>.</p>
+</section>
+<section id="loop-over-the-second-part">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">6.5.1.2. </span>Loop over the second part</a><a class="headerlink" href="#loop-over-the-second-part" title="Link to this heading">¶</a></h3>
+<p>For this part, it is assumed that <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run on a set of directory created by a previous calculation which ended at the second part. The aim of this <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> calculation is to end the previous one. Thus, very similar input parameters are used – see below.</p>
+<p>In this case, the directories:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-mol-times"><span class="std std-ref">GlobalParameter.dir_mol_times</span></a> should contains the list of the MT for all the time step needed.</p></li>
+<li><p><a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-torun-qm"><span class="std std-ref">GlobalParameter.dir_torun_QM</span></a> should contains all the configuration that should be QM treated. It includes all the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> input files, and maybe the results – in the ‘dalton_molecule_potential.out’ file.</p></li>
+<li><p><a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-submission-file"><span class="std std-ref">GlobalParameter.dir_submission_file</span></a> should contains the ‘job_to_perform.p’ file, which contains the list of the QM calculation to perform <strong>during the last execution</strong>.</p></li>
+</ul>
+</div></blockquote>
+<p>The first part of the run has already been done. There is no need to redo it, and therefore the attribute <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-pass-first-part"><span class="std std-ref">GlobalParameter.pass_first_part</span></a> should be set to True. This will skip the first part after the input parameter reading to launch directly the second part.</p>
+<a class="reference internal image-reference" href="../_images/stop-please-read.png"><img alt="../_images/stop-please-read.png" class="align-center" src="../_images/stop-please-read.png" style="width: 1200px;" /></a>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Therefore, it is <strong>very important</strong> that the parameters used in a run skipping the first part using GP.pass_first_part, and in the previous one (which generated the MTs used) are almost the same. You can change some GP attributes between the first <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run and the others, but not the ones regarding the MTs! The GP parrameter you can want safely are presented <a class="reference internal" href="../GlobalParameter/QM_management.html#gp-qm-management-numerical-parameter-subpage"><span class="std std-ref">here</span></a>.</p>
+</div>
+<p>At the begining of the second part, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> opens the list of QM calculation contains in <em>job_to_perform.p</em>. Then, for every configurations in this list, it will check if the QM calculation have been performed, and if the calculation ended correctly – <em>i.e.</em> do not crashed: ended with the standard message.</p>
+<p>The QM calculation that have not been performed are stored in a new list, and a new <em>job_to_perform.p</em> file is created. For the new call of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, the second part will thus start with this new  <em>job_to_perform.p</em> – with fewer number of QM calculation to perform. Then, as in the first call, ‘jobs’ are created according to <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-nbr-job-parr-qm"><span class="std std-ref">GlobalParameter.nbr_job_parr_QM</span></a> and <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-max-submission-qm"><span class="std std-ref">GlobalParameter.max_submission_QM</span></a>. Each ‘jobs’ used the file located at <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-file-template-script-run-qm"><span class="std std-ref">GlobalParameter.file_template_script_run_QM</span></a> as a template. Finaly, the ‘jobs’ can be launched at once using the file <em>GP.dir_submission_file/submit_job.sh</em> in the cluster. The command to submite a job on a cluster is still provided by <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-command-launch-job"><span class="std std-ref">GlobalParameter.command_launch_job</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All these attributes regarding the management of the QM calculation <strong>can</strong> be changed from one <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> call to another.</p>
+</div>
+<p>Therefore, in your first call you can use very safe parameters (like <span class="incremental">GP.nbr_job_parr_QM=1</span> and <span class="incremental">GP.max_submission_QM=1</span>) to test how behave the QM calculations. Then in the next call send more QM calculations.</p>
+<p>You have to loop over this procedure until all the QM calculation is performed:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Run <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> with <span class="incremental">GP.pass_first_part=True</span></p></li>
+</ul>
+</div></blockquote>
+<p>It will check the number of QM calculation left to do and writes a new <em>GP.dir_submission_file/job_to_perform.p</em> accordingly. Then create new ‘’jobs’’ according to the GP parameters you have given to deal with the QM management. Create a new <em>GP.dir_submission_file/submit_job.sh</em>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Run <em>GP.dir_submission_file/submit_job.sh</em></p></li>
+</ul>
+</div></blockquote>
+<p>It will send all the ‘jobs’ to the cluster</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Wait until all the ‘jobs’ ended.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="resolution">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">6.5.1.3. </span>Resolution</a><a class="headerlink" href="#resolution" title="Link to this heading">¶</a></h3>
+<p>Once all QM calculations have been done, the second part behaves differently. If no QM calculation are left to do, the second part end and the third part is launched. In this part, the optical properties are read from the QM results for all the configuration.</p>
+<p>Then, all the diagrams are updates as usual and the merging over the frame is performed. At the end of the <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> calculation, the file final output file are created in the <a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-general-path"><span class="std std-ref">GlobalParameter.general_path</span></a> directory. Now you can read the results using the post-processing files – see <strong>this tutorial</strong> for instance.</p>
+</section>
+</section>
+<section id="submision-script">
+<span id="qm-management-template-script-subpage"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">6.5.2. </span>Submision script</a><a class="headerlink" href="#submision-script" title="Link to this heading">¶</a></h2>
+<p>In this section, we will see what should be the <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-file-template-script-run-qm"><span class="std std-ref">GlobalParameter.file_template_script_run_QM</span></a> and how the ‘jobs’ are created. Let’s first see how to deal with one QM calculation per jobs (mono-core calculation). Then how to create jobs that will compute several QM calculations per servor (multi-core calculations). Finally, we will see how to define the scratch directory for the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> calculations using <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-scratch-dir"><span class="std std-ref">GlobalParameter.scratch_dir</span></a>.</p>
+<section id="template-for-a-single-qm-calculation">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">6.5.2.1. </span>Template for a single QM calculation</a><a class="headerlink" href="#template-for-a-single-qm-calculation" title="Link to this heading">¶</a></h3>
+<p>The <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-file-template-script-run-qm"><span class="std std-ref">GlobalParameter.file_template_script_run_QM</span></a> should be a file which contains all the information needed for a jobs submission in your cluster. You can find examples HERE for a SGE cluster manager. For instance, the GP.file_template_script_run_QM is the file <em>template_run_dalton_mono.sh</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#/bin/bash
+#$ -S /bin/bash
+### Jobs name
+#$ -N QM_calculations_frog
+### Queue list
+#$ -q h48*,h6*
+### parallel environnement &amp; nslots
+#$ -pe mpi32_debian 32
+### Load the SGE environment
+#$ -cwd
+#$ -V
+
+cd ${SGE_O_WORKDIR}
+### Load the Dalton software
+module purge
+module load Dalton/2018.2-full-debian9
+export OMP_NUM_THREADS=1
+HOSTFILE=${TMPDIR}/machines
+
+### The scratch directory for Dalton
+SCRATCH_DIR=/tmp/glebreto
+</pre></div>
+</div>
+<p>In this case, the template required for the queue  h48* and h6* all a servor of 32 cores. Then, its load the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> script and initialize some varaible relative to this cluster.</p>
+<p>Let’s say that there are 2 QM calculations to perform. If a a single QM calculation per jobs is required, <em>i.e.</em> the attribute <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-nbr-job-parr-qm"><span class="std std-ref">GlobalParameter.nbr_job_parr_QM</span></a> is equal to 1, 2 jobs is needed. If <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-max-submission-qm"><span class="std std-ref">GlobalParameter.max_submission_QM</span></a> is larger then 2, 3 files will be written in the <a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-submission-file"><span class="std std-ref">GlobalParameter.dir_submission_file</span></a>:</p>
+<ul class="simple">
+<li><p><em>template_run_dalton_mono_0.sh</em> and <em>template_run_dalton_mono_1.sh</em></p></li>
+</ul>
+<p>which will have the same beggining as <em>template_run_dalton_mono.sh</em>, but with at the end:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export DALTON_TMPDIR=GP.scratch_dir
+mkdir -p $SCRATCH_DIR
+dalton -w / -o GP.dir_torun_QM/MT_name/Time_T/Molecule_I/dalton_molecule_potential.out GP.dir_torun_QM/MT_name/Time_T/Molecule_I/dalton.dal GP.dir_torun_QM/MT_name/Time_T/Molecule_I/molecule.mol GP.dir_torun_QM/MT_name/Time_T/Molecule_I/potential.pot &gt; GP.dir_torun_QM/MT_name/Time_T/Molecule_I/output_dalton.txt
+rm -rf $SCRATCH_DIR
+</pre></div>
+</div>
+<dl class="simple">
+<dt>For instance, if:</dt><dd><ul class="simple">
+<li><p>GP.scratch_dir=’$SCRATCH_DIR’</p></li>
+<li><p>GP.dir_torun_QM=’/home/glebreton/Frog_test/Mono/QM_Simulations’</p></li>
+<li><p>The MT of this configuration is ‘Water_TIP4P2005’</p></li>
+<li><p>The time step of this configuration is 0</p></li>
+<li><p>The molecule number is 1</p></li>
+</ul>
+</dd>
+</dl>
+<p>The end of the <em>template_run_dalton_mono_0.sh</em> will be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export DALTON_TMPDIR=$SCRATCH_DIR
+mkdir -p $SCRATCH_DIR
+dalton -w / -o /home/glebreton/Frog_test/Mono/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/dalton_molecule_potential.out /home/glebreton/Frog_test/Mono/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/dalton.dal /home/glebreton/Frog_test/Mono/Single_core/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/molecule.mol /home/glebreton/Frog_test/Mono/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/potential.pot &gt; /home/glebreton/Frog_test/Mono/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/output_dalton.txt
+rm -rf $SCRATCH_DIR
+</pre></div>
+</div>
+<p>The first line defines the scratch directory for <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/>, see the last section. The second and last line create and delete this scratch directory. The line starting with ‘dalton’ run the QM calculation using the inputs located at the configuration directory, and store the results in the same directory using the file name <em>dalton_molecule_potential.out</em>. Another output file named <em>output_dalton.txt</em> is also created at the configuration location where additional <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> output are stored.</p>
+<p>In this case, all the servors is used to run the dalton application. Today, this means that only a single core is used, but that all the RAM of servors is reserved. If you want to required only a single core of a servors (be aware that you may not have all the RAM), use as a template something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#/bin/bash
+#$ -S /bin/bash
+### Jobs name
+#$ -N QM_calculations_frog
+### Queue list
+#$ -q mono*
+### Load the SGE environment
+#$ -cwd
+#$ -V
+
+cd ${SGE_O_WORKDIR}
+### Load the Dalton software
+module purge
+module load Dalton/2018.2-full-debian9
+
+### The scratch directory for Dalton
+SCRATCH_DIR=/tmp/glebreto
+</pre></div>
+</div>
+<p>The rest of the file will be the same.</p>
+<ul class="simple">
+<li><p><em>submit_job.sh</em></p></li>
+</ul>
+<p>This file will look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="n">GP</span><span class="o">.</span><span class="n">command_launch_job</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span><span class="o">/</span><span class="n">GP</span><span class="o">.</span><span class="n">file_template_script_run_QM</span> <span class="o">+</span> <span class="n">_0</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">command_launch_job</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span><span class="o">/</span><span class="n">GP</span><span class="o">.</span><span class="n">file_template_script_run_QM</span> <span class="o">+</span> <span class="n">_1</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>For instance:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>GP.command_launch_job=’qsub’ for the SGE cluster manager – see <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-command-launch-job"><span class="std std-ref">GlobalParameter.command_launch_job</span></a>.</p></li>
+<li><p>GP.dir_submission_file=’/home/glebreton/Frog_test/Mono/Submission_script’</p></li>
+<li><p>GP.file_template_script_run_QM=’template_run_dalton_mono.sh’</p></li>
+</ul>
+</div></blockquote>
+<p>The <em>submit_job.sh</em> is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="n">qsub</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Mono</span><span class="o">/</span><span class="n">Submission_script</span><span class="o">/</span><span class="n">template_run_dalton_mono_0</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">qsub</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Mono</span><span class="o">/</span><span class="n">Submission_script</span><span class="o">/</span><span class="n">template_run_dalton_mono_1</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>Running this script using the bash command in the shell will launch all the ‘jobs’ – in this case 2 jobs.</p>
+<p>If the number of QM calculation to do is smaller then GP.nbr_job_parr_QM times GP.max_submission_QM, only GP.max_submission_QM jobs will be created with GP.nbr_job_parr_QM QM calculation per jobs. The rest of the QM calculation will be treated in the next <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run – see the above section.</p>
+</section>
+<section id="template-for-a-multiple-qm-calculation">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">6.5.2.2. </span>Template for a multiple QM calculation</a><a class="headerlink" href="#template-for-a-multiple-qm-calculation" title="Link to this heading">¶</a></h3>
+<p>If you want to perform ‘M’ QM calculation per jobs (<em>i.e.</em> per servor), set the GP.nbr_job_parr_QM to M. The first requisit is that the GP.file_template_script_run_QM has at least this number of core. Otherwise, you will have a competition between the QM calculation, which will turn the jobs way slower. Moreover, you may have RAM crashes. Don’t run more QM calculations then the number of CPU available.</p>
+<p>For instance, for a SGE calculation, this kind of scripts, let’s call it <em>template_run_dalton_multi.sh</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>#/bin/bash
+#$ -S /bin/bash
+### Jobs name
+#$ -N QM_calculations_frog
+### Queue list
+#$ -q h48*,h6*
+### parallel environnement &amp; nslots
+#$ -pe mpi32_debian 32
+### Load the SGE environment
+#$ -cwd
+#$ -V
+
+cd ${SGE_O_WORKDIR}
+### Load the Dalton software
+module purge
+module load Dalton/2018.2-full-debian9
+export OMP_NUM_THREADS=1
+HOSTFILE=${TMPDIR}/machines
+
+### The scratch directory for Dalton
+SCRATCH_DIR=/tmp/glebreto
+</pre></div>
+</div>
+<p>requires a servor with 32 cores. Therefore, you can run 32 QM calculation in one jobs maximum.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> do not check if the number of available cores is larger then GP.nbr_job_parr_QM.</p>
+</div>
+<p>For instance, let’s say that we want to perform 2 QM calculations per jobs – and not 32 because we want to assure that enough RAM is available. If the number of QM calculation to perform is 2, 3 files will be written in the <a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-submission-file"><span class="std std-ref">GlobalParameter.dir_submission_file</span></a>:</p>
+<ul class="simple">
+<li><p><em>template_run_dalton_multi_1.sh</em></p></li>
+</ul>
+<p>which will have the same beggining as <em>template_run_dalton_multi.sh</em>, but with at the end:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export DALTON_TMPDIR=$SCRATCH_DIR
+mkdir -p $SCRATCH_DIR
+parallel -j M &lt; GP.dir_submission_file/QM_to_do_1
+rm -rf $SCRATCH_DIR
+</pre></div>
+</div>
+<p>The line with the ‘parallel’ start in parallel the QM calculation using the file located at GP.dir_submission_file/QM_to_do_J, where J is the number of jobs to launch. There are as many <em>template_run_dalton_multi_J.sh</em> as <em>QM_to_do_J</em>. For instance, if:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>M = 2, the number of jobs per cores</p></li>
+<li><p>GP.dir_submission_file=’/home/glebreton/Frog_test/Multi/Submission_script’</p></li>
+</ul>
+</div></blockquote>
+<p>The end of the <em>template_run_dalton_multi_1.sh</em> is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>export DALTON_TMPDIR=$SCRATCH_DIR
+mkdir -p $SCRATCH_DIR
+parallel -j 2 &lt; /home/glebreton/Frog_test/Multi/Submission_script/QM_to_do_1
+rm -rf $SCRATCH_DIR
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><em>QM_to_do_1</em></p></li>
+</ul>
+<p>contains the list of the QM calculation that the jobs have to perform. The structure of this file is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dalton</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span> <span class="o">-</span><span class="n">o</span> <span class="n">Localisation_1</span><span class="o">/</span><span class="n">dalton_molecule_potential</span><span class="o">.</span><span class="n">out</span> <span class="n">Localisation_1</span><span class="o">/</span><span class="n">dalton</span><span class="o">.</span><span class="n">dal</span> <span class="n">Localisation_1</span><span class="o">/</span><span class="n">molecule</span><span class="o">.</span><span class="n">mol</span> <span class="n">Localisation_1</span><span class="o">/</span><span class="n">potential</span><span class="o">.</span><span class="n">pot</span> <span class="o">&gt;</span> <span class="n">Localisation_1</span><span class="o">/</span><span class="n">output_dalton</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">dalton</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span> <span class="o">-</span><span class="n">o</span> <span class="n">Localisation_2</span><span class="o">/</span><span class="n">dalton_molecule_potential</span><span class="o">.</span><span class="n">out</span> <span class="n">Localisation_2</span><span class="o">/</span><span class="n">dalton</span><span class="o">.</span><span class="n">dal</span> <span class="n">Localisation_2</span><span class="o">/</span><span class="n">molecule</span><span class="o">.</span><span class="n">mol</span> <span class="n">Localisation_2</span><span class="o">/</span><span class="n">potential</span><span class="o">.</span><span class="n">pot</span> <span class="o">&gt;</span> <span class="n">Localisation_2</span><span class="o">/</span><span class="n">output_dalton</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">dalton</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span> <span class="o">-</span><span class="n">o</span> <span class="n">Localisation_3</span><span class="o">/</span><span class="n">dalton_molecule_potential</span><span class="o">.</span><span class="n">out</span> <span class="n">Localisation_3</span><span class="o">/</span><span class="n">dalton</span><span class="o">.</span><span class="n">dal</span> <span class="n">Localisation_3</span><span class="o">/</span><span class="n">molecule</span><span class="o">.</span><span class="n">mol</span> <span class="n">Localisation_3</span><span class="o">/</span><span class="n">potential</span><span class="o">.</span><span class="n">pot</span> <span class="o">&gt;</span> <span class="n">Localisation_3</span><span class="o">/</span><span class="n">output_dalton</span><span class="o">.</span><span class="n">txt</span>
+<span class="o">...</span>
+<span class="n">dalton</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span> <span class="o">-</span><span class="n">o</span> <span class="n">Localisation_M</span><span class="o">/</span><span class="n">dalton_molecule_potential</span><span class="o">.</span><span class="n">out</span> <span class="n">Localisation_M</span><span class="o">/</span><span class="n">dalton</span><span class="o">.</span><span class="n">dal</span> <span class="n">Localisation_M</span><span class="o">/</span><span class="n">molecule</span><span class="o">.</span><span class="n">mol</span> <span class="n">Localisation_M</span><span class="o">/</span><span class="n">potential</span><span class="o">.</span><span class="n">pot</span> <span class="o">&gt;</span> <span class="n">Localisation_M</span><span class="o">/</span><span class="n">output_dalton</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>where the Localisation_I is the directory for a QM configuration: GP.dir_torun_QM/MT_name/Time_T/Molecule_N. For instance, if:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>2 QM calculation have to be performed</p></li>
+<li><p>GP.dir_torun_QM=’/home/glebreton/Frog_test/Multi/QM_Simulations’</p></li>
+<li><p>The molecule type is ‘Water_TIP4P2005’,</p></li>
+<li><p>The time step is 0</p></li>
+<li><p>The molecule number is 1 and 10</p></li>
+</ul>
+</div></blockquote>
+<p>The <em>QM_to_do_1</em> will be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dalton</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_1</span><span class="o">/</span><span class="n">dalton_molecule_potential</span><span class="o">.</span><span class="n">out</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_1</span><span class="o">/</span><span class="n">dalton</span><span class="o">.</span><span class="n">dal</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_1</span><span class="o">/</span><span class="n">molecule</span><span class="o">.</span><span class="n">mol</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_1</span><span class="o">/</span><span class="n">potential</span><span class="o">.</span><span class="n">pot</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_1</span><span class="o">/</span><span class="n">output_dalton</span><span class="o">.</span><span class="n">txt</span>
+<span class="n">dalton</span> <span class="o">-</span><span class="n">w</span> <span class="o">/</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_10</span><span class="o">/</span><span class="n">dalton_molecule_potential</span><span class="o">.</span><span class="n">out</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_10</span><span class="o">/</span><span class="n">dalton</span><span class="o">.</span><span class="n">dal</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_10</span><span class="o">/</span><span class="n">molecule</span><span class="o">.</span><span class="n">mol</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_10</span><span class="o">/</span><span class="n">potential</span><span class="o">.</span><span class="n">pot</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">QM_Simulations</span><span class="o">/</span><span class="n">Water_TIP4P2005</span><span class="o">/</span><span class="n">Time_0</span><span class="o">/</span><span class="n">Molecule_10</span><span class="o">/</span><span class="n">output_dalton</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><em>submit_job.sh</em></p></li>
+</ul>
+<p>This file is completly equivalent to the case where only one QM calculation per jobs is perform. There are as many line as jobs to launch. To end the example:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>GP.command_launch_job=’qsub’ for the SGE cluster manager – see <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-command-launch-job"><span class="std std-ref">GlobalParameter.command_launch_job</span></a>.</p></li>
+<li><p>there are only one jobs to launch: <em>template_run_dalton_multi_1.sh</em></p></li>
+<li><p>GP.dir_submission_file=’/home/glebreton/Frog_test/Multi/Submission_script’</p></li>
+</ul>
+</div></blockquote>
+<p>Therefore, the <em>submit_job.sh</em> will be:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+
+<span class="n">qsub</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">glebreton</span><span class="o">/</span><span class="n">Frog_test</span><span class="o">/</span><span class="n">Multi</span><span class="o">/</span><span class="n">Submission_script</span><span class="o">/</span><span class="n">template_run_dalton_mono_1</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+</section>
+<section id="choose-the-scratch-directory">
+<span id="qm-management-scratch-dir-subpage"></span><h3><a class="toc-backref" href="#id8" role="doc-backlink"><span class="section-number">6.5.2.3. </span>Choose the scratch directory</a><a class="headerlink" href="#choose-the-scratch-directory" title="Link to this heading">¶</a></h3>
+<p>Without going too much details, a <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> run takes inout parameters (the dalton.dal, molecule.mol and potential.pot files), uses many temporary file to perform the QM calculations, and returns several files. In <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, only the one containing the main main resultats is used to extract the optical property: the dalton_molecule_potential.out file.</p>
+<p>The inputs file are quite small and are read once. The final output file is also small. However, the temporary file can be large, especially for large basis set. Therefore, it is important to use a place to store them that are easely accessible, for instance in a RAM-like location (or a /scratch if your cluster has one).</p>
+<p>To locate these temporary file, you can use the DALTON_TMPDIR native variable, which is defined when you call the dalton module in your cluster.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> we use rather DALTON_TMPDIR than <span class="incremental">dalton -t temp_dir</span> because it can be modified more easely in the sumisson script for each job. However it should represent the same thing.</p>
+</div>
+<dl class="simple">
+<dt>It is inside the submission script for a job that this varaible is defined using:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-scratch-dir"><span class="std std-ref">GlobalParameter.scratch_dir</span></a></p></li>
+<li><p>What is already written in <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-file-template-script-run-qm"><span class="std std-ref">GlobalParameter.file_template_script_run_QM</span></a></p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The scratch directory for all the QM calculation of a jobs is the same.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>By default, the scratch directory is deleted at the end of a job. If you are running several jobs at once, the localisation of each scratch directory should be different!</p>
+</div>
+<p>For instance, you can define to use a <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> scratch directory that depends on the node/servor you are running on. In the GP.file_template_script_run_QM, write for instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LOCAL_DIR</span><span class="o">=/</span><span class="n">tmp</span><span class="o">/</span><span class="n">glebreto</span>
+</pre></div>
+</div>
+<p>where the /tmp refers here to the intern memory of the node. You can define the LOCAL_DIR using automatical procedure (written in bash) depending on your cluster architecture. Once the LOCAL_DIR is defined in the GP.file_template_script_run_QM, using GP.scratch_dir=’$LOCAL_DIR’, a job will look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>LOCAL_DIR=/tmp/glebreto
+export DALTON_TMPDIR=$LOCAL_DIR
+mkdir -p $SCRATCH_DIR
+parallel -j M &lt; GP.dir_submission_file/QM_to_do_1
+rm -rf $SCRATCH_DIR
+</pre></div>
+</div>
+<p>The advantage of this method is that it is left to the user to define the scratch directory using bash command in the GP.file_template_script_run_QM. It is flexible and should be adaptable to your cluster.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you want to start with a simple example, set GP.scratch_dir to a directory, you will see the temporary <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> file be written there.</p>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="optical_analysis_index.html">6. Optical Analysis</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview_opt_analysis.html">6.1. Overview: Optical Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optical_parameter.html">6.2. Optical Parameter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrostatic_embedding.html">6.3. Electrostatic embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qm_box.html">6.4. QM box</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">6.5. QM Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advices_for_qm.html">6.6. Some Advices for the QM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/OpticalAnalysis/qm_management.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

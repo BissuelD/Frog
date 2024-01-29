@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog.second_part &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Frog.second_part</h1><div class="highlight"><pre>
+<span></span><span class="c1">##############################################################################</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    FROG: FROm molecular dynamics to second harmonic Generation             #</span>
+<span class="c1">#    Copyright (C) 2024                                                      #</span>
+<span class="c1">#    Author list                                                             #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    Guillaume Le Breton                                                     #</span>
+<span class="c1">#    Oriane Bonhomme                                                         #</span>
+<span class="c1">#    Emmanuel Benichou                                                       #</span>
+<span class="c1">#    Claire Loison                                                           #</span>
+<span class="c1">#                                                                            # </span>
+<span class="c1">#    This program is free software: you can redistribute it and/or modify    #</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by    #</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or       #</span>
+<span class="c1">#    (at your option) any later version.                                     #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is distributed in the hope that it will be useful,         #</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #</span>
+<span class="c1">#    GNU General Public License for more details.                            #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License       # </span>
+<span class="c1">#    along with this program.  If not, see &lt;https://www.gnu.org/licenses/    #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">##############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">Frog.toolbox</span> <span class="k">as</span> <span class="nn">toolbox</span>
+<span class="kn">import</span> <span class="nn">Frog.dalton_manager_module</span> <span class="k">as</span> <span class="nn">dalton_manager_module</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="how_many_QM_jobs_are_left">
+<a class="viewcode-back" href="../../Frog.html#Frog.second_part.how_many_QM_jobs_are_left">[docs]</a>
+<span class="k">def</span> <span class="nf">how_many_QM_jobs_are_left</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Find how many QM calculations has to be done. </span>
+<span class="sd">    </span>
+<span class="sd">    Either starting from a first part: No QM calculation that should be done had been done. Hence just count them. </span>
+<span class="sd">    Either starting from a restart Frog run: a previous set of QM calculation may have been done. So we have to check how many QM calcualtion have been done compared to the previous run. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Restarting or not a QM calculation </span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">GP</span><span class="o">.</span><span class="n">pass_first_part</span><span class="p">:</span> <span class="c1"># if we restart the analysis, we should not try to read the previous result.</span>
+        <span class="n">IS_there_file</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">name_job_todo</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span><span class="p">,</span> <span class="s1">&#39;job_to_perform.p&#39;</span><span class="p">)</span>
+        <span class="n">IS_there_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">name_job_todo</span><span class="p">)</span>
+    
+    <span class="n">L_QM_todo</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">IS_there_file</span><span class="p">:</span> <span class="c1"># Check what QM calculation have already be performed:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: Frog is reading the QM job to be performed using the file&#39;</span><span class="p">,</span> <span class="n">name_job_todo</span><span class="p">)</span>
+        <span class="n">L_QM_todo_old</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">open_pickle</span><span class="p">(</span><span class="n">name_job_todo</span><span class="p">)</span>
+        <span class="c1"># temporary check while Frog is still under development (Jan 2024)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_QM_todo_old</span><span class="p">)</span> <span class="o">!=</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;VERSION ERROR: Probleme de version. Il faut relancer la first part en supprimant le Submission file!&#39;</span><span class="p">)</span> 
+        <span class="n">L_nbr_job_todo_old</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">L_QM_todo_old</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">)]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The total number of QM job to performed in the previous run was: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">L_nbr_job_todo_old</span><span class="p">)</span><span class="si">}</span><span class="s1">. Now let s check how many QM run are left to do.&#39;</span><span class="p">)</span>
+        <span class="c1"># construct the new lists by checking if the calculations were done</span>
+        <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">qm_todo</span> <span class="ow">in</span> <span class="n">L_QM_todo_old</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="p">:</span> 
+                <span class="n">is_done</span> <span class="o">=</span> <span class="n">dalton_manager_module</span><span class="o">.</span><span class="n">check_if_run_done</span><span class="p">(</span><span class="n">qm_todo</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">is_done</span><span class="p">:</span>
+                    <span class="n">L_QM_todo</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">qm_todo</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="k">for</span> <span class="n">time_step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">L_moleculetype_temp</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">open_pickle</span><span class="p">(</span><span class="s1">&#39;L_moleculetype_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_step</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.p&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_mol_times</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="c1">#iteration over the molecule type</span>
+                <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype_temp</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> 
+                <span class="k">if</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">IS_run_QM</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">L_QM_todo</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">qm_todo</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">L_QM_todo</span><span class="p">:</span>
+                            <span class="n">L_QM_todo</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">qm_todo</span><span class="p">)</span>
+    <span class="n">L_nbr_job_todo</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">L_QM_todo</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">)]</span>               
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The total number of QM job to be performed is: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">L_nbr_job_todo</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>   
+    <span class="n">toolbox</span><span class="o">.</span><span class="n">save_pickle</span><span class="p">(</span><span class="s1">&#39;job_to_perform.p&#39;</span><span class="p">,</span> <span class="n">L_QM_todo</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_QM_todo</span><span class="p">,</span> <span class="n">L_nbr_job_todo</span><span class="p">)</span></div>
+
+                                
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="prepare_submission_scripts">
+<a class="viewcode-back" href="../../Frog.html#Frog.second_part.prepare_submission_scripts">[docs]</a>
+<span class="k">def</span> <span class="nf">prepare_submission_scripts</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_QM_todo</span><span class="p">,</span> <span class="n">L_nbr_job_todo</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Prepare the submission scripts to be run on a cluster. </span>
+<span class="sd">    First assignes how many QM calculation should be done on a servor of each MT, then creates the scripts using or not the job array technic. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">L_moleculetype_temp</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">open_pickle</span><span class="p">(</span><span class="s1">&#39;L_moleculetype_0.p&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_mol_times</span><span class="p">)</span>
+    <span class="c1"># Total number of jobs to sent and for each MT</span>
+    <span class="n">L_nbr_job_to_launch_perMT</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">L_left_todo_perMT</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype_temp</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> 
+        <span class="n">L_nbr_job_to_launch_perMT</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L_nbr_job_todo</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="o">//</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_repetition_QM_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]))</span>
+        <span class="n">L_left_todo_perMT</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L_nbr_job_todo</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="o">%</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_repetition_QM_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">L_left_todo_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+            <span class="n">L_nbr_job_to_launch_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># User friendly prints</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The number of QM calculation  to perform  for molecule type </span><span class="si">{</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is: </span><span class="si">{</span><span class="n">L_nbr_job_todo</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Using GP.nbr_job_parr_QM and GP.nbr_repetition_QM_perMT values (</span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_repetition_QM_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="si">}</span><span class="s1">) for the molecule type </span><span class="si">{</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">, the number of job to send to the cluster for this MT is: </span><span class="si">{</span><span class="n">L_nbr_job_to_launch_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">L_nbr_job_to_launch_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">L_left_todo_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span> 
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">L_nbr_job_to_launch_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s1">  jobs will perform  </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_repetition_QM_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">])</span><span class="si">}</span><span class="s1"> QM calculations.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">L_nbr_job_to_launch_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="si">}</span><span class="s1">  jobs will perform </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_repetition_QM_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">])</span><span class="si">}</span><span class="s1">  QM calculations.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">L_left_todo_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;1 job will perform &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">L_left_todo_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; QM calculations.&#39;</span><span class="p">)</span>
+    <span class="n">total_nbr_job_to_launch</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">L_nbr_job_to_launch_perMT</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">total_nbr_job_to_launch</span> <span class="o">&gt;</span> <span class="n">GP</span><span class="o">.</span><span class="n">max_submission_QM</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The total number of jobs to do for all MTs is </span><span class="si">{</span><span class="n">total_nbr_job_to_launch</span><span class="si">}</span><span class="s1">. Yet, only </span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">max_submission_QM</span><span class="si">}</span><span class="s1"> will be submitted to the cluster (defined by GP.max_submission_QM). Hence, there will be some QM calculations to be done even once the one submitted by this part finished.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>                            
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The total number of jobs to do for all MTs is </span><span class="si">{</span><span class="n">total_nbr_job_to_launch</span><span class="si">}</span><span class="s1">. &#39;</span><span class="p">)</span>
+       
+    <span class="n">name_total_script_job</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span><span class="p">,</span> <span class="s1">&#39;submit_job.sh&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The script to launch all the jobs independantly is: </span><span class="si">{</span><span class="n">name_total_script_job</span><span class="si">}</span><span class="s1">. It will send all the job to the cluster using as template the file </span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">file_template_script_run_QM</span><span class="si">}</span><span class="s1">. In order to launch the job, the command </span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">command_launch_job</span><span class="si">}</span><span class="s1"> will be used.&#39;</span><span class="p">)</span>
+          
+    <span class="c1"># Write the scripts to be send to the cluster</span>
+    <span class="n">template_ready_to_copy</span> <span class="o">=</span> <span class="n">GP</span><span class="o">.</span><span class="n">file_template_script_run_QM</span>
+    <span class="n">template_filename_sharp</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">extract_file_name</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">file_template_script_run_QM</span><span class="p">)</span>
+    <span class="n">name_template_ready_to_fill</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span><span class="p">,</span> <span class="n">template_filename_sharp</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">total_job_number</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">L_left_todo_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">L_nbr_job_to_launch_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">=</span> <span class="n">L_nbr_job_to_launch_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+            <span class="n">job_number</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">L_nbr_job_to_launch_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">job_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L_nbr_job_to_launch_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">total_job_number</span> <span class="o">&lt;</span> <span class="n">GP</span><span class="o">.</span><span class="n">max_submission_QM</span><span class="p">:</span>
+                    <span class="n">total_job_number</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">name_file_temp</span> <span class="o">=</span> <span class="n">name_template_ready_to_fill</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_job_number</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.sh&#39;</span>
+                    <span class="n">first_QM_todo</span> <span class="o">=</span> <span class="n">job_number</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_repetition_QM_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+                    <span class="n">last_QM_todo</span> <span class="o">=</span>  <span class="n">first_QM_todo</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_repetition_QM_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+                    <span class="n">dalton_manager_module</span><span class="o">.</span><span class="n">submit_qm_calculation</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">name_file_temp</span><span class="p">,</span> <span class="n">L_QM_todo</span><span class="p">[</span><span class="n">K</span><span class="p">][</span><span class="n">first_QM_todo</span><span class="p">:</span><span class="n">last_QM_todo</span><span class="p">],</span> <span class="n">template_ready_to_copy</span><span class="p">,</span> <span class="n">total_job_number</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">L_left_todo_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">total_job_number</span> <span class="o">&lt;</span> <span class="n">GP</span><span class="o">.</span><span class="n">max_submission_QM</span><span class="p">:</span>
+                <span class="n">total_job_number</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">name_file_temp</span> <span class="o">=</span> <span class="n">name_template_ready_to_fill</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_job_number</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.sh&#39;</span>
+                <span class="k">if</span> <span class="n">L_left_todo_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">dalton_manager_module</span><span class="o">.</span><span class="n">submit_qm_calculation</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">name_file_temp</span><span class="p">,</span> <span class="p">[</span><span class="n">L_QM_todo</span><span class="p">[</span><span class="n">K</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">template_ready_to_copy</span><span class="p">,</span> <span class="n">total_job_number</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">job_number</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">first_QM_todo</span> <span class="o">=</span> <span class="p">(</span><span class="n">job_number</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_repetition_QM_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+                        <span class="n">last_QM_todo</span> <span class="o">=</span>  <span class="n">first_QM_todo</span> <span class="o">+</span> <span class="n">L_left_todo_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">first_QM_todo</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">last_QM_todo</span> <span class="o">=</span> <span class="n">L_left_todo_perMT</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+                    <span class="n">dalton_manager_module</span><span class="o">.</span><span class="n">submit_qm_calculation</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">name_file_temp</span><span class="p">,</span> <span class="n">L_QM_todo</span><span class="p">[</span><span class="n">K</span><span class="p">][</span><span class="n">first_QM_todo</span><span class="p">:</span><span class="n">last_QM_todo</span><span class="p">],</span> <span class="n">template_ready_to_copy</span><span class="p">,</span> <span class="n">total_job_number</span><span class="p">)</span>
+                
+    
+    <span class="c1"># Write the script to submit all at once:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_total_script_job</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">thefile</span><span class="p">:</span>
+        <span class="n">thefile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#!/bin/bash </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">thefile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">job_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">total_job_number</span><span class="p">):</span>
+            <span class="n">thefile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">name_file_temp</span> <span class="o">=</span> <span class="n">name_template_ready_to_fill</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">job_number</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.sh&#39;</span>
+            <span class="n">thefile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">command_launch_job</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">name_file_temp</span><span class="p">)</span>
+        <span class="n">thefile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">thefile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Write a file to submit the jobs as an array</span>
+    <span class="k">if</span> <span class="n">GP</span><span class="o">.</span><span class="n">submit_job_array</span><span class="p">:</span> <span class="c1"># CAREFULL, ONLY FOR SBATCH</span>
+        <span class="n">dalton_manager_module</span><span class="o">.</span><span class="n">create_submissionfile_array</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">total_job_number</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+                     <span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

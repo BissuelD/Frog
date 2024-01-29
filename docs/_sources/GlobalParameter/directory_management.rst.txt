@@ -1,0 +1,26 @@
+.. _gp_directory_management_page:
+
+====================
+Directory Management
+====================
+
+.. Warning:: In case you are working with a cluster, be aware that the '~' might not work threw job management. Prefere explicite location instead -- /home/yourname instead of ~ !
+
+.. _autodoc_gp_general_path:
+.. autoattribute:: Frog.class_GP.GlobalParameter.general_path
+
+
+|    
+  
+.. _autodoc_gp_dir_mol_times:
+.. autoattribute:: Frog.class_GP.GlobalParameter.dir_mol_times
+
+|    
+
+.. _autodoc_gp_dir_torun_QM:
+.. autoattribute:: Frog.class_GP.GlobalParameter.dir_torun_QM
+
+|    
+
+.. _autodoc_gp_dir_submission_file:
+.. autoattribute:: Frog.class_GP.GlobalParameter.dir_submission_file

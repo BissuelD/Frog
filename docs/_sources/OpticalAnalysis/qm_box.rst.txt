@@ -1,0 +1,321 @@
+.. _qm_box_page:
+
+========================
+QM box
+========================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+.. _qm_parameter_object_page:  
+
+In this page is presented how to select the parameter you want for the QM calculations using the QMParameter object. The ''important'' part in |frog| relies in the electrostatic embbeding part, and maybe less in the other parameters. Indeed, |frog| has been built to handle for you the electrostatic emmebdding and provide several scheme, see :ref:`this page<electrostatic_embedding_page>`. The rest of the parameter, such as the theoretical framework to solve the electornic Hamiltonian or the basis set, are also very important but are less difficult to use numerically speacking: |dalton| makes it easy. 
+
+Therefore, in this page is presented how to deal with the QM calculation options using the QMParameter object. Most of the attributes presented here are very 'simple': they will write in the |dalton| input file some lines. The |dalton| software provide an extensive and complete user manuel, where all the input are explained. We warmly recommand to read it to understand along with the dalton.dal file created by |frog| to understand the effect of some QMParameter attributes. 
+
+.. note:: For |dalton| veteran user/developers: the way |frog| handle the input has been dictacted by its initial use: DFT and hyperpolarizability calculation. Today no parameter are available to use a given 'dalton.dal' file, and thus bypass the actual architecture and limitations. If you need this behaviour please do not hesitate to contact us. 
+
+
+QMParameter Object
+=====================
+
+If an optical property with the 'QM' calculation style in the OpticalParameter object is required, see :ref:`this part<optical_property_calculation_subpage>`, a QMParameter object should be provided in the :ref:`OpticalParameter.qmparameter<autodoc_opticalparameter_qmparameter>` attribute. 
+
+To initialize a QMParameter object, first creat one: ::
+
+    from Frog.class_OpticalParameter import QMParameter
+    my_qmparameter = QMParameter()
+
+Then, fill the attribute as usual for an object: ::
+
+    my_qmparameter.attribute_name = attribute_value
+    
+
+-----------------
+Presentation
+-----------------
+
+There are several QMParameter attributes, here are a list sorted by use: 
+
+**Environment management:**
+
+    + :ref:`QMParameter.calculation_style<autodoc_qmparameter_calculation_style>`
+    
+    + :ref:`QMParameter.pe_level<autodoc_qmparameter_pe_level>`
+    
+    + :ref:`QMParameter.max_pe_distance_neigh<autodoc_qmparameter_max_pe_distance_neigh>`
+    
+    + :ref:`QMParameter.long_range_distance_switch<autodoc_qmparameter_long_range_distance_switch>`
+    
+    + :ref:`QMParameter.max_pe_polarization_distance_neigh<autodoc_qmparameter_max_pe_polarization_distance_neigh>`
+    
+    + :ref:`QMParameter.max_qm_box_distance_neigh<autodoc_qmparameter_max_qm_box_distance_neigh>`
+    
+    + :ref:`QMParameter.rcut_PE_direct<autodoc_qmparameter_rcut_PE_direct>`
+    
+    + :ref:`QMParameter.rcut_PE_smoth<autodoc_qmparameter_rcut_PE_smoth>`
+    
+    + :ref:`QMParameter.ewald_factor<autodoc_qmparameter_ewald_factor>`
+    
+    + :ref:`QMParameter.PE_k_vector_range<autodoc_qmparameter_PE_k_vector_range>`
+
+**Quantum resolution scheme:**    
+    
+    + :ref:`QMParameter.theory_lv<autodoc_qmparameter_theory_lv>`
+    
+    + :ref:`QMParameter.functional<autodoc_qmparameter_functional>`
+
+**Basis:**      
+    
+    + :ref:`QMParameter.type_basis<autodoc_qmparameter_type_basis>`
+    
+    + :ref:`QMParameter.global_basis_value<autodoc_qmparameter_global_basis_value>`
+    
+**QM box properties:**   
+
+    + :ref:`QMParameter.total_charge<autodoc_qmparameter_total_charge>`
+
+    + :ref:`QMParameter.static_electric_field_direction<autodoc_qmparameter_static_electric_field_direction>`
+    
+    + :ref:`QMParameter.static_electric_field<autodoc_qmparameter_static_electric_field>`
+    
+
+**Optical property:**     
+    
+    + :ref:`QMParameter.polarizability_response<autodoc_qmparameter_polarizability_response>`
+    
+    + :ref:`QMParameter.shg_response<autodoc_qmparameter_shg_response>`
+    
+**Functionement parameters:**       
+    
+    + :ref:`QMParameter.max_iter_scf<autodoc_qmparameter_max_iter_scf>`
+    
+    + :ref:`QMParameter.restart<autodoc_qmparameter_restart>`
+    
+    + :ref:`QMParameter.write_xyz_environment<autodoc_qmparameter_write_xyz_environment>`
+    
+.. note:: Est ce que c est suffisement comprehensible en lisant la definition des attribues? Etant donne que pour l instant on n a pas beaucoup de choix, je n ai pas fait de sous-section ou j explique plus en details qui fait quoi. A voir?
+
+
+----------------------------------------------------
+Where are the information to write the input file?
+----------------------------------------------------
+
+Once you have provided the QMParameter for an MT, these parameters will be used to wrtie the |dalton| input file for all the molecule of this MT that should be QM-treated -- thus for all the frame. Appart for very few parameter, like the electrostatic field (especially in the PE long scheme), the dalton.dal file will be similar for all the molecule of this MT. The molecule.mol file may be different for every configuration since the geometry are written in the laboratory frame. Finally, the potential.pot file, which contains the electrostatic environement, will be different for every configuration. 
+
+To write the dalton.dal file, |frog| uses mostly the parameter provided in the QMParameter object. To write the molecule.mol file, the basis are provided by the QMParameter object, while the geometry and the number of electrons are provided by the :ref:`QMDescription<qm_description_object_page>` object. The potential.pot file uses the QMParameter object and the :ref:`ElectrostaticDescription<electrostatic_description_object_page>` of the neighborgs. 
+
+-----------------------
+QMParameter Attributes
+-----------------------
+
+
+
+.. _autodoc_qmparameter_calculation_style:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.calculation_style
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_pe_level:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.pe_level
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_max_pe_distance_neigh:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.max_pe_distance_neigh
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_long_range_distance_switch:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.long_range_distance_switch
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_max_pe_polarization_distance_neigh:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.max_pe_polarization_distance_neigh
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_max_qm_box_distance_neigh:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.max_qm_box_distance_neigh
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_rcut_PE_direct:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.rcut_PE_direct
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_rcut_PE_smoth:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.rcut_PE_smoth
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_ewald_factor:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.ewald_factor
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_PE_k_vector_range:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.PE_k_vector_range
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_static_electric_field_direction:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.static_electric_field_direction
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_static_electric_field:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.static_electric_field
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_theory_lv:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.theory_lv
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_functional:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.functional
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_type_basis:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.type_basis
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_global_basis_value:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.global_basis_value
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_total_charge:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.total_charge
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_polarizability_response:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.polarizability_response
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_shg_response:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.shg_response
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_max_iter_scf:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.max_iter_scf
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_restart:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.restart
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_write_xyz_environment:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.write_xyz_environment
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_RUN_pe:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.RUN_pe
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_RUN_properties:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.RUN_properties
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_RUN_integral:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.RUN_integral
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_RUN_electric_field:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.RUN_electric_field
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_RUN_response:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.RUN_response
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_RUN_polarization:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.RUN_polarization
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_RUN_shg:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.RUN_shg
+    :noindex:
+
+|
+
+.. _autodoc_qmparameter_effective_field_polarization:
+.. autoattribute:: Frog.class_OpticalParameter.QMParameter.effective_field_polarization
+    :noindex:
+
+|
+
+
+.. _qm_description_object_page:
+
+
+QM Description Object
+======================
+
+In this section is detailed precisly the different attribute of the QMDescription object. This section is of primor interest if you intend to define yourself a new MT with its QMDescription associated. The QMDescription is provided by the  molecular library file function :ref:`qm_target_description<molecular_library_file_qm_description_function_page>` which assign for each target molecule the individual QMDescription object. 
+
+
+---------------------------
+QM Description Attributes
+---------------------------
+
+.. _autodoc_qmdescription_L_atom_type:
+.. autoattribute:: Frog.class_OpticalParameter.QMDescription.L_atom_type
+    :noindex:
+
+|
+
+.. _autodoc_qmdescription_L_coordinate:
+.. autoattribute:: Frog.class_OpticalParameter.QMDescription.L_coordinate
+    :noindex:
+
+|
+
+

@@ -1,0 +1,20 @@
+.. _mt_index_page:
+
+==================
+Molecule Type
+==================
+
+This section present first the structure of the Molecule Type object. Then, how to initialized a MT and how to assigned molecule of the topology file to this MT. 
+
+The SingleMolecule object is presented, but this part is adressed to advance user. 
+
+Finally it summarized the available MT.
+
+
+.. toctree::
+    :maxdepth: 2  
+    
+    ./how_to_create_mt
+    ./mt_structure
+    ./single_molecule_parameter
+    ./MolecularLibraryFile/available_mt

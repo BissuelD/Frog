@@ -1,0 +1,25 @@
+.. _beta_constant_and_NLO:
+
+==================================
+Beta constant and NLO
+==================================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+    
+
+
+why use constant beta
+============================
+Mettre ici la partie SI du papier
+
+
+Correction using gamma
+======================
+
+Presenter le principe
+Mettre le diagram des gamma: ca peut pas marcher!
+
+

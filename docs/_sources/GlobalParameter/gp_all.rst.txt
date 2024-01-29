@@ -1,0 +1,12 @@
+.. _gp_all_page:
+
+======================
+All the GP parameters
+======================
+
+
+.. automodule:: Frog.class_GP
+   :noindex:
+   :members:
+   :undoc-members:
+   :show-inheritance:

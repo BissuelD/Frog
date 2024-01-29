@@ -1,0 +1,26 @@
+.. _advices_for_qm_page:
+
+========================
+Some Advices for the QM
+========================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+
+
+
+
+
+If you have a lot of calculation, you may want to try for only one time step. Then you can check the shape of the results, and use the same directory with more time steps.
+
+
+
+
+Please also note that you really want to stay in touch with your cluster management tearm while using |frog|. If it is quite usual to run large but few QM calculations, it is less to required hundreads of servor to run hours (or  even less) of independent calculations.
+
+
+
+Better to have less calculation per jobs, but high speed (RAM ok, writing procedure ok)
+
+

@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>6.4. QM box &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="6.5. QM Management" href="qm_management.html" />
+    <link rel="prev" title="6.3. Electrostatic embedding" href="electrostatic_embedding.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="qm-box">
+<span id="qm-box-page"></span><h1><span class="section-number">6.4. </span>QM box<a class="headerlink" href="#qm-box" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#qmparameter-object" id="id1">QMParameter Object</a></p>
+<ul>
+<li><p><a class="reference internal" href="#presentation" id="id2">Presentation</a></p></li>
+<li><p><a class="reference internal" href="#where-are-the-information-to-write-the-input-file" id="id3">Where are the information to write the input file?</a></p></li>
+<li><p><a class="reference internal" href="#qmparameter-attributes" id="id4">QMParameter Attributes</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#qm-description-object" id="id5">QM Description Object</a></p>
+<ul>
+<li><p><a class="reference internal" href="#qm-description-attributes" id="id6">QM Description Attributes</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p id="qm-parameter-object-page">In this page is presented how to select the parameter you want for the QM calculations using the QMParameter object. The ‘’important’’ part in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> relies in the electrostatic embbeding part, and maybe less in the other parameters. Indeed, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> has been built to handle for you the electrostatic emmebdding and provide several scheme, see <a class="reference internal" href="electrostatic_embedding.html#electrostatic-embedding-page"><span class="std std-ref">this page</span></a>. The rest of the parameter, such as the theoretical framework to solve the electornic Hamiltonian or the basis set, are also very important but are less difficult to use numerically speacking: <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> makes it easy.</p>
+<p>Therefore, in this page is presented how to deal with the QM calculation options using the QMParameter object. Most of the attributes presented here are very ‘simple’: they will write in the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> input file some lines. The <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> software provide an extensive and complete user manuel, where all the input are explained. We warmly recommand to read it to understand along with the dalton.dal file created by <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> to understand the effect of some QMParameter attributes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> veteran user/developers: the way <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> handle the input has been dictacted by its initial use: DFT and hyperpolarizability calculation. Today no parameter are available to use a given ‘dalton.dal’ file, and thus bypass the actual architecture and limitations. If you need this behaviour please do not hesitate to contact us.</p>
+</div>
+<section id="qmparameter-object">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink"><span class="section-number">6.4.1. </span>QMParameter Object</a><a class="headerlink" href="#qmparameter-object" title="Link to this heading">¶</a></h2>
+<p>If an optical property with the ‘QM’ calculation style in the OpticalParameter object is required, see <a class="reference internal" href="optical_parameter.html#optical-property-calculation-subpage"><span class="std std-ref">this part</span></a>, a QMParameter object should be provided in the <a class="reference internal" href="optical_parameter.html#autodoc-opticalparameter-qmparameter"><span class="std std-ref">OpticalParameter.qmparameter</span></a> attribute.</p>
+<p>To initialize a QMParameter object, first creat one:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Frog.class_OpticalParameter</span> <span class="kn">import</span> <span class="n">QMParameter</span>
+<span class="n">my_qmparameter</span> <span class="o">=</span> <span class="n">QMParameter</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Then, fill the attribute as usual for an object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my_qmparameter</span><span class="o">.</span><span class="n">attribute_name</span> <span class="o">=</span> <span class="n">attribute_value</span>
+</pre></div>
+</div>
+<section id="presentation">
+<h3><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">6.4.1.1. </span>Presentation</a><a class="headerlink" href="#presentation" title="Link to this heading">¶</a></h3>
+<p>There are several QMParameter attributes, here are a list sorted by use:</p>
+<p><strong>Environment management:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#autodoc-qmparameter-calculation-style"><span class="std std-ref">QMParameter.calculation_style</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-pe-level"><span class="std std-ref">QMParameter.pe_level</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-max-pe-distance-neigh"><span class="std std-ref">QMParameter.max_pe_distance_neigh</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-long-range-distance-switch"><span class="std std-ref">QMParameter.long_range_distance_switch</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-max-pe-polarization-distance-neigh"><span class="std std-ref">QMParameter.max_pe_polarization_distance_neigh</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-max-qm-box-distance-neigh"><span class="std std-ref">QMParameter.max_qm_box_distance_neigh</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-rcut-pe-direct"><span class="std std-ref">QMParameter.rcut_PE_direct</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-rcut-pe-smoth"><span class="std std-ref">QMParameter.rcut_PE_smoth</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-ewald-factor"><span class="std std-ref">QMParameter.ewald_factor</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-pe-k-vector-range"><span class="std std-ref">QMParameter.PE_k_vector_range</span></a></p></li>
+</ul>
+</div></blockquote>
+<p><strong>Quantum resolution scheme:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#autodoc-qmparameter-theory-lv"><span class="std std-ref">QMParameter.theory_lv</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-functional"><span class="std std-ref">QMParameter.functional</span></a></p></li>
+</ul>
+</div></blockquote>
+<p><strong>Basis:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#autodoc-qmparameter-type-basis"><span class="std std-ref">QMParameter.type_basis</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-global-basis-value"><span class="std std-ref">QMParameter.global_basis_value</span></a></p></li>
+</ul>
+</div></blockquote>
+<p><strong>QM box properties:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#autodoc-qmparameter-total-charge"><span class="std std-ref">QMParameter.total_charge</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-static-electric-field-direction"><span class="std std-ref">QMParameter.static_electric_field_direction</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-static-electric-field"><span class="std std-ref">QMParameter.static_electric_field</span></a></p></li>
+</ul>
+</div></blockquote>
+<p><strong>Optical property:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#autodoc-qmparameter-polarizability-response"><span class="std std-ref">QMParameter.polarizability_response</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-shg-response"><span class="std std-ref">QMParameter.shg_response</span></a></p></li>
+</ul>
+</div></blockquote>
+<p><strong>Functionement parameters:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="#autodoc-qmparameter-max-iter-scf"><span class="std std-ref">QMParameter.max_iter_scf</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-restart"><span class="std std-ref">QMParameter.restart</span></a></p></li>
+<li><p><a class="reference internal" href="#autodoc-qmparameter-write-xyz-environment"><span class="std std-ref">QMParameter.write_xyz_environment</span></a></p></li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Est ce que c est suffisement comprehensible en lisant la definition des attribues? Etant donne que pour l instant on n a pas beaucoup de choix, je n ai pas fait de sous-section ou j explique plus en details qui fait quoi. A voir?</p>
+</div>
+</section>
+<section id="where-are-the-information-to-write-the-input-file">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">6.4.1.2. </span>Where are the information to write the input file?</a><a class="headerlink" href="#where-are-the-information-to-write-the-input-file" title="Link to this heading">¶</a></h3>
+<p>Once you have provided the QMParameter for an MT, these parameters will be used to wrtie the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> input file for all the molecule of this MT that should be QM-treated – thus for all the frame. Appart for very few parameter, like the electrostatic field (especially in the PE long scheme), the dalton.dal file will be similar for all the molecule of this MT. The molecule.mol file may be different for every configuration since the geometry are written in the laboratory frame. Finally, the potential.pot file, which contains the electrostatic environement, will be different for every configuration.</p>
+<p>To write the dalton.dal file, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> uses mostly the parameter provided in the QMParameter object. To write the molecule.mol file, the basis are provided by the QMParameter object, while the geometry and the number of electrons are provided by the <a class="reference internal" href="#qm-description-object-page"><span class="std std-ref">QMDescription</span></a> object. The potential.pot file uses the QMParameter object and the <a class="reference internal" href="electrostatic_embedding.html#electrostatic-description-object-page"><span class="std std-ref">ElectrostaticDescription</span></a> of the neighborgs.</p>
+</section>
+<section id="qmparameter-attributes">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">6.4.1.3. </span>QMParameter Attributes</a><a class="headerlink" href="#qmparameter-attributes" title="Link to this heading">¶</a></h3>
+<dl class="py attribute" id="autodoc-qmparameter-calculation-style">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">calculation_style</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>The type of electrostatic embedding for the QM calculation of this MT.</p>
+<dl class="simple">
+<dt>3 types of embedding are available: ‘Vacuum’, ‘PE’, ‘PE long’ and ‘PE + QM’.</dt><dd><ul class="simple">
+<li><p>‘Vacuum’</p></li>
+</ul>
+</dd>
+</dl>
+<p>Depreciated, use ‘PE’ with pe_level=-1 instead.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘PE’</p></li>
+</ul>
+</div></blockquote>
+<p>The electrostatic embedding scheme where each molecule are alone in their QM box – monomere QM calculation. The order used to described the electrostatic neighborgs is set by QMParameter.pe_level. The neighborhood is built up to a distance given by QMParameter.max_pe_distance_neigh.</p>
+<p>If QMParameter.pe_level = 1, 3 areas are defined. If a neighborgs distance is less then QMParameter.max_pe_polarization_distance_neigh, this neighborgs is described using polarizability (and the other point charge, dipole ect…). After this distance, and until QMParameter.max_pe_distance_neigh, the neighborgs is described without polarizability. After QMParameter.max_pe_distance_neigh, the neighborgs does not contribute to the electrostatic environment of the target molecule.</p>
+<p>Important note: you may define larger QMParameter.max_pe_distance_neigh then the MD box size. In this case, FROG will increase the neighborhood by using the PBC defines in GP.env_authorised_pbc_condition.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘PE long’</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In the current version, this method is no longer available. It has been replace by ‘PE’ with qmparameter.long_range_distance_switch attribute.</p>
+</div>
+<p>The long-range electrostatic embedding scheme where each molecule are alone in their QM box – monomere QM calculation.</p>
+<p>In this case, all the molecule in the MD box contributes to the electrostatic environment. If there are within a distance of QMParameter.rcut_PE_direct, they contribute ‘directly’. Each neighbors are added in the potential dalton file and thus produce an <strong>heterogenous</strong> electric field within the QM box vinicity. For the molecule in the box but futher away, the electrostatic field generated by them at the ‘mean position’ of the target molecule is computed. All of these ‘long-range’ contribution are summed up and affects the QM calculation by adding an <strong>homogenous</strong> electrostatic field.</p>
+<p>In top of these ‘long-range’ contribution of molecule in the box, periodic copy of the MD box are created using the QMParameter.PE_k_vector_range attribute. All the molecule, including the copies of the target one, contributes to the ‘long-range’ electrostatic field. This is done in the same spirit as long-range intermolecular interaction calculation in MD calculation, but without using the fourier space.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The order used to described the electrostatic neighborgs SHALL BE QMParameter.pe_level=0. Note because there is important argument against, but because it has not been tested yet.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The QMParameter.rcut_PE_direct has to be smaller then the MD box size!</p>
+</div>
+<p>Like in MD, you can use the QMParameter.rcut_PE_smoth and QMParameter.ewald_factor to creat a third area where the molecule contribute both to the direct and long-range part. Note that this functionality has not been widely tested.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘PE + QM’</p></li>
+</ul>
+</div></blockquote>
+<p>The electrostatic embedding scheme where the target molecule may be not alone in their QM box.</p>
+<p>The neighborgs that are closer then QMParameter.max_qm_box_distance_neigh are added to the QM box. This mean that the QM calculation will have more atoms are more electrons.</p>
+<p>Let’s say that the target molecule is Water, and that an Ethanol is added to the QM box. Questions arise if the parameter used to described the electronic part of one molecule is not the same as the other. For instance, if different basis are used, or different functional ect.. To deal with this problem, the GP.preference_functional can be used.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This ‘PE + QM’ option has not been extensively tested.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are looking for a vacuum-like QM calculation, use QMParameter.calculation_style = ‘PE’ along with QMParameter.pe_level = -1.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-pe-level">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">pe_level</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>Set the Polarizable Environment of the neighborhood.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>pe_level = -1: Vacuum</p></li>
+</ul>
+</div></blockquote>
+<p>No contribution of the neigborgs.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>pe_level = 0: static neighborgs</p></li>
+</ul>
+</div></blockquote>
+<p>The neighborgs are described using point charge and/or dipole and/or quadrupole, as defined in their molecular library file. No polarizability.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>pe_level = 1: polarizability</p></li>
+</ul>
+</div></blockquote>
+<p>The neighborgs are described using point charge and/or dipole and/or quadrupole, as defined in their molecular library file, and mayby a polarizability. This means that the permanent dipole can be created at the neighborgs localization depending on the total neighborhood.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If the QMParameter.calculation_style = ‘PE long’, QMParameter.pe_level SHALL BE 0.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The pe_level = 1 has not been extensively tested.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-max-pe-distance-neigh">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">max_pe_distance_neigh</span></span></dt>
+<dd><p><strong>Type</strong> [float]</p>
+<p>Parameter meaningfull only for QMParameter.calculation_style = ‘PE’ or ‘PE + QM’. For ‘PE long’, use QMParameter.rcut_PE_direct instead.</p>
+<p>If QMParameter.pe_level = 0 or 1, set the maximal distance to add an electrostatic neighborgs. The neighbors is add without polarizabilities.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>QMParameter.max_pe_distance_neigh is used to find all the neighbors in the first place. Therefore, QMParameter.max_pe_distance_neigh should be at least larger then QMParameter.max_pe_polarization_distance_neigh or QMParameter.max_qm_box_distance_neigh. If you want all the neighbors to be described with polarizabilities until a distance D,  set QMParameter.max_pe_distance_neigh to D and MParameter.max_pe_polarization_distance_neigh to something larger then D.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If QMParameter.pe_level is larger then the MD box, FROG uses the PBC condition defines in GP.env_authorised_pbc_condition to extend the accessible neighborhood by copying the QM box.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-long-range-distance-switch">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">long_range_distance_switch</span></span></dt>
+<dd><p><strong>Type</strong> [float or str]</p>
+<p>Parameter meaningfull only for QMParameter.calculation_style = ‘PE’.</p>
+<p>Defined a distance after which the neighbors are not included explicitly in the PE environement.
+After this distance, the neighbors electrostatic field is computed at the target molecule ‘mean position’ in the laboratory frame.
+This contribution is added to all the other neighborgs after this distance, and closer than max_pe_distance_neigh.
+The total electrostatic field is added to the QM box as if it was an spatially homogenous field.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If long_range_distance_switch &gt; max_pe_distance_neigh nothing for the environment description.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can also defined an extra electrostatic field using static_electric_field and static_electric_field_direction. This field would be added to the one created by the long-range environment.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Today this scheme works only for PE level=0 and for point charge for the electrostatic description.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-max-pe-polarization-distance-neigh">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">max_pe_polarization_distance_neigh</span></span></dt>
+<dd><p><strong>Type</strong> [float]</p>
+<p>Parameter meaningfull only for QMParameter.calculation_style = ‘PE’ or ‘PE + QM’.</p>
+<p>If QMParameter.pe_level = 1, set the maximal distance to add an electrostatic neighborgs which can be polarizable. The neigbors which will be described using polarizabilities should be closer then QMParameter.max_pe_polarization_distance_neigh. If neighbors are closer then QMParameter.max_pe_distance_neigh but futher away then QMParameter.max_pe_polarization_distance_neigh, they are described with no polarizabilities.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you want to describe all the neighbors using polarizabilities, set QMParameter.max_pe_polarization_distance_neigh &gt;  QMParameter.max_pe_distance_neigh.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-max-qm-box-distance-neigh">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">max_qm_box_distance_neigh</span></span></dt>
+<dd><p><strong>Type</strong> [float]</p>
+<p>Parameter meaningfull only for QMParameter.calculation_style = ‘PE + QM’.</p>
+<p>If the distance between a neighbors and the target molecule is less then QMParameter.max_qm_box_distance_neigh, the neighbors is added to the QM box. Therefore, this neighbors is no longer in the ‘’electrostatic environment’’. It is the best way to add the effect of a neighbors to a target molecule because it will contain all the electrostatic and quatum effect.</p>
+<p>However, it may be more difficult to understand the optical result obtained because they are no longer from a ‘’single molecule’’ but a graps of molecule.</p>
+<p>Be aware that setting a large QMParameter.max_qm_box_distance_neigh will increase a lot the number of electron in the QM box, and therefore increase the QM calculation time.</p>
+<p>In the more complexe environment case: QMParameter.calculation_style = ‘PE + QM’ and QMParameter.pe_level = 1. A molecule is added to the QM box if its distance from the target molecule is less then QMParameter.max_qm_box_distance_neigh. If it is not the case, it is added to the electrostatic environment using polarizability description if its distance is less then QMParameter.max_pe_polarization_distance_neigh. If it is not the case, it is added to the electrostatic environement without polarizability if its distance is less then QMParameter.max_pe_distance_neigh. If the neighbors is futher away, it does not affect the QM calculation.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The functionality has not been widely tested. Please take some time to check the dalton input created before running tons of calculation – especially if you have very long molecule!</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-rcut-pe-direct">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">rcut_PE_direct</span></span></dt>
+<dd><p><strong>Type</strong> [float]</p>
+<p>Parameter meaningfull only for QMParameter.calculation_style = ‘PE long’. For ‘PE’  or ‘PE + QM’ use QMParameter.max_pe_distance_neigh instead.</p>
+<p>Set the maximal distance to add an electrostatic neighborgs directly. The neighbors is add without polarizabilities.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The QMParameter.rcut_PE_direct should be smaller then the MD box size at any time! The QMParameter.calculation_style = ‘PE long’ was especially designed to avoid building large direct electrostatic environement!!! If you are uncertain about the radius to use, try out some value! You can also see the electrostatic field derivative generated by the long-range part to better understand the direct radius to use. See the electrostatic_field diagram.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-rcut-pe-smoth">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">rcut_PE_smoth</span></span></dt>
+<dd><p><strong>Type</strong> [float]</p>
+<p>Parameter meaningfull only for QMParameter.calculation_style = ‘PE long’.</p>
+<p>Used to defined a smothing radius thoughout which the neighborgs are added both in the direct and long-range part. If a nieghbors is within QMParameter.rcut_PE_direct from the target molecule, it is added directly in the Dalton potential file using the charge, dipole and quadrupole moment defined in its molecular library module. If a neighbors distance from the target molecule is between QMParameter.rcut_PE_direct and QMParameter.rcut_PE_smoth, it is added to the potential file but with a smaller charge, dipole and quadrupole moment. The rescaling factor used is given by the QMParameter.ewald_factor parameter:</p>
+<p>rescaling_factor = np.exp(-(distance_from_target/qmparameter.ewald_factor)**2)</p>
+<p>The direct part is rescaled using the rescaling_factor, the long range part using (1-rescaling_factor)</p>
+<p>If a neighbors is futher away then QMParameter.rcut_PE_direct and QMParameter.rcut_PE_smoth, its contributes to the electrostatic environement by an homogenous electrostatic field - with its full charge, dipole and/or quadrupole moment.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you do not want to use this feature, set QMParameter.rcut_PE_smoth &lt; QMParameter.rcut_PE_direct</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This functionality has not been widely used. It may be usefull if you have ionic molecule where the electrostatic field generated is very strong. Or you can use a larger QMParameter.rcut_PE_smoth.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-ewald-factor">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">ewald_factor</span></span></dt>
+<dd><p><strong>Type</strong> [float]</p>
+<p>Parameter meaningfull only for QMParameter.calculation_style = ‘PE long’.</p>
+<p>Set the rescaling paramter used for the molecule within 0 &lt; QMParameter.rcut_PE_direct &lt; QMParameter.rcut_PE_smoth from the target molecule</p>
+<p>The rescaling parameter is given by:</p>
+<p>rescaling_factor = np.exp(-(distance_from_target/qmparameter.ewald_factor)**2)</p>
+<p>The direct part is rescaled using the rescaling_factor, the long range part using (1-rescaling_factor)</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-pe-k-vector-range">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">PE_k_vector_range</span></span></dt>
+<dd><p><strong>Type</strong> [list of int]</p>
+<p>Parameter meaningfull only for QMParameter.calculation_style = ‘PE long’.</p>
+<p>Set the number of QM box to repeat in the given direction to add to the target molecule long-range electrostatic field. For each repated box, all the molecule contributes to the long range electorstatic field.</p>
+<p class="rubric">Example</p>
+<p>QMParameter.PE_k_vector_range = [2, 2, 2]</p>
+<p>This case representa a 3D PBC. Lets say the initial box is a 2x2x2nm box and that QMParameter.rcut_PE_direct = 10 Angstrom. One target molecule neighborhood is built up to 10 Angstrom. The found neighborgs contribute directly to the electrostatic environement with the dalton potential file. The rest of the molecule in the box contribute to the QM calculation by adding a homogenous electrostatic field.</p>
+<p>Then, the box is reapeated 2 times in every direction, creating a 10x10x10nm box. Every molecule in this extended box contributes to the long-range part except the one that are within a radius of 1 nm. This include the periodic copy of the target molecule itself.</p>
+<p>QMParameter.PE_k_vector_range = [3, 3, 0]</p>
+<p>This case represents a 2D PBC. If the initial box is a 2x2x10m, the repeated one will be 14x14x10 nm.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The obtained ‘’repeated box’’ is centered around the target molecule.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This parameter can be completly different from the GP.env_authorised_pbc_condition. However, they represent more or less the same thing: what is the symetry of the system (bulk, plane ect…).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Using many repetition can lead to a very high numerical cost. Try out small one and the obtained result before asking for large QMParameter.PE_k_vector_range value!</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-static-electric-field-direction">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">static_electric_field_direction</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>Parameter meaningfull only if a QMParameter.static_electric_field has been set.</p>
+<p>Provide in which frame the electrostatic field given in QMParameter.static_electric_field is expressed. It can be either in the ‘Molecular’ frame, or the ‘Laboratory’ one.</p>
+<p>The laboratory frame is quite straightforeward to understand: it represents an extra electric field which impact all the MD box.</p>
+<p>The molecular frame may not reproduce any physical situtation. However, it is very handy to compute optical property using the Finite Field formalism.</p>
+<p class="rubric">Example</p>
+<p>See the QMParameter.static_electric_field attribute</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To get the molecular electric field if QMParameter.static_electric_field_direction = ‘Molecular’:</p>
+<p>static_electric_field_mol = toolbox.rotate_1st_order_tensor(rot_mat.T, QMParameter.static_electric_field)</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-static-electric-field">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">static_electric_field</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>Add an <strong>homogenous</strong> electric field for every molecule of this MT during the QM calculation. The value is given in atomic unit. You can add an electric field in any direction in the laboratory or in the molecular frame. To select the frame, use the attribute QMParameter.static_electric_field_direction.</p>
+<p class="rubric">Example</p>
+<p>QMParameter.static_electric_field_direction = ‘Laboratory’
+QMParameter.static_electric_field = [0.003, 0.0001, 0]</p>
+<p>An extra electric field is added along the direction X with amplitude 0.003 a.u., another in the Y direction with amplitude 0.0001 a.u. This electric field will be the same for all the molecule of this MT.</p>
+<p>QMParameter.static_electric_field_direction = ‘Molecular’
+QMParameter.static_electric_field = [0.0, 0.0, 0.0005]</p>
+<p>An extra electric field is added along the molecular direction z with amplitude 0.0005 a.u. This electric field will be diferent for every molecule because it will depend on the molecular orientation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are using the QMParameter.calculation_style = ‘PE long’, for every molecule the long-range part is added by a very similar processus. You can use both QMParameter.calculation_style = ‘PE long’ and QMParameter.static_electric_field: each molecule will have an extra homogenous electric field which will be the sum of the one produced by the long-range environment, and one given for every molecule by QMParameter.static_electric_field.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you do not want to add an electrostatic electric field, do not initialize QMParameter.static_electric_field nor  QMParameter.static_electric_field_direction.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-theory-lv">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">theory_lv</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>Set the ‘theory level’ used for solving the electronic quantum problem.</p>
+<p>Today, only the DFT framework is available in Frog. Not because the rest would arise important problem, Dalton is very powerfull and provide optical reponse for many framework, but because the Frog users do not need more at until today. Therefore, if you need to use other framework, please contact us – or code it directly in Frog: it will not be complicate!</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>DFT:</p></li>
+</ul>
+</div></blockquote>
+<p>For DFT calculation, you need to provide to Frog the functionla you want to use, using the QMParameter.functional.</p>
+<p class="rubric">Example</p>
+<p>For DFT:</p>
+<p>QMParameter.theory_lv = ‘DFT’</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please note that some theory level/functional cannot be used to compute optical properties in Dalton. Therefore, we strongly recommand to test new framework on very few molecule to make sure the QM calculation works.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you are using the QMParameter.calculation_style = ‘PE + QM’, it would be easier to use the same framework for every MT.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-functional">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">functional</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>Parameter meaningfull only if QMParameter.theory_lv = ‘DFT’.</p>
+<p>Set the functional to use for this MT. The name you give to this attribute will be directly written in the dalotn.dal Dalton file without more checking: it is up to you to use a valid Dalton functional name.</p>
+<p class="rubric">Example</p>
+<p>QMParameter.functional = ‘Camb3lyp’</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Sadly, for some functional, Dalton may not be able to compute optical properties.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-type-basis">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">type_basis</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>Define the type of basis to use. This parameter was written originaly because you may want to chose a basis set for all the molecule, or for each atom.</p>
+<p>Today, only ‘Global basis’ are implemented in Frog – every atomic orbital are described using the same general basis set. If needed, it would not be difficult to define basis set for every atom.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘Global basis’</p></li>
+</ul>
+</div></blockquote>
+<p>Every atomic orbital are described using the same basis set. To provide the basis set, use QMParameter.global_basis_value .</p>
+<p class="rubric">Example</p>
+<p>QMParameter.type_basis = ‘Global basis’
+QMParameter.global_basis_value = ‘d-aug-cc-pVTZ’</p>
+<p>The basis ‘d-aug-cc-pVTZ’ (very large, indended for hyperpolarizability calculation) is used for all the atom of this MT.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-global-basis-value">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">global_basis_value</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>Parameter meaningfull only if QMParameter.type_basis = ‘Global basis’.</p>
+<p>Defines the basis set to use for every atomic orbital.</p>
+<p>The basis set is written written in the molecule.mol Dalton file without more checking: it is up to you to use a valid Dalton basis name.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-total-charge">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">total_charge</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>Add an extra charge to the molecule of this MT. By default, no charge is defined.</p>
+<p class="rubric">Example</p>
+<p>QMParameter.total_charge = int(-1)</p>
+<p>Defines an anionic molecule.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If ionic molecular are defined in the molecular library file, it would be very likely that this property is already defined there. So check the qm_target_description function of the MT if a charge is already defined. The charge defined in the qm_target_description will overwrite the one defined in the parameter file if any.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-polarizability-response">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">polarizability_response</span></span></dt>
+<dd><p><strong>Type</strong> [list or bool]</p>
+<p>Defines the frequency at which the polarizability of this MT should be recorded. The frequency are given in atomic unit.
+For every frequency required, a diagram is created where its last part of the name is the frequency. Moreover, a SingleMolecule attribute is also created for each frequency.</p>
+<p class="rubric">Example</p>
+<p>QMParameter.polarizability_response = [0.0, 0.05686, 0.11372]</p>
+<p>3 frequency are required: infinite wave-length (0 atomic unit), 800 nm (0.05686) and 400 nm (0.11372).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Today, the polarizability calculation can only be perform if hyperpolrizability calculation are required. The frequency available in the polrizability are limited by the one required in the hyperpolarizability calculation. Until now, Frog has been many used for hyperpolarizability calculation. Please contact us if you want to use only polarizability calculation.</p>
+<p>Therefore, if you want to have these frequency for the polarizability, you have to set at least these one for the hyperpolarizability:</p>
+<p>QMParameter.shg_response = [0.0, 0.05686]</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-shg-response">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">shg_response</span></span></dt>
+<dd><p><strong>Type</strong> [list or bool]</p>
+<p>Defines the frequency at which the first hyperpolarizability of this MT should be recorded. The frequency are given in atomic unit. The frequency are for the excitation wave-length: the created dipole oscilates at twice the frequency.</p>
+<p>For every frequency required, a diagram is created where its last part of the name is the frequency. Moreover, a SingleMolecule attribute is also created for each frequency.</p>
+<p class="rubric">Example</p>
+<p>QMParameter.shg_response = [0.0, 0.05686]</p>
+<p>2 frequency are required: infinite wave-length (0 atomic unit) and 800 nm (0.05686).</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-max-iter-scf">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">max_iter_scf</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>Set the maximal SCF iteration for the electronic degree of freedom solving procedure.</p>
+<p>By default set to 500</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-restart">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">restart</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Originaly created to perform a restart calculation from a template electronic problem to reduce the QM cost.</p>
+<p>Until today, this feature has not been used. Mainly because only small molecule have been used, and because the reponse part is more CPU-demanding then the electronic energy problem.</p>
+<p>If you want to use this feature, please contact us. But keep in mind that in any case the response part will have to be compute for every molecule!</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>QMParameter.restart shall be False</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-write-xyz-environment">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">write_xyz_environment</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Set if the electrostatic environment should be written in an .xyz file or not. By default set to False.</p>
+<p>If set to True, a .xyz file is written at the location where the Dalton input and output are. It represent the <em>direct</em> electrostatic environement. You can open this file using VMD for instance.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The default value is False to reduce the disk-space occupency. However, we warmly recommand to use this option at least at the beginingto check how the electrostatic emmebedding is performed</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the option QMParameter.calculation_style = ‘PE + QM’ is used, you can have also access to the molecule that are no longer in the electrostatic environement, but in the QM box.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-run-pe">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">RUN_pe</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Not user defined</p>
+<p>Attribute used to make the Frog excetution easier. Set to True if electrostatic envrionement are used.  Related to the dalton.dal file, see dalton_manager_module.generate_inp_dal .</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-run-properties">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">RUN_properties</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Not user defined</p>
+<p>Attribute used to make the Frog execution easier. Set to True by default. Related to the dalton.dal file, see dalton_manager_module.generate_inp_dal .</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-run-integral">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">RUN_integral</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Not user defined</p>
+<p>Attribute used to make the Frog execution easier. Set to False by default. Related to the dalton.dal file, see dalton_manager_module.generate_inp_dal .</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-run-electric-field">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">RUN_electric_field</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Not user defined</p>
+<p>Attribute used to make the Frog execution easier. Set to False by default. Related to the dalton.dal file, see dalton_manager_module.generate_inp_dal .</p>
+<p>Set to True if any homogenous electrostatic field has to be added to the QM box.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-run-response">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">RUN_response</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Not user defined</p>
+<p>Attribute used to make the Frog execution easier. Set to False by default. Related to the dalton.dal file, see dalton_manager_module.generate_inp_dal .</p>
+<p>Set to True if any optical property has to be computed.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-run-polarization">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">RUN_polarization</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Not user defined</p>
+<p>Attribute used to make the Frog execution easier. Set to False by default. Related to the dalton.dal file, see dalton_manager_module.generate_inp_dal .</p>
+<p>Set to True if the polarizability has to be computed.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-run-shg">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">RUN_shg</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Not user defined</p>
+<p>Attribute used to make the Frog execution easier. Set to False by default. Related to the dalton.dal file, see dalton_manager_module.generate_inp_dal .</p>
+<p>Set to True if the hyperpolarizability has to be computed.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmparameter-effective-field-polarization">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMParameter.</span></span><span class="sig-name descname"><span class="pre">effective_field_polarization</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Not user defined</p>
+<p>Originaly designed for effective field (cavity field) calculation. Today not implemented. Shall remain False.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+<section id="qm-description-object">
+<span id="qm-description-object-page"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">6.4.2. </span>QM Description Object</a><a class="headerlink" href="#qm-description-object" title="Link to this heading">¶</a></h2>
+<p>In this section is detailed precisly the different attribute of the QMDescription object. This section is of primor interest if you intend to define yourself a new MT with its QMDescription associated. The QMDescription is provided by the  molecular library file function <a class="reference internal" href="../Tutorials/what_should_contain_molecular_type_file.html#molecular-library-file-qm-description-function-page"><span class="std std-ref">qm_target_description</span></a> which assign for each target molecule the individual QMDescription object.</p>
+<section id="qm-description-attributes">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">6.4.2.1. </span>QM Description Attributes</a><a class="headerlink" href="#qm-description-attributes" title="Link to this heading">¶</a></h3>
+<dl class="py attribute" id="autodoc-qmdescription-l-atom-type">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMDescription.</span></span><span class="sig-name descname"><span class="pre">L_atom_type</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>Atribute defines in the qm_target_description molecular library function.</p>
+<p>QMDescription.L_atom_type contains the the atom type name and the number of electrons associated.</p>
+<p class="rubric">Example</p>
+<p>For Water:
+QMDescription.L_atom_type = [[8, 1, [[‘O’, 0]]], [1, 2, [[‘H’, 1], [‘H’, 2]]]]</p>
+<p>The QMDescription.L_atom_type is composed of list. Each sub-list described one type of atom. For instance, for Water there are 2 atom type: [8, 1, [[‘O’, 0]]] and [1, 2, [[‘H’, 1], [‘H’, 2]]].</p>
+<p>The format is: [Nbr electron, Nbr of this atom type, [[name for this atom, index in the coordinate], [name for this atom, index in the coordinate], …]]]</p>
+<p>The first list described the Oxygen atom. There is 8 electrons per atom and 1 Oxygen in this molecule. The atom is named ‘O’ in the molecule.mol file, and its coordinate is given by: QMDescription.L_coordinate[0]</p>
+<p>The second list described the Hydrogen atom. There is 1 electrons per atom and 2 Hydrogen in this molecule. The first atom is named ‘H’ in the molecule.mol file, and its coordinate is given by: QMDescription.L_coordinate[1]. The second atom is also named ‘H’ in the molecule.mol file, and its coordinate is given by: QMDescription.L_coordinate[2]</p>
+<p>Another example of a Methanol molecule:
+QMDescription.L_atom_type = [[8, 1, [[‘O’, 0]]], [1, 4, [[‘H’, 1], [‘H’, 3], [‘H’, 4], [‘H’, 5]]], [6, 1, [[‘C’, 2]]]]</p>
+<p>There are 3 type of atom: Oxygen, Hydrogen and Carbon.</p>
+<p>The first list described the Oxygen atom. There is 8 electrons per atom and 1 Oxygen in this molecule. The atom is named ‘O’ in the molecule.mol file, and its coordinate is given by: QMDescription.L_coordinate[0].</p>
+<p>The second list described the Hydrogen atom. There is 1 electrons per atom and 4 Hydrogen in this molecule. The all the Hydrogen are named ‘H’ in the molecule.mol file, and their coordinates are given by: QMDescription.L_coordinate[1], QMDescription.L_coordinate[3], QMDescription.L_coordinate[4], QMDescription.L_coordinate[5].</p>
+<p>The third list described the Carbon atom. There is 6 electrons per atom and 1 Carbon in this molecule. The atom is named ‘C’ in the molecule.mol file, and its coordinate is given by: QMDescription.L_coordinate[2].</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are using QMParameter.calculation_style = ‘PE + QM’, try to use (or modify) the same atom name to make easier the creating of graps. For instance, defines all the Oxygen using ‘O’, all the Hydrogen using ‘H’ …</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-qmdescription-l-coordinate">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">QMDescription.</span></span><span class="sig-name descname"><span class="pre">L_coordinate</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>Atribute defines in the qm_target_description molecular library function.</p>
+<p>QMDescription.L_coordinate contains the the atom position in the laboratory frame. The position shall be expressed in Angstrom.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="optical_analysis_index.html">6. Optical Analysis</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview_opt_analysis.html">6.1. Overview: Optical Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optical_parameter.html">6.2. Optical Parameter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrostatic_embedding.html">6.3. Electrostatic embedding</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">6.4. QM box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qm_management.html">6.5. QM Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advices_for_qm.html">6.6. Some Advices for the QM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/OpticalAnalysis/qm_box.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

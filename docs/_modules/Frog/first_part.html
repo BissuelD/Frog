@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog.first_part &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Frog.first_part</h1><div class="highlight"><pre>
+<span></span><span class="c1">##############################################################################</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    FROG: FROm molecular dynamics to second harmonic Generation             #</span>
+<span class="c1">#    Copyright (C) 2024                                                      #</span>
+<span class="c1">#    Author list                                                             #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    Guillaume Le Breton                                                     #</span>
+<span class="c1">#    Oriane Bonhomme                                                         #</span>
+<span class="c1">#    Emmanuel Benichou                                                       #</span>
+<span class="c1">#    Claire Loison                                                           #</span>
+<span class="c1">#                                                                            # </span>
+<span class="c1">#    This program is free software: you can redistribute it and/or modify    #</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by    #</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or       #</span>
+<span class="c1">#    (at your option) any later version.                                     #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is distributed in the hope that it will be useful,         #</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #</span>
+<span class="c1">#    GNU General Public License for more details.                            #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License       # </span>
+<span class="c1">#    along with this program.  If not, see &lt;https://www.gnu.org/licenses/    #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">##############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">time</span> <span class="k">as</span> <span class="nn">python_time</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">MDAnalysis</span>
+<span class="kn">import</span> <span class="nn">pytim</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+
+<span class="kn">import</span> <span class="nn">Frog.toolbox</span> <span class="k">as</span> <span class="nn">toolbox</span>
+<span class="kn">import</span> <span class="nn">Frog.geometry_manager</span> <span class="k">as</span> <span class="nn">geometry_manager</span>
+<span class="kn">import</span> <span class="nn">Frog.class_Diagrams</span> <span class="k">as</span> <span class="nn">class_Diagrams</span>
+<span class="kn">import</span> <span class="nn">Frog.class_modules</span> <span class="k">as</span> <span class="nn">class_modules</span>
+<span class="kn">import</span> <span class="nn">Frog.dalton_manager_module</span> <span class="k">as</span> <span class="nn">dalton_manager_module</span>
+<span class="kn">import</span> <span class="nn">Frog.universe_manager</span> <span class="k">as</span> <span class="nn">universe_manager</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="treat_block_of_frame">
+<a class="viewcode-back" href="../../Frog.html#Frog.first_part.treat_block_of_frame">[docs]</a>
+<span class="k">def</span> <span class="nf">treat_block_of_frame</span><span class="p">(</span><span class="n">time_step_management</span><span class="p">,</span> <span class="n">L_dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Treat each frame and write the result in the GP.dir_mol_times directory. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">GP</span> <span class="o">=</span> <span class="n">L_dict</span><span class="p">[(</span><span class="s1">&#39;GP&#39;</span><span class="p">)]</span>
+    <span class="n">L_molecule_empty</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">open_pickle</span><span class="p">(</span><span class="s1">&#39;L_moleculetype_empty.p&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_mol_times</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">time_step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_step_management</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">time_step_management</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">time_step_management</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">time_step_management</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># to print only once the time tracking</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time step: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_step</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; over &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_step_management</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">time_step_management</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Real time:&#39;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+        <span class="n">treat_one_frame</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">L_molecule_empty</span><span class="p">),</span> <span class="n">time_step</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+    
+<div class="viewcode-block" id="treat_one_frame">
+<a class="viewcode-back" href="../../Frog.html#Frog.first_part.treat_one_frame">[docs]</a>
+<span class="k">def</span> <span class="nf">treat_one_frame</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype</span><span class="p">,</span> <span class="n">time_step</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Perform all the analysis which do not involve QM results nor the effective field calculation. Prepare the QM inputs and update the list of the QM calculation to perform. Not that if this function is called, previous results may be deleted since the new L_molecule_time (computed here) will be saved using the same name. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1">#Loading the position of all the atoms   </span>
+    
+    <span class="c1"># old version</span>
+    <span class="c1">#u, ts, L_box_size = universe_manager.trajectory_load_old(GP, time_step)     </span>
+    <span class="c1">#if isinstance(GP.env_authorised_pbc_condition, list): #meaning that the PBC condition may be used in order to built the environment: </span>
+    <span class="c1">#    ts.L_movment_environment_building_pbc = universe_manager.construct_pbc_movement(GP.env_authorised_pbc_condition, L_box_size) </span>
+
+    <span class="c1"># CL version</span>
+    <span class="n">u</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">pbc</span> <span class="o">=</span> <span class="n">universe_manager</span><span class="o">.</span><span class="n">trajectory_load</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">time_step</span><span class="p">)</span>    
+    <span class="n">L_box_size</span> <span class="o">=</span> <span class="n">pbc</span><span class="o">.</span><span class="n">L_box_size</span>
+
+    <span class="c1"># Important calculations that should be done first for every Molecule type: mean position, layer, assignation, rotational matrix</span>
+    
+    <span class="c1"># Mean Position</span>
+    <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="c1">#iteration over the molecule type</span>
+        <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+        <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_box_size</span> <span class="o">=</span> <span class="n">L_box_size</span> <span class="c1"># usefull </span>
+        <span class="n">module_MT_name</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">creat_name_for_MT_module_load</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">molecule_type_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_MT_name</span><span class="p">)</span> <span class="c1">#Load the module for all the analysis and all the molecule of this type. </span>
+        <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">:</span> <span class="c1">#iteration over the molecule of this molecule type</span>
+            <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">compute_mean_position</span><span class="p">(</span><span class="n">kkk</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">molecule_type_module</span><span class="p">,</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">smparameter</span><span class="p">,</span> <span class="n">L_box_size</span><span class="p">)</span> 
+    
+    <span class="c1"># Layer</span>
+    <span class="k">if</span> <span class="n">GP</span><span class="o">.</span><span class="n">IS_layer_selection</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_which_radii_MT</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">interface</span> <span class="o">=</span> <span class="n">pytim</span><span class="o">.</span><span class="n">ITIM</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">max_layers</span><span class="o">=</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span><span class="p">,</span> <span class="n">radii_dict</span><span class="o">=</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_which_radii_MT</span><span class="p">,</span> <span class="n">warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">multiproc</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">interface</span> <span class="o">=</span> <span class="n">pytim</span><span class="o">.</span><span class="n">ITIM</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">max_layers</span><span class="o">=</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span><span class="p">,</span> <span class="n">warnings</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">multiproc</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="c1">#iteration over the molecule type</span>
+            <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">:</span> <span class="c1">#iteration over the molecule of this molecule type</span>
+                <span class="n">layer</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">residues</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">side</span> <span class="o">=</span> <span class="n">u</span><span class="o">.</span><span class="n">residues</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">sides</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1">#upper layer</span>
+                    <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">layer</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">side</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1">#lower layer</span>
+                    <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">layer</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">side</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1">#bulk part</span>
+                     <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Code probleme: the side of a layer should be 0, 1 or -1!!! Are you dealing with a 2D interface?!&#39;</span><span class="p">)</span>
+                <span class="c1">#print(&#39;position&#39;, moleculetype.L_molecule[kkk-moleculetype.L_key_mol[0]].mean_position[2], &#39;layer and side&#39;, layer, side, &#39;attribution&#39;, moleculetype.L_molecule[kkk-moleculetype.L_key_mol[0]].layer)</span>
+
+    <span class="c1"># Special Selection</span>
+    <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="c1">#iteration over the molecule type</span>
+        <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+        <span class="n">geometry_manager</span><span class="o">.</span><span class="n">special_selection_assignement_for_molecules</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">moleculetype</span><span class="p">,</span> <span class="n">L_box_size</span><span class="p">)</span>
+                
+    <span class="c1"># Rotational matrix</span>
+    <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="c1">#iteration over the molecule type</span>
+        <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">IS_rot_mat</span><span class="p">:</span>
+            <span class="n">module_MT_name</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">creat_name_for_MT_module_load</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">molecule_type_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_MT_name</span><span class="p">)</span> <span class="c1">#Load the module for all the analysis and all the</span>
+            <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">:</span> <span class="c1">#iteration over the molecule of this molecule type</span>
+                <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">compute_rot_matrix</span><span class="p">(</span><span class="n">kkk</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">molecule_type_module</span><span class="p">,</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">smparameter</span><span class="p">,</span> <span class="n">L_box_size</span><span class="p">)</span>
+                
+    <span class="c1"># Initialize for every molecule the &#39;backup&#39; polarization if effective field calculation may be perform:</span>
+    <span class="k">if</span> <span class="n">GP</span><span class="o">.</span><span class="n">IS_effective_field</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="c1">#iteration over the molecule type</span>
+            <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+            <span class="n">module_MT_name</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">creat_name_for_MT_module_load</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">molecule_type_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_MT_name</span><span class="p">)</span> <span class="c1">#Load the module for all the analysis and all the</span>
+            <span class="n">class_temp_diagram</span> <span class="o">=</span> <span class="n">class_modules</span><span class="o">.</span><span class="n">give_class_diagram_name</span><span class="p">(</span><span class="s1">&#39;alpha&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">qmparameter</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">polarizability_response</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">freq_alpha</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">polarizability_response</span><span class="p">:</span>
+                    <span class="n">name_attr</span> <span class="o">=</span> <span class="n">class_Diagrams</span><span class="o">.</span><span class="n">str_to_class</span><span class="p">(</span><span class="n">class_temp_diagram</span><span class="p">)</span><span class="o">.</span><span class="n">SM_attribute_name</span><span class="p">(</span><span class="n">freq_alpha</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">:</span> <span class="c1">#iteration over the molecule of this molecule type</span>
+                        <span class="nb">setattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">name_attr</span><span class="p">,</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">L_alpha_ref</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>            
+                <span class="n">name_attr</span> <span class="o">=</span> <span class="n">class_Diagrams</span><span class="o">.</span><span class="n">str_to_class</span><span class="p">(</span><span class="n">class_temp_diagram</span><span class="p">)</span><span class="o">.</span><span class="n">SM_attribute_name</span><span class="p">(</span><span class="s1">&#39;REF&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">:</span> <span class="c1">#iteration over the molecule of this molecule type</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">name_attr</span><span class="p">,</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">L_alpha_ref</span><span class="p">)</span>
+                
+    <span class="c1"># The rest of the analysis:         </span>
+    <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="c1">#iteration over the molecule type</span>
+        <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>
+        <span class="n">module_MT_name</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">creat_name_for_MT_module_load</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">molecule_type_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module_MT_name</span><span class="p">)</span> <span class="c1">#Load the module for all the analysis and all the molecule of this type. </span>
+        <span class="c1"># Perform all the analysis required for all the molecule. </span>
+        <span class="k">for</span> <span class="n">sdparameter</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">L_diagram</span><span class="p">:</span>
+            <span class="n">continue_treat_single_mol</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">analysis_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="s1">&#39;iota&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">alpha_calculation_style</span> <span class="o">==</span> <span class="s1">&#39;QM&#39;</span><span class="p">:</span>
+                <span class="n">class_temp_diagram</span> <span class="o">=</span> <span class="s1">&#39;Prepare_run_QM&#39;</span>
+                <span class="n">name_attr</span> <span class="o">=</span> <span class="n">class_Diagrams</span><span class="o">.</span><span class="n">str_to_class</span><span class="p">(</span><span class="n">class_temp_diagram</span><span class="p">)</span><span class="o">.</span><span class="n">SM_attribute_name</span><span class="p">(</span><span class="s1">&#39;dummy_arg&#39;</span><span class="p">)</span>
+                <span class="n">continue_after_single_mol</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">analysis_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="s1">&#39;chi&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">beta_calculation_style</span> <span class="o">==</span> <span class="s1">&#39;QM&#39;</span> <span class="p">:</span>
+                <span class="n">class_temp_diagram</span> <span class="o">=</span> <span class="s1">&#39;Prepare_run_QM&#39;</span>
+                <span class="n">name_attr</span> <span class="o">=</span> <span class="n">class_Diagrams</span><span class="o">.</span><span class="n">str_to_class</span><span class="p">(</span><span class="n">class_temp_diagram</span><span class="p">)</span><span class="o">.</span><span class="n">SM_attribute_name</span><span class="p">(</span><span class="s1">&#39;dummy_arg&#39;</span><span class="p">)</span>
+                <span class="n">continue_after_single_mol</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">analysis_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;effective_field&#39;</span><span class="p">]:</span>
+                <span class="n">continue_after_single_mol</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">continue_treat_single_mol</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">class_temp_diagram</span> <span class="o">=</span> <span class="n">class_modules</span><span class="o">.</span><span class="n">give_class_diagram_name</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">analysis_type</span><span class="p">)</span> <span class="c1">#name of the class relative to the diagram requiered </span>
+                <span class="n">name_attr</span> <span class="o">=</span> <span class="n">class_Diagrams</span><span class="o">.</span><span class="n">str_to_class</span><span class="p">(</span><span class="n">class_temp_diagram</span><span class="p">)</span><span class="o">.</span><span class="n">SM_attribute_name</span><span class="p">(</span><span class="n">sdparameter</span><span class="p">)</span>
+                <span class="n">continue_after_single_mol</span> <span class="o">=</span> <span class="kc">True</span>
+                
+            <span class="k">if</span> <span class="n">continue_treat_single_mol</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">L_allowed_molecule</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">name_attr</span><span class="p">),</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">name_attr</span><span class="p">):</span>
+                        <span class="c1"># print(kkk, &#39;authorised&#39;)</span>
+                        <span class="n">class_Diagrams</span><span class="o">.</span><span class="n">str_to_class</span><span class="p">(</span><span class="n">class_temp_diagram</span><span class="p">)</span><span class="o">.</span><span class="n">add_single_molecule_property</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">pbc</span><span class="p">,</span>  <span class="n">molecule_type_module</span><span class="p">,</span> <span class="n">moleculetype</span><span class="p">,</span> <span class="n">sdparameter</span><span class="p">,</span> <span class="n">name_attr</span><span class="p">,</span> <span class="n">kkk</span><span class="p">,</span> <span class="n">time_step</span><span class="p">,</span> <span class="n">L_moleculetype</span><span class="p">)</span> 
+                                
+            <span class="k">if</span> <span class="n">continue_after_single_mol</span><span class="p">:</span> <span class="c1">#not the case when QM simulation have to be performed for instance</span>
+                <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">L_allowed_molecule</span><span class="p">:</span>
+                    <span class="c1"># print(kkk, &#39;authorised&#39;)</span>
+                    <span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="p">,</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">add_value_to_diagram</span><span class="p">(</span><span class="n">L_box_size</span><span class="p">,</span> <span class="n">GP</span><span class="p">,</span> <span class="n">moleculetype</span><span class="p">,</span> <span class="n">sdparameter</span><span class="p">,</span> <span class="n">name_attr</span><span class="p">,</span> <span class="n">kkk</span><span class="p">)</span> <span class="c1">#add the molecule value to the diagram.   </span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="p">,</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">end_frame_diagram</span><span class="p">(</span><span class="n">L_box_size</span><span class="p">,</span> <span class="n">sdparameter</span><span class="p">)</span>
+                
+            <span class="k">if</span> <span class="n">class_temp_diagram</span> <span class="o">==</span> <span class="s1">&#39;Prepare_run_QM&#39;</span><span class="p">:</span> <span class="c1">#update the list of the QM calculation to perform:</span>
+                <span class="n">L_QM_todo</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">L_allowed_molecule</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="s1">&#39;IS_QM_run&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;TODO&#39;</span><span class="p">:</span>
+                        <span class="n">QM_file_localization_name</span> <span class="o">=</span> <span class="n">dalton_manager_module</span><span class="o">.</span><span class="n">build_QM_file_localization</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_torun_QM</span><span class="p">,</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">time_step</span><span class="p">,</span> <span class="n">kkk</span><span class="p">)</span>
+                        <span class="n">L_QM_todo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QM_file_localization_name</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="p">,</span> <span class="s1">&#39;L_QM_todo&#39;</span><span class="p">,</span> <span class="n">L_QM_todo</span><span class="p">)</span>
+                    
+    <span class="c1"># Saving the L_moleculetype_n:</span>
+    <span class="n">toolbox</span><span class="o">.</span><span class="n">save_pickle</span><span class="p">(</span><span class="s1">&#39;L_moleculetype_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_step</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.p&#39;</span><span class="p">,</span> <span class="n">L_moleculetype</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_mol_times</span><span class="p">)</span></div>
+
+ 
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

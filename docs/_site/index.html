@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>FROG &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="_static/_static/css/s4defs-roles.css" />
+    <script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="1. How to Install Frog?" href="Installation/how_to_install_frog.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="frog">
+<h1>FROG<a class="headerlink" href="#frog" title="Link to this heading">¶</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Release<span class="colon">:</span></dt>
+<dd class="field-odd"><p>1.0.0</p>
+</dd>
+<dt class="field-even">Date<span class="colon">:</span></dt>
+<dd class="field-even"><p>Jan 24, 2024</p>
+</dd>
+</dl>
+<p><img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> is a software originally designed to compute the second harmonic generation response of liquids from Molecular Dynamics (MD) at the quantum level. To achieve this, it uses the PE scheme of the <img class="math" src="_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> software which provides optical response of molecules within an electrostatic embedding.</p>
+<p>Here are the main <img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> functionalities:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Perform usual <strong>structural</strong> analysis such as density, molecular orientation, Radial Distribution Function or H-bond.</p></li>
+<li><p>Compute automatically the <strong>optical</strong> response (polarizability, first and second hyperpolarizability) of molecules at the quantum level in an embedded environment.</p></li>
+</ul>
+</div></blockquote>
+<p>Its main advantages are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Can open many types of MD, works for pure liquid or mixture.</p></li>
+<li><p>Can deal with 2D liquid interfaces, but also work in bulk.</p></li>
+<li><p>The user can quite easily define the parameters for a molecule description or analysis.</p></li>
+<li><p>Has a whole part designed to help you to treat thousands of QM calculations in a cluster.</p></li>
+</ul>
+</div></blockquote>
+<p>And for honesty sake, its drawback:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Not that easy to use at first.</p></li>
+<li><p>Can be slow.</p></li>
+</ul>
+</div></blockquote>
+<p>Today, <img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> is still in intense development, as this wiki. You will find practical information to use <img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> in the <a class="reference internal" href="Tutorials/tutorial_index.html#tutorial-index-page"><span class="std std-ref">tutorials</span></a>. The other parts of the wiki give more explanations. Some of the parts are really dedicated for developers and to deeper understand the objects defined in <img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>. The common user may not read all! Rather, we strongly recommend reading also the documentation of the <img class="math" src="_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> software, and especially the part related to the PE environment.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For beginers: <a class="reference internal" href="Installation/installation.html#installation-page"><span class="std std-ref">install it</span></a> and try the <a class="reference internal" href="Tutorials/get_started.html#get-started-on-frog-tutorial-page"><span class="std std-ref">first tutorial</span></a> with the help of this <a class="reference internal" href="Tutorials/overview.html#overview-tutorial-page"><span class="std std-ref">quick overview</span></a> on how the code works. We recommand <a class="reference internal" href="Tutorials/tuto_optical_analysis_overview.html#tuto-optical-analysis-overview-page"><span class="std std-ref">this tutorial for the optical property</span></a> to start with QM/MM calculation.</p>
+</div>
+<p>The central object of <img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> is the <a class="reference internal" href="MoleculeType/mt_index.html#mt-index-page"><span class="std std-ref">MolecularType</span></a> (referred as <strong>MT</strong>), which describes a molecule with a set of functions and attributes. Each molecule (water, methanol or sodium cation for instance) used in the MD should be described by a MT. The current available MTs are presented <a class="reference internal" href="MoleculeType/MolecularLibraryFile/available_mt.html#available-mt-page"><span class="std std-ref">here</span></a>. <img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> aims to be a collaborative and open software: if you want to define by yourself a new MT, see <a class="reference internal" href="Tutorials/what_should_contain_molecular_type_file.html#what-should-contain-molecular-type-file-page"><span class="std std-ref">this tutorial</span></a> or contact us!</p>
+<p>Another important objet is the <a class="reference internal" href="GlobalParameter/gp_index.html#gp-index-page"><span class="std std-ref">GlobalParameter</span></a> (referred as <strong>GP</strong>), which contains information and parameters for all the runs. This object is mainly used to help the use of other functionalities of <img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>.</p>
+<p>To perform the analysis and store the results, <a class="reference internal" href="Diagram/diagram_index.html#diagram-index-page"><span class="std std-ref">Diagrams</span></a> are used. There are as many diagrams as the type of analysis available in <img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>. See <a class="reference internal" href="Diagram/diagram_list.html#diagram-list-page"><span class="std std-ref">this page</span></a> for the available ones.</p>
+<p>To deal with the quantum calculation and the electrostatic embedding, a set of objects are defined. Therefore, if you want to compute optical properties (QM-based properties), you will have to use them. They are presented in the <a class="reference internal" href="OpticalAnalysis/optical_analysis_index.html#optical-analysis-index-page"><span class="std std-ref">Optical Analysis part</span></a> of the wiki, along with a lot of information regarding the <a class="reference internal" href="OpticalAnalysis/electrostatic_embedding.html#electrostatic-embedding-page"><span class="std std-ref">electrostatic embedding scheme</span></a> or <a class="reference internal" href="OpticalAnalysis/qm_management.html#qm-management-page"><span class="std std-ref">how to deal with the QM calculation in the cluster</span></a>.</p>
+<p>Finally <a class="reference internal" href="Mathematics/mathematical_index.html#mathematical-index-page"><span class="std std-ref">an annexe</span></a> with some mathematical and physical explanations and examples is provided.</p>
+<p>To conclude this short presentation, the authors want to highlight that they are non-professional computer scientists, but rather physicists and chemists. Thus, the code may not be the most numerically efficient code possible. However, efforts have been made to make it not too complicate to read and to update/improve. The wiki is long, but should provide information to help a future potential developer understanding the spirit of the code and how it works. Indeed, if you want to participate to the code and/or give physical or numerical advice, please do not hesitate to contact us. Any help is welcome!</p>
+<section id="contact-us">
+<h2>Contact Us<a class="headerlink" href="#contact-us" title="Link to this heading">¶</a></h2>
+<p>You can contact us using the <a class="reference external" href="https://zenodo.org/record/5998193#.YicB8PfjKds/">Zenodo page</a> or by e-mail at:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference external" href="mailto:guillaume&#46;le-breton&#37;&#52;&#48;ens-lyon&#46;fr">guillaume<span>&#46;</span>le-breton<span>&#64;</span>ens-lyon<span>&#46;</span>fr</a></p></li>
+<li><p><a class="reference external" href="mailto:claire&#46;loison&#37;&#52;&#48;univ-lyon1&#46;fr">claire<span>&#46;</span>loison<span>&#64;</span>univ-lyon1<span>&#46;</span>fr</a></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="licence">
+<h2>Licence<a class="headerlink" href="#licence" title="Link to this heading">¶</a></h2>
+<p><img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> is under the LICENCE TODO.</p>
+</section>
+<section id="publications">
+<h2>Publications<a class="headerlink" href="#publications" title="Link to this heading">¶</a></h2>
+<p>To cite <img class="math" src="_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, use the DOI: 10.5281/zenodo.5998192.</p>
+<div class="docutils container" id="id1">
+<div role="list" class="citation-list">
+<div class="citation" id="id2" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Guillaume Le Breton, Oriane Bonhomme, Pierre-François Brevet, Emmanuel Benichou, and Claire Loison. First hyperpolarizability of water at the air–vapor interface: a qm/mm study questions standard experimental approximations. <em>Physical Chemistry Chemical Physics</em>, 23(43):24932–24941, 2021.</p>
+</div>
+<div class="citation" id="id3" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>Guillaume Le Breton, Oriane Bonhomme, Emmanuel Benichou, and Claire Loison. First hyperpolarizability of water in the bulk phase: long-range electrostatic effects included via the second hyperpolarizability. <em>Chemrxiv</em>, 2022.</p>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="#">
+    <img class="logo" src="_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

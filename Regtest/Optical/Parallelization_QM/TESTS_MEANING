@@ -1,0 +1,36 @@
+# Notation: 
+# J jobs: number of to send to the cluster 
+# N QM: N QM calculation per job (nbr of QM calculation per nodes)  
+# np cores: np core per QM calculation (cores per QM calculation)
+
+# All tests are performed with a mixture of water and methanol in bulk. 
+# The goal of these tests are to checked how the submission scripts are written and how the parralelization is AIMED to be done on a cluster. To actually test your implementaiton, we recomand to run these tests on your local machine /cluster with your version of Dalton. 
+# The total number of job to perform 177 for water and  36 for methanol, for a total of 213. 
+
+# test with np=1 and NO GP.nbr_repetition_QM_perMT defined: test_np_1_all_MT_i 
+1. J=1, N=1 
+2. J=10, N=1 
+3. J=499, N=1
+4. J=default, N=1
+5. J=1, N=16 
+6. J=2, N=16
+7. J=12, N=16
+8. J=13, N=16
+9. J=15, N=16 
+
+# test with np=1 and GP.nbr_repetition_QM_perMT defined: test_np_1_several_MT_i. GP.nbr_repetition_QM_perMT is given in braket:
+1. J=1, N=1, [1, 1]
+2. J=500, N=1, [10, 5]
+3. J=500, N=2, [10, 5]
+4. J=500, N=4, [32, 1]
+
+# test with GP.nbr_mpi_dalton != 1 
+test_np_2.py : J=1, N=1, no GP.nbr_mpi_dalton defined: default value (=1)
+test_np_3.py : J=1, N=1, GP.nbr_mpi_dalton = 4. This represent one QM calculation over 4 cores
+test_np_4.py : J=1, N=3, GP.nbr_mpi_dalton = 4. This represent 3 QM calculation over 4 cores. Thus it needs a 12 cores-CPU at least. 
+
+# Left to do: 
+# GP.submit_job_array and GP.submit_array_maxjobs 
+
+
+#END 

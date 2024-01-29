@@ -1,0 +1,5 @@
+To install sphnix in your computer; use:
+ python3 -m pip install --upgrade --force-reinstall sphinx
+ python3 -m pip install --upgrade --force-reinstall sphinxcontrib-applehelp
+ python3 -m pip install --upgrade --force-reinstall recommonmark
+ python3 -m pip install --upgrade --force-reinstall sphinxcontrib-bibtex

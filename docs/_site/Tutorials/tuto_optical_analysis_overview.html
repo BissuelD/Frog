@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2.5. Optical Analysis &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.6. Quadrupole and Long range QM/MM" href="tuto_quadrupole_long.html" />
+    <link rel="prev" title="2.4. Mixture and structural analysis" href="tuto_mixture_md.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="optical-analysis">
+<span id="tuto-optical-analysis-overview-page"></span><h1><span class="section-number">2.5. </span>Optical Analysis<a class="headerlink" href="#optical-analysis" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#goal-and-perquisite" id="id1">Goal and Perquisite:</a></p></li>
+<li><p><a class="reference internal" href="#parameter-file" id="id2">Parameter file:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#gp-definition" id="id3">GP definition:</a></p></li>
+<li><p><a class="reference internal" href="#mt-definition" id="id4">MT definition:</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#procedure" id="id5">Procedure:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#first-part" id="id6">First Part</a></p></li>
+<li><p><a class="reference internal" href="#second-part" id="id7">Second Part</a></p></li>
+<li><p><a class="reference internal" href="#third-part" id="id8">Third Part</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#analysing-the-results" id="id9">Analysing the results:</a></p></li>
+</ul>
+</nav>
+<section id="goal-and-perquisite">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink"><span class="section-number">2.5.1. </span>Goal and Perquisite:</a><a class="headerlink" href="#goal-and-perquisite" title="Link to this heading">¶</a></h2>
+<p>In this first tutorial about the QM/MM calculation, we will see how to prepare the parameter file to compute the SHG property of a molecule within an explicite electrostatic environement.
+To start simple, we will present the usual polarizable Emvironement at the zeroth-order scheme emmebdding as proposed in the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> software.
+The system is net bulk water at room temperature.</p>
+<p>For simplicity sake, the results of the QM calculations are provided within the tutorial so that you do not have to performed them on a cluster. However, you may if you want to check your implementation.</p>
+<p>Finally, we will present how to load and see the datas obtained using a Jupyter Notebook Python environment.</p>
+<p>You should be familiar to the standard command presented in the <a class="reference internal" href="get_started.html#get-started-on-frog-tutorial-page"><span class="std std-ref">get started tutorial</span></a> and the one presented in the <a class="reference internal" href="tuto_space_discretization.html#tuto-space-discretization-page"><span class="std std-ref">space discretization tutorial started tutorial</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We also recommand to read this <a class="reference internal" href="../OpticalAnalysis/overview_opt_analysis.html#overview-opt-analysis-page"><span class="std std-ref">overview</span></a>.</p>
+</div>
+<p>The file needed to run this tutorial are located at: <em>Frog/Doc/Tutorial_files/Traj/Tutorial_files/Traj/Tuto_get_strated</em> for the MD trajectory and <em>Frog/Doc/Tutorial_files/Optical_analysis_overview/</em> for all the other documents.</p>
+</section>
+<section id="parameter-file">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">2.5.2. </span>Parameter file:</a><a class="headerlink" href="#parameter-file" title="Link to this heading">¶</a></h2>
+<p>The definition of which property to compute at the QM level and how to do it are defined in the MoleculeType.
+Running among every MTs and time step, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> construct a pool of QM calculation to perform.
+First of all, let’s define how to deal with these QM calculation using the Global parameter object.</p>
+<section id="gp-definition">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">2.5.2.1. </span>GP definition:</a><a class="headerlink" href="#gp-definition" title="Link to this heading">¶</a></h3>
+<p>New attribute foir the Global Parameters must be defined for a <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run when QM calculations are performed.
+First, if the QM calculations may or may not be perforemed again (‘redo’):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">redo_QM</span> <span class="o">=</span> <span class="s1">&#39;do_not_redo&#39;</span> <span class="c1"># or &#39;redo&#39;</span>
+</pre></div>
+</div>
+<p>Indeed, you may want to use your own way (for instance other parameters/basis/theory level not yet available in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>) to perform the QM calculations.
+Hence, you can have already the QM result at the begining of the <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run, and you still want to use <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> for its data management and/or space discretization procedure.
+Or, you can have already perform a previous <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run with QM calculations but for a small number of molecules/time step.
+In this case, you want to keep the same QM parameters, but increase the statistics.</p>
+<p>In both cases, you should set <span class="incremental">GP.redo_QM = ‘do_not_redo’</span>: if <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> find for a molecule a QM result available (see later on), it will not try to perform a QM run for this molecule.</p>
+<p>If <span class="incremental">GP.redo_QM = ‘redo’</span>, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will creat a new set of <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> input and <strong>change the available QM results file name</strong> if any to avoid confusion. See <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-redo-qm"><span class="std std-ref">this page</span></a> for more information about GP.redo_QM.</p>
+<p>In general, we recommend to work on another directory if you want to test new QM parameters – compare to use <span class="incremental">GP.redo_QM = ‘redo’</span> and thus make the previous QM results more difficult to use again.</p>
+<p>2 new directories are created:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">dir_torun_QM</span> <span class="o">=</span> <span class="s1">&#39;QM_dir&#39;</span>  <span class="c1"># default is GP.general_path/QM_Simulations</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span> <span class="o">=</span> <span class="s1">&#39;Submit_dir&#39;</span> <span class="c1"># default is GP.general_path/Submission_script</span>
+</pre></div>
+</div>
+<p>This first one hold the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> input files and results.
+For the presentation of the organisation within this directory, see <a class="reference internal" href="../OpticalAnalysis/qm_management.html#autodoc-dalton-manager-module-build-qm-file-localization"><span class="std std-ref">this page</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-torun-qm"><span class="std std-ref">GP.dir_torun_QM</span></a> is not supposed to be the directory where <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> stores its temporary files – given by <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-scratch-dir"><span class="std std-ref">GP.scratch_dir</span></a>. In GP.dir_torun_QM only few files will be created and should be the first and final input of <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/>.</p>
+</div>
+<p><a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-submission-file"><span class="std std-ref">GP.dir_submission_file</span></a> defines where to store the submission script used to start the QM calculation (in parrallel) on a cluster.
+You may or may not redefine these directory names or localisation.</p>
+<p>Then is defined which ‘template’ for the submission to your cluster job management should be used and how to launch the command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">file_template_script_run_QM</span> <span class="o">=</span> <span class="s1">&#39;template_run_dalton_parr.sh&#39;</span> <span class="c1"># any .sh file in the same directory as the parameter.py file.</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">command_launch_job</span> <span class="o">=</span> <span class="s1">&#39;qsub&#39;</span> <span class="c1"># for instance: qsub for SGE, sbatch for SLURM.</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-command-launch-job"><span class="std std-ref">GP.command_launch_job</span></a> sonely depend on your cluster job manager type (for instance SGE or SLURM).
+The <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-file-template-script-run-qm"><span class="std std-ref">GP.file_template_script_run_QM</span></a> should point to an existing file.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>You</strong> shall take care of this file because it would be heavely dependent on the cluster you are using and the type of calculation. For more information, see <a class="reference internal" href="../OpticalAnalysis/qm_management.html#qm-management-template-script-subpage"><span class="std std-ref">this page</span></a>. We warmly recommend to try out by yourself (on a small number of QM calculations) several type of ways to submit these jobs on your cluster. We hope that <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> provide enough flexibility to find the ‘best’ way for <strong>your</strong> type of calculation (many small molecule, few large ones? On a mono-servor? Using MPI?).</p>
+</div>
+<p>Attached to these QM calculation management attribute are :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">max_submission_QM</span> <span class="o">=</span> <span class="mi">5000</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span> <span class="o">=</span> <span class="mi">32</span> <span class="c1"># default is 1</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-max-submission-qm"><span class="std std-ref">GP.max_submission_QM</span></a> defines a maximum for the number of ‘job’ that can be submit to the cluster at once.
+This avoid to overload the cluster (or to test if the parameters are correct using <span class="incremental">GP.max_submission_QM = 1</span>.
+<a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-nbr-job-parr-qm"><span class="std std-ref">GP.nbr_job_parr_QM</span></a> defines how many QM calculations are planned for a single ‘job’. Typically, a fraction of the core available for each job. See <a class="reference internal" href="../OpticalAnalysis/qm_management.html#qm-management-general-procedure-subpage"><span class="std std-ref">this page</span></a> for more informations.</p>
+<p>The last parameter to take care of is the <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-scratch-dir"><span class="std std-ref">GP.scratch_dir</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">scratch_dir</span><span class="o">=</span> <span class="s1">&#39;$SCRATCH_DIR&#39;</span> <span class="c1"># default is ./</span>
+</pre></div>
+</div>
+<p>This parameter is deeply connected to the GP.file_template_script_run_QM file.
+It defines where the temporary file of <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> are localised.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please take some time to read <a class="reference internal" href="../OpticalAnalysis/qm_management.html#qm-management-scratch-dir-subpage"><span class="std std-ref">this page</span></a> for the use of GP.scratch_dir. Depending on how you are using <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> you can really request to fill your cluster with <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> large temporary files and thus crash it down. As for the GP.file_template_script_run_QM, try out several ways!</p>
+</div>
+<p>The GP.pass_first_part is discussed further.</p>
+</section>
+<section id="mt-definition">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">2.5.2.2. </span>MT definition:</a><a class="headerlink" href="#mt-definition" title="Link to this heading">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>Diagram definition</p></li>
+</ul>
+</div></blockquote>
+<p>You can perform QM calculation on several MTs within a single <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run – or perform QM calculation for a single MT while several are defined.
+In this tutorial, only one MT is defined (water).
+For several MTs, repeat the MTs definition as presented in <a class="reference internal" href="tuto_mixture_md.html#tuto-mixture-structural-analysis"><span class="std std-ref">this tutorial</span></a> but with a read_optic_properties_input similar to the one presented here.</p>
+<p>For this tutorial, we will focus on the available <strong>optical properties</strong>: the polarizability and the first hyperpolarizability.
+We would like to compute the first hyperpolarizability at the QM/MM level, and only set the polarizability using a fix value in the laboratory frame.
+For more information about the available optical properties and there scientific meaning, see <a class="reference internal" href="../OpticalAnalysis/optical_parameter.html#optical-parameter-page"><span class="std std-ref">this page</span></a>
+The electrostatic emmbbeding is performed by the Polarizable Environement (PE) scheme of the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> software.
+Hence, we may want to keep track of the electrostatic field felt by every molecule (the one generated by the neighborgs).
+Thus, we will declare several diagram:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L_diagram_analysis_to_perform</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s1">&#39;electric_field&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="s1">&#39;on_fly&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;electric_field&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="s1">&#39;PE&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">]],</span>
+    <span class="p">[</span><span class="s1">&#39;iota&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">]],</span>
+    <span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">35</span><span class="p">,</span> <span class="mi">35</span><span class="p">]],</span>
+    <span class="p">[</span><span class="s1">&#39;chi&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">35</span><span class="p">,</span> <span class="mi">35</span><span class="p">]]</span>
+                              <span class="p">]</span>
+<span class="n">moleculetype</span><span class="o">.</span><span class="n">read_diagram_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_diagram_analysis_to_perform</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The diagram type ‘electric_field’ will hold the electrostatic field felt by a molecule.
+2 ways to compute this electrostatic field are used: ‘on_fly’ and ‘PE’. We will discussed the difference later on.
+The diagram type ‘alpha’ is the polarizability in the molecular frame while ‘iota’ is in the laboratory one.
+The diagram type ‘beta’ is the first hyperpolarizability in the molecular frame, ‘chi’ in the laboratory one.</p>
+<p>As for all diagram, several space discretization can be defined (here ‘Averaged’ for simplicity sake) as the number of bins for this space discretization (here 1 because of the ‘Averaged’ type).
+However, the absolute range of these observable are not know by <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> and should be provided.
+The electrostatic field unit is Volt per Angstrom while the polarizability and first hyperpolarizabilty are given in atomic unit.
+In this example, the range to performed the diagram are [-10, 10] for the electric field, [-25, 25] for the polarizability and [-35, 35] for the first hyperpolarizability.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>these limits do not impact the mean and standard deviation calculation, only the diagram.value distribution.</p>
+</div>
+<p>In this example, 200 bins are used to discretize the observable of each diagram.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Optical Parameters definition</p></li>
+</ul>
+</div></blockquote>
+<p>The optical parameters are defined using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">moleculetype</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">alpha_calculation_style</span><span class="o">=</span><span class="s1">&#39;Fixed for all&#39;</span><span class="p">,</span> <span class="n">L_alpha_ref</span><span class="o">=</span><span class="n">L_alpha_ref</span><span class="p">,</span> <span class="n">beta_calculation_style</span><span class="o">=</span><span class="s1">&#39;QM&#39;</span><span class="p">,</span> <span class="n">L_beta_ref</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">where_to_run_QM</span><span class="o">=</span><span class="n">where_to_run_QM</span><span class="p">,</span> <span class="n">qmparameter</span><span class="o">=</span><span class="n">qmparameter</span><span class="p">,</span> <span class="n">selection_tool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we can notice that the polarizability is not QM dependent (alpha_calculation_style=’Fixed for all’) and that the first hyperpolarizability is (beta_calculation_style=’QM’).
+Hence, for the polarizability one should provide a value, used for every molecule, in the molecular frame:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L_alpha_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">9.8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">9.8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">9.8</span><span class="p">]])</span> <span class="c1"># should be a 3x3 matrix or False</span>
+</pre></div>
+</div>
+<p>On the contrary, L_beta_ref should be set to False (or not set at all because it is the default value).</p>
+<p>To perform the QM calculation, the key object is the qmparameter defined using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qmparameter</span> <span class="o">=</span> <span class="n">QMParameter</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>All the attribute of the QMParameter object are defined <a class="reference internal" href="../OpticalAnalysis/qm_box.html#qm-parameter-object-page"><span class="std std-ref">in the page</span></a>.</p>
+<p>Every molecule can undergo only one QM calculation during a <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run.
+Hence, only one qmparameter can be defined for an MT – for instance the ground state parameters are the same for all the optical property of this MT.</p>
+<p>First, let’s define the QM/MM environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qmparameter</span><span class="o">.</span><span class="n">calculation_style</span> <span class="o">=</span> <span class="s1">&#39;PE&#39;</span> <span class="c1">#&#39;PE long&#39;</span>
+<span class="n">qmparameter</span><span class="o">.</span><span class="n">pe_level</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">qmparameter</span><span class="o">.</span><span class="n">max_pe_distance_neigh</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../OpticalAnalysis/qm_box.html#autodoc-qmparameter-calculation-style"><span class="std std-ref">qmparameter.calculation_style</span></a> defines the general scheme, here the classical PE.
+Attached with it the order of the PE environement: <a class="reference internal" href="../OpticalAnalysis/qm_box.html#autodoc-qmparameter-pe-level"><span class="std std-ref">qmparameter.pe_level</span></a>: -1 is for vacuum, 0 for static description of the neighborhood and 1 up to polarizable environement.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The neighborgs electrostatic description (point charge, permanent dipole or quadrupole or dipolar polarizability) are defined within the MT itself. See <a class="reference internal" href="../OpticalAnalysis/electrostatic_embedding.html#electrostatic-description-object-page"><span class="std std-ref">this page</span></a> and <a class="reference internal" href="what_should_contain_molecular_type_file.html#molecular-library-file-electrostatic-description-function-page"><span class="std std-ref">this one</span></a> for more informations.</p>
+</div>
+<p>The environement in the PE0 scheme is included up to a distance of 10 angstrom as defined in <a class="reference internal" href="../OpticalAnalysis/qm_box.html#autodoc-qmparameter-max-pe-distance-neigh"><span class="std std-ref">qmparameter.max_pe_distance_neigh</span></a>.
+See <a class="reference internal" href="../OpticalAnalysis/electrostatic_embedding.html#electrostatic-embedding-page"><span class="std std-ref">this page</span></a> for more information about the electrostatic emmbedding scheme in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>.</p>
+<p>To keep track of the influence of the environement size, the electric field diagram type can be used.
+Above we have defined 2 kinds using ‘on_fly’ and ‘PE’ options.
+The one obtained by the ‘on_fly’ option is computed outside the QM calculation procedure: it can be used without any QM calculation and/or QMParameter definition.
+To do that, the environment up to 10 angstrom is built and the electrostatic description of these neighborgs is used to compute the electrostatic field felt by the molecule.
+For the ‘PE’ option, the electrostatic field generated by the PE environement built during the QM/MM procedure is store.
+Hence, defining the same radius for the ‘on_fly’ (here 10 angstrom) and <a class="reference internal" href="../OpticalAnalysis/qm_box.html#autodoc-qmparameter-max-pe-distance-neigh"><span class="std std-ref">qmparameter.max_pe_distance_neigh</span></a> for the ‘PE’ scheme lead to the same results.
+A deeper analysis of these electrostatic field is presented in the jupyter notebook analysis file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When using the diagram electric_field with the option ‘PE’, you <strong>have to</strong> skip the first part if any QM calculation is already performed. Otherwise the creation of the environement is not done (because there is already a QM results available) and this the electrostatic calculation. This will lead to krash later on.</p>
+</div>
+<p>You can also use <a class="reference internal" href="../OpticalAnalysis/qm_box.html#autodoc-qmparameter-write-xyz-environment"><span class="std std-ref">qmparameter.write_xyz_environment</span></a> to have a look of the environement over every molecule. Setting this attribute to True will generate for every molecule for every time step its electrostatic environement readable using <a class="reference external" href="http://www.ks.uiuc.edu/Research/vmd/">VMD</a>.</p>
+<p>Then, we should define how to compute the ground state property:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qmparameter</span><span class="o">.</span><span class="n">theory_lv</span> <span class="o">=</span> <span class="s1">&#39;DFT&#39;</span>
+<span class="n">qmparameter</span><span class="o">.</span><span class="n">functional</span> <span class="o">=</span> <span class="s1">&#39;Camb3lyp&#39;</span>
+<span class="n">qmparameter</span><span class="o">.</span><span class="n">type_basis</span> <span class="o">=</span> <span class="s1">&#39;Global basis&#39;</span>
+<span class="n">qmparameter</span><span class="o">.</span><span class="n">global_basis_value</span> <span class="o">=</span> <span class="s1">&#39;d-aug-cc-pVTZ&#39;</span>
+</pre></div>
+</div>
+<p>Here we use the DFT formalism with the CAM-B3YLYP functional. The basis set used is Dunning’s ones: d-aug-cc-pVTZ. More information can be found <a class="reference internal" href="../OpticalAnalysis/qm_box.html#qm-parameter-object-page"><span class="std std-ref">here</span></a>.
+We also recommand to read the relative part in the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> manual.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The available option/scheme in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> depends on previous uses. Only a few framework/options available in <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> are currently implemtented in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>. However, it should not be difficult to upgrade <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> code to include the scheme/option you want to use.</p>
+</div>
+<p>Once the ground state calculted, the Response scheme is used to compute the polarizability and/or the first hyperpolarizability.
+Thus, the frequency of the perturbation should be defined using <a class="reference internal" href="../OpticalAnalysis/qm_box.html#autodoc-qmparameter-shg-response"><span class="std std-ref">qmparameter.shg_response</span></a> in <strong>atomic unit</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qmparameter</span><span class="o">.</span><span class="n">shg_response</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.05686</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Here we required to compute the first hyperpolarizability for an excitating wave-length of 0 and 0.05686 a.u. (<em>i.e.</em> at the inifite limit wave-length and at 800 nm).
+Since we are not computing the polarizeability at the QM level, we shall not defined the equivalent attribute – <a class="reference internal" href="../OpticalAnalysis/qm_box.html#autodoc-qmparameter-polarizability-response"><span class="std std-ref">qmparameter.polarizability_response</span></a>.</p>
+<p>Finally, 2 parameters can be used to defined which molecule should undergo a QM calculation: <a class="reference internal" href="../OpticalAnalysis/optical_parameter.html#autodoc-opticalparameter-where-to-run-qm"><span class="std std-ref">OpticalParameter.where_to_run_QM</span></a> and <a class="reference internal" href="../OpticalAnalysis/optical_parameter.html#autodoc-opticalparameter-selection-tool"><span class="std std-ref">OpticalParameter.selection_tool</span></a>.</p>
+<p>In this example, we are dealing with a bulk simulation with 1700 molecules in the box.
+Using :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">where_to_run_QM</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;All&#39;</span><span class="p">]</span>
+<span class="n">selection_tool</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+<p>will compute for <em>all</em> the molecule of this MT at 1 time step there property at the QM level.</p>
+<p>Using :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">where_to_run_QM</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;All&#39;</span><span class="p">]</span>
+<span class="n">selection_tool</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;traking_molecules&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>will compute for the molecule 1, 4 and 10 there property at the QM level for 10 time steps.</p>
+<p>At interfaces, you can use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">where_to_run_QM</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">65</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>to compute the QM property only of molecule within the 50, 62, 63, 64 and 65th bin. You can also defined the molecule using layers.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can combine both requirement of where_to_run_QM and selection_tool.</p>
+</div>
+<p>See <a class="reference internal" href="../OpticalAnalysis/optical_parameter.html#optical-property-which-molecule-should-be-qm-treated-subpage"><span class="std std-ref">this page</span></a> for more details</p>
+</section>
+</section>
+<section id="procedure">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">2.5.3. </span>Procedure:</a><a class="headerlink" href="#procedure" title="Link to this heading">¶</a></h2>
+<p>Now that we have defined the new attributes of the parameters files, let’s have a look on the <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run.</p>
+<section id="first-part">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">2.5.3.1. </span>First Part</a><a class="headerlink" href="#first-part" title="Link to this heading">¶</a></h3>
+<p>As always, launch the run using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Frog</span> <span class="n">parameter_optical_analysis_overview</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>In the shell. You will have new prints during the reading of the parameters file which should confirm the new optical parameters defined.</p>
+<p>The first part may be much longer than the previous tutorial: <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> is building for every molecule its environement and write <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> input file. Typically this should spend several minutes.
+You can find the input file in the GP.dir_torun_QM directory (by default QM_Simulations).</p>
+<p>At the very beggining of this directory, you can find some <em>example</em> files: .dal, .mol, .pot and .xyz.
+These file can help you understanding how a MT are considerated if they are the one that is QM-treated (the .mol file) or if they are a neighborg (.pot and .xyz file).
+For more information about the meaning of these file see the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> manual at the PE section.</p>
+<p>At the end of the first part, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> count how many QM calculation it should perform for all MTs and time step.
+It write this information in a file called <em>job_to_perform.p</em> in the GP.dir_submission_file directory.</p>
+</section>
+<section id="second-part">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">2.5.3.2. </span>Second Part</a><a class="headerlink" href="#second-part" title="Link to this heading">¶</a></h3>
+<p>At the begginig of the second part, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> checks how many of these QM calculations has already be made.
+Then, it will create submission file, which we called ‘jobs’ in this wiki, where GP.nbr_job_parr_QM QM calculations will be made.
+A final file called <em>submit_job.sh</em> in the GP.dir_submission_file directory is created.
+Running this file using bash will send every jobs to the cluster.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We recommand you to have a look at these files to understand how they work.</p>
+</div>
+<p>If there is any QM calculation left to do (which is the case for the first <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> run), the software stops and print:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QM</span> <span class="n">run</span> <span class="ow">not</span> <span class="n">finished</span> <span class="n">yet</span><span class="p">:</span> <span class="n">please</span> <span class="n">launch</span> <span class="n">the</span> <span class="n">QM</span> <span class="n">run</span> <span class="ow">and</span> <span class="n">relaunch</span> <span class="n">the</span> <span class="n">software</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>At this point you have 2 choices:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Perform the QM/MM calculations:</p></li>
+</ul>
+</div></blockquote>
+<p>In this case you should have access to a cluster and rewrite the GP.file_template_script_run_QM file and/or the GP.command_launch_job and/or GP.scratch_dir. To test you really should start using <span class="incremental">GP.max_submission_QM = 1</span> and <span class="incremental">GP.nbr_job_parr_QM = 1</span> (or 2 if you want to compte several QM calculations in one job).</p>
+<p>To perform the QM calculation, see <a class="reference internal" href="../OpticalAnalysis/qm_management.html#qm-management-general-procedure-subpage"><span class="std std-ref">this page</span></a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Use the available results for tutorial sake:</p></li>
+</ul>
+</div></blockquote>
+<p>In the directory <em>Optical_analysis_overview</em> you have already the results called <em>QM_result_for_testing.tar.gz</em>.
+This directory is exactly the same as the GP.dir_torun_QM directory, but there the actual QM results have been computed.
+For every molecule, you will find a file called <em>dalton_molecule_potential.out</em> which is the output of the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> run for this molecule at the QM/MM level.
+To achieve that, you should copying the <em>QM_result_for_testing.tar.gz</em> as <em>GP.dir_torun_QM directory</em>: <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will find the results and go to the next step.</p>
+<p>Once every QM calculations finished (or available in the right directory), <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> continue to the last part.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To speed up the loop over the second part, use <span class="incremental">GP.pass_first_part = True</span>. <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will not redo the first part, and thus the numerical part devoted to <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> should be almost nul. Using this attribute, you can also change some of the GP parameters used for the QM management, see <a class="reference internal" href="../GlobalParameter/QM_management.html#gp-qm-management-numerical-parameter-subpage"><span class="std std-ref">this page</span></a> for the trusted list.</p>
+</div>
+</section>
+<section id="third-part">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink"><span class="section-number">2.5.3.3. </span>Third Part</a><a class="headerlink" href="#third-part" title="Link to this heading">¶</a></h3>
+<p>In this part, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> reads the QM results from the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> output files.
+Then, the distribution, averaged and standard deviation are computed for all the molecules.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If some of the molecule are not QM treated, using <a class="reference internal" href="../OpticalAnalysis/optical_parameter.html#autodoc-opticalparameter-where-to-run-qm"><span class="std std-ref">OpticalParameter.where_to_run_QM</span></a> and/or <a class="reference internal" href="../OpticalAnalysis/optical_parameter.html#autodoc-opticalparameter-selection-tool"><span class="std std-ref">OpticalParameter.selection_tool</span></a>, this is not a problem. For these molecules, not results are available and they will not be considerated in the distribution, averaged or standard deviation. If you are using complicated selection, you can keep track of the population using diagram.population and/or diagram.axis_population.</p>
+</div>
+</section>
+</section>
+<section id="analysing-the-results">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink"><span class="section-number">2.5.4. </span>Analysing the results:</a><a class="headerlink" href="#analysing-the-results" title="Link to this heading">¶</a></h2>
+<p>As for the case without QM calculation, the results are available in average in the <em>L_moleculetype_result.p</em> file or in the time step one (GP.dir_mol_times/L_moleculetype_T.p where T stand for every time steps).
+You can also find the raw individual results in the <em>dalton_molecule_potential.out</em> file of every molecule.</p>
+<p>A jupyter notebook <em>analysis_optical_overview.ipynb</em> file is proposed to load and read the results.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_index.html">2. Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview.html">2.1. Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="get_started.html">2.2. Get started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_space_discretization.html">2.3. Space Discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_mixture_md.html">2.4. Mixture and structural analysis</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.5. Optical Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_quadrupole_long.html">2.6. Quadrupole and Long range QM/MM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html">2.7. Gamma calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read_frog_data.html">2.8. How to read results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html">2.9. Molecular Type Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Tutorials/tuto_optical_analysis_overview.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

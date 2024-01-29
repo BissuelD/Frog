@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog.frog_data_analysis &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Frog.frog_data_analysis</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="c1">##############################################################################</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    FROG: FROm molecular dynamics to second harmonic Generation             #</span>
+<span class="c1">#    Copyright (C) 2024                                                      #</span>
+<span class="c1">#    Author list                                                             #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    Guillaume Le Breton                                                     #</span>
+<span class="c1">#    Oriane Bonhomme                                                         #</span>
+<span class="c1">#    Emmanuel Benichou                                                       #</span>
+<span class="c1">#    Claire Loison                                                           #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is free software: you can redistribute it and/or modify    #</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by    #</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or       #</span>
+<span class="c1">#    (at your option) any later version.                                     #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is distributed in the hope that it will be useful,         #</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #</span>
+<span class="c1">#    GNU General Public License for more details.                            #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License       #</span>
+<span class="c1">#    along with this program.  If not, see &lt;https://www.gnu.org/licenses/    #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">##############################################################################</span>
+
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">copy</span> 
+
+
+<span class="kn">import</span> <span class="nn">Frog.toolbox</span> <span class="k">as</span> <span class="nn">toolbox</span>
+<span class="kn">import</span> <span class="nn">Frog.messages</span> <span class="k">as</span> <span class="nn">messages</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">curve_fit</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="gaussian_fct">
+<a class="viewcode-back" href="../../Frog.html#Frog.frog_data_analysis.gaussian_fct">[docs]</a>
+<span class="k">def</span> <span class="nf">gaussian_fct</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">max_y</span><span class="p">,</span> <span class="n">x_0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">max_y</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">((</span><span class="n">x</span><span class="o">-</span><span class="n">x_0</span><span class="p">)</span><span class="o">/</span><span class="n">sigma</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="gaussian_fit">
+<a class="viewcode-back" href="../../Frog.html#Frog.frog_data_analysis.gaussian_fit">[docs]</a>
+<span class="k">def</span> <span class="nf">gaussian_fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span>  <span class="n">curve_fit</span><span class="p">(</span><span class="n">gaussian_fct</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+   
+<div class="viewcode-block" id="load_result">
+<a class="viewcode-back" href="../../Frog.html#Frog.frog_data_analysis.load_result">[docs]</a>
+<span class="k">def</span> <span class="nf">load_result</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name_result</span><span class="o">=</span><span class="s1">&#39;L_moleculetype_result.p&#39;</span><span class="p">,</span> <span class="n">what_to_print</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading the results from the directory: &#39;</span> <span class="o">+</span> <span class="n">directory</span> <span class="o">+</span> <span class="s1">&#39; the MT resulting list is supposed to be called: &#39;</span> <span class="o">+</span> <span class="n">name_result</span> <span class="o">+</span> <span class="s1">&#39; according to the &quot;name_result&quot; optional argument.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">GP</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">open_pickle</span><span class="p">(</span><span class="s1">&#39;GP.p&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
+    <span class="n">L_moleculetype_result</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">open_pickle</span><span class="p">(</span><span class="n">name_result</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Succesfull loading!&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">what_to_print</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No other messages asked, use the &quot;what_to_print&quot; optional argument if you want to get more informations about this simulation parameters and values&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;general info&#39;</span> <span class="ow">in</span> <span class="n">what_to_print</span><span class="p">:</span>
+            <span class="n">print_general_info</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="s1">&#39;diagram info&#39;</span> <span class="ow">in</span> <span class="n">what_to_print</span><span class="p">:</span>
+            <span class="n">print_diagram_info</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">)</span>
+                
+    <span class="k">return</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="return_diagram">
+<a class="viewcode-back" href="../../Frog.html#Frog.frog_data_analysis.return_diagram">[docs]</a>
+<span class="k">def</span> <span class="nf">return_diagram</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">,</span> <span class="n">MT_name</span><span class="p">,</span> <span class="n">name_diagram</span><span class="p">):</span>
+    <span class="n">fail_name</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">fail_diagram</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_moleculetype_result</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype_result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">MT_name</span><span class="p">:</span>
+            <span class="n">fail_name</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">sdparameter</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">L_diagram</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name_diagram</span><span class="p">:</span>
+                    <span class="n">fail_diagram</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="c1">#TODO: mettre ca dans sdparameter class def, appeller plutot: sdparameter.creat_axis(GP)</span>
+                    <span class="n">my_diagram</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="p">,</span> <span class="n">name_diagram</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">fail_name</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARINING: the MT name defined (&quot;MT_name&quot; argument) is not found in the list of the moleculetype available. Call the print_general_info function to know what are the MT available!&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fail_diagram</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARINING: the diagram name defined (&quot;name_diagram&quot; argument) is not found in available diagram for the MT &#39;</span> <span class="o">+</span> <span class="n">MT_name</span> <span class="o">+</span> <span class="s1">&#39;. Call the print_diagram_info function to know what are the diagrams available for this MT!&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">my_diagram</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+       <span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="print_general_info">
+<a class="viewcode-back" href="../../Frog.html#Frog.frog_data_analysis.print_general_info">[docs]</a>
+<span class="k">def</span> <span class="nf">print_general_info</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">):</span>
+    
+    <span class="n">messages</span><span class="o">.</span><span class="n">message_with_hashtag</span><span class="p">(</span><span class="mi">74</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Some general information:&#39;</span><span class="p">)</span>    
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The MD topology (GP.MD_file_name_topology) and trajectory (GP.MD_file_name_traj) files used are: &#39;</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_topology</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_traj</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The number of time step is (GP.nbr_time_step): &#39;</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The number of MD frame skipped between 2 treated ones is (GP.trotter_step): &#39;</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">trotter_step</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="n">L_moleculetype_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">L_moleculetype_result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_moleculetype_result</span><span class="p">),</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Here is the list of the available MT: &#39;</span><span class="p">,</span> <span class="n">L_moleculetype_name</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Here are the typical dimension of the simulation box in the x,y,z directions (GP.box_size): &#39;</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">box_size</span><span class="p">)</span>    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="print_diagram_info">
+<a class="viewcode-back" href="../../Frog.html#Frog.frog_data_analysis.print_diagram_info">[docs]</a>
+<span class="k">def</span> <span class="nf">print_diagram_info</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">):</span>
+    
+    <span class="n">messages</span><span class="o">.</span><span class="n">message_with_hashtag</span><span class="p">(</span><span class="mi">74</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Some information about the diagram available:&#39;</span><span class="p">)</span>    
+    
+    <span class="n">L_moleculetype_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">L_moleculetype_result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_moleculetype_result</span><span class="p">),</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Here is the list of the available MT: &#39;</span><span class="p">,</span> <span class="n">L_moleculetype_name</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;For every MT, here are the available diagram:&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_moleculetype_result</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">moleculetype</span> <span class="o">=</span> <span class="n">L_moleculetype_result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MT: &#39;</span><span class="p">,</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;name of the diagram, population&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sdparameter</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">L_diagram</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="p">,</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">population</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+    
+
+    
+    
+   
+    
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

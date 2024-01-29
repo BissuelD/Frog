@@ -1,0 +1,149 @@
+.. _installation_page:
+
+#############
+Installation
+#############
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+
+Get the code 
+-------------
+
+To get the code from the Githib server, see :frog_github:`this page<>`.
+You can also get the last version published on :frog_zenodo:`Zenodo<>`.  
+
+Installation using pip
+-----------------------
+
+.. _installation_using_pip:
+
+|frog| is a Python module which can be installed using pip once the *Frog-version.tar.gz* file downloaded. First, make sure that you version of pip is up-to-date: :: 
+
+    $ python -m pip install --upgrade pip
+
+Then, install |frog| and its dependencies using: ::
+
+    $ pip install dist/Frog-1.0.0.tar.gz
+
+Make sure to update this command for the |frog| version or localisation you are using. Similarly, you can use: ::
+    
+    $ python -m pip install dist/Frog-1.0.0.tar.gz
+    
+If you want more information about the numerical requirement, see :ref:`this page.<numerical_notes_and_requirements_page>`. The last part of this page presents commun error that you may enconter. 
+
+
+Local python environment
+------------------------
+If you want to work with a local installation, with a specific python version for example, you can use python environment. For instance, to create a python environment with a specific version at the localization 'vfrog', use: ::
+
+    $ virtualenv --python=python3.6.1 --system-site-packages vfrog
+
+Then, to use this python version, write: ::
+
+    $ source vfrog/bin/activate
+
+You can check that you are within the correct environment using 'which': ::
+    
+    $ which pip
+    $ which python
+    
+Then, install |frog| using this version of pip: ::
+
+    $ pip install dist/Frog-1.0.0.tar.gz
+
+Finally, when you want to run |frog|, you shall initialize this version of python with 'source': ::
+    
+    $ source vfrog/bin/activate
+    
+Then, you can run |frog| from the shell: :: 
+
+    $ Frog my_parameter.py
+
+Check the installation
+----------------------
+
+.. _check_frog_installatiion:
+
+The first check you shall do is to call |frog| within a python environment using the classical import function: ::
+    
+    import Frog
+
+Try also to import one of its modules: ::
+
+    import Frog.main as main
+
+The function Frog.main.frog_run is the main gate to run |frog|. See the :ref:`get started tutorial<get_started_on_frog_tutorial_page>`.
+
+If you do not get any error, you can try to perform a |frog| run in the shell. To do so, go to the Tutorials/Get_started_tuto directory and run the *parameters_example_get_started.py* tutorial: ::
+    
+    $ Frog parameters_example_get_started.py
+
+
+You can also run |frog| with a particular python version if you have installed it with this one: ::
+
+    $ python -m Frog my_parameter.py  
+
+If you get the sentence *FROG run finished without error!* you have run succefully your first |frog| run! 
+
+
+Regular tests
+-------------
+
+|frog| has a list of regular tests (regtests) available on the :frog_github:`the git repository<>`.. 
+You can perform these run thanks to the *bash* script *RUN_REGTESTS.sh*. Go to thei the directory Regtest and run: :: 
+
+    $ bash RUN_REGTESTS.sh
+
+Today, their are no reference values for the tests. They are assumed successful if you manage to run all of them and have the final print message: *FROG regtests have been "successful"*.
+If you are looking for a specific use of a keyword, you can also *grep* it on this directory to have an example of how to use it. For instance, if you want an example of the *L_alpha_ref* option, type these line in the Regtest directory (or the Tutorial one): ::
+
+    $ grep -nr 'L_alpha_ref'
+
+
+Troubleshouting
+----------------
+
+For |frog| installation: 
+
+- Pip version
+    
+You may have issue with installing some packages if your pip version is not up-to-date. To do so, use: ::
+
+    $ python -m pip install --upgrade pip
+
+- *numpy*, *MDAnalysis*, or *Pytim* version
+
+|frog| needs these packages to run. Hence, if you already have installed an old version, it may lead to problems. Make sure you have the latest one: :: 
+
+    python -m pip install --upgrade --force-reinstall numpy
+    python -m pip install --upgrade --force-reinstall MDAnalysis
+    python -m pip install --upgrade --force-reinstall pytim
+
+If you encounter a compatibility problem, please contact us. 
+
+- I do not find the output or |frog| complains about file it did not find 
+
+Make sure to have defined the :ref:`GlobalParameter.general_path<autodoc_gp_general_path>`,  :ref:`GlobalParameter.MD_file_name_topology<autodoc_gp_MD_file_name_topology>`, and :ref:`GlobalParameter.MD_file_name_traj<autodoc_gp_MD_file_name_traj>`. We recommand to define the path absolutly (from the root) to avoid any ambiguity. 
+
+- Run crashes
+
+We tried to prevent issues that may occurs in the run. During the parameter definition and after all of the parameters are defined, checks and cross-compatibility are investiage.  Hence, if you have defined (or forgot to define) some parameters which may lead to problem, the run will not take place and an error message is printed to help you understand the problem and solve it.
+
+Such parameter-ill-defined problems should lead to crash before the first part of the run. If the errors occurs once the first part started, the error is more likely to be harder to solve.
+
+- Problems with |dalton|
+
+If the |dalton| run crashes, we recommand to perform the QM calculation without the electrostatic emmbedding first. To do so, remove the .PEQM and *PEQM section keyword in the dalton.dal input file and submit the job without the potential.pot file. 
+If the problem is still there, try with a very simple molecule. 
+
+Issues regarding the QM part of the calculation and the definition of the molecule in Dalton as part of the QM box can be address by modifying the :ref:`qm_target_description function<molecular_library_file_qm_description_function_page>`  of the molecule type file. Issues regarding its electrostatic description when included in another molecule'environment can be address by modifying the :ref:`electrostatic_description function<molecular_library_file_electrostatic_description_function_page>`  of the molecule type file.
+
+- I am lost and I do not know what to do
+
+Take a cofee, read this page again and try again! If you are still stuck, have a look at our :frog_github:`GitHub repository<>` in the Issue section and open a new one if you do not find an answer.
+
+
+

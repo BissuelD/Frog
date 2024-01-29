@@ -1,0 +1,10 @@
+.. _effective_field_page:
+
+===========================
+Effective Field 
+===========================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+

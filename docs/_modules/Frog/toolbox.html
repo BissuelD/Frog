@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog.toolbox &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Frog.toolbox</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="c1">##############################################################################</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    FROG: FROm molecular dynamics to second harmonic Generation             #</span>
+<span class="c1">#    Copyright (C) 2024                                                      #</span>
+<span class="c1">#    Author list                                                             #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    Guillaume Le Breton                                                     #</span>
+<span class="c1">#    Oriane Bonhomme                                                         #</span>
+<span class="c1">#    Emmanuel Benichou                                                       #</span>
+<span class="c1">#    Claire Loison                                                           #</span>
+<span class="c1">#                                                                            # </span>
+<span class="c1">#    This program is free software: you can redistribute it and/or modify    #</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by    #</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or       #</span>
+<span class="c1">#    (at your option) any later version.                                     #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is distributed in the hope that it will be useful,         #</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #</span>
+<span class="c1">#    GNU General Public License for more details.                            #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License       # </span>
+<span class="c1">#    along with this program.  If not, see &lt;https://www.gnu.org/licenses/    #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">##############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span> 
+<span class="kn">import</span> <span class="nn">pickle</span> 
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span><span class="p">,</span> <span class="n">Pool</span>
+
+<span class="kn">import</span> <span class="nn">Frog.error_messages</span> <span class="k">as</span> <span class="nn">error_messages</span>
+<span class="kn">import</span> <span class="nn">Frog.messages</span> <span class="k">as</span> <span class="nn">messages</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="concatenate_path">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.concatenate_path">[docs]</a>
+<span class="k">def</span> <span class="nf">concatenate_path</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">left_unable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">right_unable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unable_return</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Concatenate the string &quot;left&quot; to the string &quot;right&quot; assuming that they are separated by an &#39;/&#39;. This function was written to avoid trouble while directory-name concatenation -- due to bad input in the input file or to lighten the writing of the code/avoid implementation mistakes.</span>
+<span class="sd">    </span>
+<span class="sd">    If left_unable is set, it has to be a string, it will avoid concatenation of the left and right argument if left==left_unable. In this case, the function will return either the left or the right argument. This is set by defining unable_return to the string &quot;left&quot; or &quot;right&quot;. </span>
+<span class="sd">    </span>
+<span class="sd">    right_unable option works similarly, the condition is on the right argument. </span>
+<span class="sd">    </span>
+<span class="sd">    unable_return should be equal to the string &quot;left&quot; or &quot;right&quot; if the option left_unable and/or right_unable are set.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Avoid concatenation for specific condition</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">left_unable</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">left</span> <span class="o">==</span> <span class="n">left_unable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">unable_return</span> <span class="o">==</span> <span class="s1">&#39;left&#39;</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">unable_return</span> <span class="o">==</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_messages</span><span class="o">.</span><span class="n">e_97</span><span class="p">(</span><span class="n">unable_return</span><span class="p">))</span>
+            
+    <span class="c1"># Avoid concatenation for specific condition    </span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">right_unable</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">right</span> <span class="o">==</span> <span class="n">right_unable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">unable_return</span> <span class="o">==</span> <span class="s1">&#39;left&#39;</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">unable_return</span> <span class="o">==</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">right</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_messages</span><span class="o">.</span><span class="n">e_96</span><span class="p">(</span><span class="n">unable_return</span><span class="p">))</span>
+    
+    <span class="c1"># Perform &#39;safe&#39; concatenation.</span>
+    <span class="k">if</span> <span class="n">left</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">left</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">right</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="extract_file_name">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.extract_file_name">[docs]</a>
+<span class="k">def</span> <span class="nf">extract_file_name</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Extract the filename if the input is given as a general path. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">trotter</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> 
+    <span class="n">new_filename</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    
+    <span class="k">while</span> <span class="n">filename</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;/&#39;</span> <span class="ow">and</span> <span class="n">trotter</span> <span class="o">&gt;</span> <span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">new_filename</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_filename</span>
+        <span class="n">trotter</span> <span class="o">=</span> <span class="n">trotter</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">new_filename</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="creat_directory">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.creat_directory">[docs]</a>
+<span class="k">def</span> <span class="nf">creat_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Creat the directory given in the argument. Works also if several directory have to be created. The implmentation may be smater but this old version works. Do not hesitate to change it if you like.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">directory</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
+        <span class="n">directory</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+        
+    <span class="c1"># Creat the directory if it not exist (works if several directory have to be created)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">trotter_directory_end</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">directory</span><span class="p">[</span><span class="n">trotter_directory_end</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
+                <span class="n">dir_temp</span> <span class="o">=</span> <span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">trotter_directory_end</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">dir_temp</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dir_temp</span><span class="p">)</span></div>
+
+                    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="save_pickle">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.save_pickle">[docs]</a>
+<span class="k">def</span> <span class="nf">save_pickle</span><span class="p">(</span><span class="n">name_save</span><span class="p">,</span> <span class="n">data_to_save</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">directory</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">     Save something inside a pickle and make sure the name of the pickle is a &#39;.p&#39;. The &#39;text&#39; optional argument can be used to print a message after saving the data. The &#39;directory&#39; option can be used to update the name of the pickle file. In this case: name_save = directory + name_save. This option have been made to lighten the implementation of some part of the code.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">name_save</span> <span class="o">=</span> <span class="n">concatenate_path</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name_save</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">name_save</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">name_save</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">name_save</span><span class="p">)]</span> <span class="o">!=</span> <span class="s2">&quot;.p&quot;</span><span class="p">:</span> <span class="c1"># just to make sure it is a .p </span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">user_frendly_50_a</span><span class="p">(</span><span class="n">name_save</span><span class="p">)</span>
+        <span class="n">name_save</span> <span class="o">=</span> <span class="n">name_save</span> <span class="o">+</span> <span class="s1">&#39;.p&#39;</span> 
+    
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">name_save</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: I have deleted the file: &#39;</span> <span class="o">+</span> <span class="n">name_save</span> <span class="o">+</span> <span class="s1">&#39; since I have to write a file with the same name.&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name_save</span><span class="p">)</span>
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_save</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span> <span class="p">)</span> <span class="k">as</span> <span class="n">pfile</span><span class="p">:</span> <span class="c1"># with makes sure that the file is properly closed after writing</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_to_save</span><span class="p">,</span> <span class="n">pfile</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">text</span> <span class="o">+</span> <span class="n">name_save</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="open_pickle">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.open_pickle">[docs]</a>
+<span class="k">def</span> <span class="nf">open_pickle</span><span class="p">(</span><span class="n">name_pickle</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Open a pickle and return the value. The pickle is close anyway. The &#39;directory&#39; option can be used to update the name of the pickle file. In this case: name_pickle = directory + name_pickle. This option have been made to lighten the implementation of some part of the code. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">name_pickle</span> <span class="o">=</span> <span class="n">concatenate_path</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name_pickle</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">name_pickle</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">name_pickle</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">name_pickle</span><span class="p">)]</span> <span class="o">!=</span> <span class="s2">&quot;.p&quot;</span><span class="p">:</span>
+        <span class="n">messages</span><span class="o">.</span><span class="n">user_frendly_50_b</span><span class="p">(</span><span class="n">name_pickle</span><span class="p">)</span>
+        <span class="n">name_pickle</span> <span class="o">=</span> <span class="n">name_pickle</span> <span class="o">+</span> <span class="s1">&#39;.p&#39;</span>
+   
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_pickle</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">filetoload</span><span class="p">:</span>
+        <span class="n">LL_result</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filetoload</span><span class="p">)</span>
+        
+    <span class="k">return</span><span class="p">(</span><span class="n">LL_result</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="delete_file">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.delete_file">[docs]</a>
+<span class="k">def</span> <span class="nf">delete_file</span><span class="p">(</span><span class="n">name_file</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Delete the file if it exists.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">name_file</span> <span class="o">=</span> <span class="n">concatenate_path</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name_file</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">name_file</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: I have deleted the file: &#39;</span> <span class="o">+</span> <span class="n">name_file</span> <span class="o">+</span> <span class="s1">&#39; .&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name_file</span><span class="p">)</span> </div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+        
+<div class="viewcode-block" id="parallelize_fct">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.parallelize_fct">[docs]</a>
+<span class="k">def</span> <span class="nf">parallelize_fct</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">function_to_launch</span><span class="p">,</span> <span class="n">L_dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    TODO</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span> <span class="o">=</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span><span class="p">)</span>
+    <span class="c1"># Creat the time interval which each core have to treat during the parrallele run</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">L_time_step_management</span> <span class="o">=</span> <span class="p">[[</span><span class="n">K</span><span class="o">*</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">L_time_step_management</span> <span class="o">=</span> <span class="p">[[</span><span class="n">K</span><span class="o">*</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span> <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span>  <span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)]</span> 
+        <span class="k">for</span> <span class="n">K</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">L_time_step_management</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">K</span><span class="o">*</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+       
+    <span class="c1"># This line is triky: It says that the function treat_block_of_frame will be called in parrallele. This function can have only 2 arguments. The input is fixed using this command to be &#39;&#39;L_dict&#39;&#39;, the other input shall be given as a list with the same len as the number of parrallele job. </span>
+    <span class="n">prod_x</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">function_to_launch</span><span class="p">,</span> <span class="n">L_dict</span> <span class="o">=</span> <span class="n">L_dict</span><span class="p">)</span> 
+    <span class="c1"># Lunch the parrallele job. L_time_step_management provides the first input of the function &#39;&#39;treat_block_of_frame&#39;&#39; which is run in parrallele. For the moment, this implementation allows the parrallelization on cores of the same nodes (or process on the same core if you prefer). I have not try to run it on several nodes/cores physically different. </span>
+    <span class="c1"># TODO: Test on several cores. </span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">prod_x</span><span class="p">,</span> <span class="n">L_time_step_management</span><span class="p">)</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">pool</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>  <span class="c1"># This line wait all the job to be finished.</span></div>
+
+
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################       </span>
+    
+<div class="viewcode-block" id="frog_format_time">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.frog_format_time">[docs]</a>
+<span class="k">def</span> <span class="nf">frog_format_time</span><span class="p">(</span><span class="n">the_time</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return the time in year-month-days h:m:s format. Use as input time.struct_time object.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">time_string</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">-</span><span class="si">%s</span><span class="s2">-</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">the_time</span><span class="o">.</span><span class="n">tm_year</span><span class="p">,</span> <span class="n">the_time</span><span class="o">.</span><span class="n">tm_mon</span><span class="p">,</span> <span class="n">the_time</span><span class="o">.</span><span class="n">tm_mday</span><span class="p">,</span> <span class="n">the_time</span><span class="o">.</span><span class="n">tm_hour</span><span class="p">,</span> <span class="n">the_time</span><span class="o">.</span><span class="n">tm_min</span><span class="p">,</span> <span class="n">the_time</span><span class="o">.</span><span class="n">tm_sec</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">time_string</span><span class="p">)</span></div>
+
+
+<span class="c1">##</span>
+<span class="c1">################################################################################################################################# </span>
+<div class="viewcode-block" id="return_time">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.return_time">[docs]</a>
+<span class="k">def</span> <span class="nf">return_time</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return the current time using the Frog time format (year-month-days h:m:s). </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">the_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">time_string</span> <span class="o">=</span> <span class="n">frog_format_time</span><span class="p">(</span><span class="n">the_time</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">time_string</span><span class="p">)</span></div>
+
+<span class="c1">##</span>
+<span class="c1">################################################################################################################################# </span>
+<div class="viewcode-block" id="diff_time">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.diff_time">[docs]</a>
+<span class="k">def</span> <span class="nf">diff_time</span><span class="p">(</span><span class="n">time_i</span><span class="p">,</span> <span class="n">time_f</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return the time spend between the time_i and time_f call. These time should have been generated using time.time() function. </span>
+<span class="sd">    </span>
+<span class="sd">    The first return delta_t simply gives the time spend in sec. The delta_t_string return a string with present the time spend in the year, month, days, hour, min, sec format.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">delta_t</span> <span class="o">=</span> <span class="n">time_f</span> <span class="o">-</span> <span class="n">time_i</span> <span class="c1"># in sec</span>
+    <span class="n">delta_t_time_structure</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">localtime</span><span class="p">(</span><span class="n">delta_t</span><span class="p">)</span> 
+    <span class="n">delta_t_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_year</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1970</span><span class="p">:</span>
+        <span class="n">delta_t_string</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> year, &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_year</span><span class="p">)</span><span class="o">-</span><span class="mi">1970</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_mon</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">delta_t_string</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> month, &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_mon</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_mday</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">delta_t_string</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> day, &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_mday</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_hour</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">delta_t_string</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%i</span><span class="s1"> hour, &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_hour</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_min</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">delta_t_string</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> min, &#39;</span> <span class="o">%</span> <span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_min</span>
+        
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_sec</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">delta_t_string</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> sec, &#39;</span> <span class="o">%</span> <span class="n">delta_t_time_structure</span><span class="o">.</span><span class="n">tm_sec</span>
+
+    <span class="n">delta_t_string</span> <span class="o">=</span> <span class="n">delta_t_string</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="k">return</span><span class="p">(</span><span class="n">delta_t</span><span class="p">,</span> <span class="n">delta_t_string</span><span class="p">)</span></div>
+
+    
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################    </span>
+
+
+<div class="viewcode-block" id="creat_beta_kleinman">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.creat_beta_kleinman">[docs]</a>
+<span class="k">def</span> <span class="nf">creat_beta_kleinman</span><span class="p">(</span><span class="n">L_Beta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">     Return the molecular beta using Kleinman symmetry from the 10 independant component: Bxxx, Byyy, BzzzBxyy, Bxzz, Byxx, Byzz, Bzxx, Bzyy, Bxyz. The understood input is: L_beta = [Bxxx, Byyy, Bzzz, Bxyy, Bxzz, Byxx, Byzz, Bzxx, Bzyy, Bxyz].</span>
+<span class="sd">     &#39;&#39;&#39;</span>
+    <span class="p">[</span><span class="n">Bxxx</span><span class="p">,</span> <span class="n">Byyy</span><span class="p">,</span> <span class="n">Bzzz</span><span class="p">,</span> <span class="n">Bxyy</span><span class="p">,</span> <span class="n">Bxzz</span><span class="p">,</span> <span class="n">Byxx</span><span class="p">,</span> <span class="n">Byzz</span><span class="p">,</span> <span class="n">Bzxx</span><span class="p">,</span> <span class="n">Bzyy</span><span class="p">,</span> <span class="n">Bxyz</span><span class="p">]</span> <span class="o">=</span> <span class="n">L_Beta</span>
+    <span class="n">beta_mol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    
+    <span class="c1">#No permutation</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxxx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byyy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzzz</span>
+    
+    <span class="c1">#3 permutations</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyy</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxzz</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxzz</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxzz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byxx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byxx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byxx</span>     
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byzz</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byzz</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byzz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzxx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzxx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzxx</span>     
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzyy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzyy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzyy</span>
+    
+    <span class="c1">#6 permutations</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyz</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyz</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyz</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyz</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyz</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyz</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">beta_mol</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="creat_beta_intrinsic">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.creat_beta_intrinsic">[docs]</a>
+<span class="k">def</span> <span class="nf">creat_beta_intrinsic</span><span class="p">(</span><span class="n">L_Beta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return the molecular beta using intrasinc symmetry for SHG! 2w = w + w. 18 independant component:  [Bxxx, Bxyy, Bxzz, Bxxy, Bxxz, Bxyz, Byxx, Byyy, Byzz, Byxy, Byxz, Byyz, Bzxx, Bzyy, Bzzz, Bzxy, Bzxz, Bzyz] are expected as input.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="p">[</span><span class="n">Bxxx</span><span class="p">,</span> <span class="n">Bxyy</span><span class="p">,</span> <span class="n">Bxzz</span><span class="p">,</span> <span class="n">Bxxy</span><span class="p">,</span> <span class="n">Bxxz</span><span class="p">,</span> <span class="n">Bxyz</span><span class="p">,</span>
+     <span class="n">Byxx</span><span class="p">,</span> <span class="n">Byyy</span><span class="p">,</span> <span class="n">Byzz</span><span class="p">,</span> <span class="n">Byxy</span><span class="p">,</span> <span class="n">Byxz</span><span class="p">,</span> <span class="n">Byyz</span><span class="p">,</span>
+     <span class="n">Bzxx</span><span class="p">,</span> <span class="n">Bzyy</span><span class="p">,</span> <span class="n">Bzzz</span><span class="p">,</span> <span class="n">Bzxy</span><span class="p">,</span> <span class="n">Bzxz</span><span class="p">,</span> <span class="n">Bzyz</span><span class="p">]</span> <span class="o">=</span> <span class="n">L_Beta</span>
+    
+    <span class="n">beta_mol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    
+    <span class="c1">#X</span>
+    <span class="n">Bxzy</span> <span class="o">=</span> <span class="n">Bxyz</span>
+    <span class="n">Bxyx</span> <span class="o">=</span> <span class="n">Bxxy</span>
+    <span class="n">Bxzx</span> <span class="o">=</span> <span class="n">Bxxz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxxx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxxy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxxz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxyz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxzx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxzy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bxzz</span>
+    
+     <span class="c1">#Y</span>
+    <span class="n">Byzy</span> <span class="o">=</span> <span class="n">Byyz</span>
+    <span class="n">Byyx</span> <span class="o">=</span> <span class="n">Byxy</span>
+    <span class="n">Byzx</span> <span class="o">=</span> <span class="n">Byxz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byxx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byxy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byxz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byyx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byyy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byyz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byzx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byzy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Byzz</span>
+
+    <span class="c1">#Z</span>
+    <span class="n">Bzzy</span> <span class="o">=</span> <span class="n">Bzyz</span>
+    <span class="n">Bzyx</span> <span class="o">=</span> <span class="n">Bzxy</span>
+    <span class="n">Bzzx</span> <span class="o">=</span> <span class="n">Bzxz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzxx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzxy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzxz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzyx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzyy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzyz</span>
+    
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzzx</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzzy</span>
+    <span class="n">beta_mol</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">Bzzz</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">beta_mol</span><span class="p">)</span></div>
+
+
+ 
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="rotate_1st_order_tensor">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.rotate_1st_order_tensor">[docs]</a>
+<span class="k">def</span> <span class="nf">rotate_1st_order_tensor</span><span class="p">(</span><span class="n">base_changement</span><span class="p">,</span> <span class="n">vector</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function transform a 1st order tensor (3d vector) from one base to another using a rotational matrix called base_changement.</span>
+<span class="sd">    In Frog, the matrix are defined to be: vector_{mol} =  base_changement . vector_{lab}</span>
+<span class="sd">    Then: vector_{lab} = rotate_1st_order_tensor(base_changement.T, vector_{mol})</span>
+<span class="sd">    Then: vector_{mol} = rotate_1st_order_tensor(base_changement, vector_{lab})</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">vector_new_base</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>                
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">vector_new_base</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">base_changement</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">p</span><span class="p">]</span><span class="o">*</span><span class="n">vector</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">vector_new_base</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<div class="viewcode-block" id="rotate_2nd_order_tensor">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.rotate_2nd_order_tensor">[docs]</a>
+<span class="k">def</span> <span class="nf">rotate_2nd_order_tensor</span><span class="p">(</span><span class="n">base_changement</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function transform a 2nd order tensor (3X3 matrix) from one base to another using a rotational matrix called base_changement.</span>
+<span class="sd">    In Frog, the matrix are defined to be: vector_{mol} =  base_changement . vector_{lab}</span>
+<span class="sd">    Then: tensor_{lab} = rotate_2nd_order_tensor(base_changement, tensor_{mol})</span>
+<span class="sd">    Then: tensor_{mol} = rotate_2nd_order_tensor(base_changement.T, tensor_{lab})</span>
+<span class="sd">    </span>
+<span class="sd">    For electric field gradients</span>
+<span class="sd">    If one have dEi\dxj in the laboratory frame, with the base_changement matrix (R) is defined to be: vector_{lab} = base_changement . vector_{mol}. Then, to go in the molecular frame: </span>
+<span class="sd">    </span>
+<span class="sd">    dEa\dxb_{mol} = \sum_{i,k} R_{ia} R_{kb} dEi\dxk_{lab}</span>
+<span class="sd">    </span>
+<span class="sd">    In pratice:</span>
+<span class="sd">    dE_{mol} = rotate_2nd_order_tensor(base_changement.T, dE_{lab})</span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">tensor_new_base</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>                
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="n">tensor_new_base</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">base_changement</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">p</span><span class="p">]</span><span class="o">*</span><span class="n">base_changement</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">q</span><span class="p">]</span><span class="o">*</span><span class="n">tensor</span><span class="p">[</span><span class="n">p</span><span class="p">][</span><span class="n">q</span><span class="p">]</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">tensor_new_base</span><span class="p">)</span>    </div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="rotate_3rd_order_tensor">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.rotate_3rd_order_tensor">[docs]</a>
+<span class="k">def</span> <span class="nf">rotate_3rd_order_tensor</span><span class="p">(</span><span class="n">base_changement</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;&#39;</span>
+<span class="sd">    This function transform a 3rd order tensor (3X3X3 matrix) from one base to another using a rotational matrix called base_changement.</span>
+<span class="sd">    In Frog, the matrix are defined to be: vector_{mol} =  base_changement . vector_{lab}</span>
+<span class="sd">    Then: tensor_{lab} = rotate_3nd_order_tensor(base_changement, tensor_{mol})</span>
+<span class="sd">    Then: tensor_{mol} = rotate_3nd_order_tensor(base_changement.T, tensor_{lab})</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">tensor_new_base</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>                
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="n">tensor_new_base</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">base_changement</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">p</span><span class="p">]</span><span class="o">*</span><span class="n">base_changement</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">m</span><span class="p">]</span><span class="o">*</span><span class="n">base_changement</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">n</span><span class="p">]</span><span class="o">*</span><span class="n">tensor</span><span class="p">[</span><span class="n">p</span><span class="p">][</span><span class="n">m</span><span class="p">][</span><span class="n">n</span><span class="p">]</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">tensor_new_base</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="rotate_4th_order_tensor">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.rotate_4th_order_tensor">[docs]</a>
+<span class="k">def</span> <span class="nf">rotate_4th_order_tensor</span><span class="p">(</span><span class="n">base_changement</span><span class="p">,</span> <span class="n">tensor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;&#39;</span>
+<span class="sd">    This function transform a 4th order tensor (3X3X3X3 matrix) from one base to another using a rotational matrix called base_changement.</span>
+<span class="sd">    In Frog, the matrix are defined to be: vector_{mol} =  base_changement . vector_{lab}</span>
+<span class="sd">    Then: tensor_{lab} = rotate_4th_order_tensor(base_changement, tensor_{mol})</span>
+<span class="sd">    Then: tensor_{mol} = rotate_4th_order_tensor(base_changement.T, tensor_{lab})</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="n">tensor_new_base</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>                
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                                <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                                    <span class="n">tensor_new_base</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">+=</span> <span class="n">base_changement</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">p</span><span class="p">]</span><span class="o">*</span><span class="n">base_changement</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">m</span><span class="p">]</span><span class="o">*</span><span class="n">base_changement</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">n</span><span class="p">]</span><span class="o">*</span><span class="n">base_changement</span><span class="p">[</span><span class="n">l</span><span class="p">][</span><span class="n">o</span><span class="p">]</span><span class="o">*</span><span class="n">tensor</span><span class="p">[</span><span class="n">p</span><span class="p">][</span><span class="n">m</span><span class="p">][</span><span class="n">n</span><span class="p">][</span><span class="n">o</span><span class="p">]</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">tensor_new_base</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="write_xyz_mol">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.write_xyz_mol">[docs]</a>
+<span class="k">def</span> <span class="nf">write_xyz_mol</span><span class="p">(</span><span class="n">nbr_atom</span><span class="p">,</span> <span class="n">L_atom_type_name</span><span class="p">,</span> <span class="n">L_pos</span><span class="p">,</span> <span class="n">name_file</span><span class="p">,</span> <span class="n">type_writting</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    TODO</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">type_writting</span> <span class="o">==</span> <span class="s1">&#39;w&#39;</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">the_file</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nbr_atom</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Typical site used</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_atom_type_name</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>    
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">L_atom_type_name</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>  <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">the_file</span><span class="p">:</span>
+             <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_atom_type_name</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>    
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">L_atom_type_name</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>  <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+                
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="binarize_array">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.binarize_array">[docs]</a>
+<span class="k">def</span> <span class="nf">binarize_array</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">nbr_bits</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    TODO</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">size</span>
+    <span class="c1"># print(L.size)</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">module_binarized_array</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="n">pbc</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>   
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">op_flags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;readwrite&#39;</span><span class="p">])</span> <span class="k">as</span> <span class="n">it</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">it</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">module_binarized_array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="n">pbc</span><span class="p">)</span>
+    <span class="n">extend</span> <span class="o">=</span> <span class="n">y_max</span> <span class="o">-</span> <span class="n">y_min</span>
+    <span class="n">L_bin</span> <span class="o">=</span> <span class="p">((</span><span class="n">L</span><span class="o">-</span><span class="n">y_min</span><span class="p">)</span><span class="o">/</span><span class="n">extend</span><span class="o">*</span><span class="n">nbr_bits</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">L_bin</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">L_bin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">L_bin</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_bin</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="module_binarized_array">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.module_binarized_array">[docs]</a>
+<span class="k">def</span> <span class="nf">module_binarized_array</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">y_max</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pbc</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>            
+            <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_max</span> <span class="o">-</span> <span class="p">(</span><span class="n">y_max</span><span class="o">-</span><span class="n">y_min</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">7</span><span class="p">)</span> <span class="c1"># in order to avoid out-of-bounds problem in the diagrams.</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="k">while</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">y_max</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">-</span> <span class="n">pbc</span>
+            <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">y_max</span><span class="o">-</span><span class="n">y_min</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">7</span><span class="p">)</span>
+                    
+    <span class="k">elif</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">y_min</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pbc</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_min</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="k">while</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">y_min</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">...</span><span class="p">]</span> <span class="o">+</span> <span class="n">pbc</span> <span class="o">-</span> <span class="p">(</span><span class="n">y_max</span><span class="o">-</span><span class="n">y_min</span><span class="p">)</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">7</span><span class="p">)</span> <span class="c1"># in order to avoid out-of-bounds problem in the diagrams.</span>
+    
+    <span class="k">return</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="concatenate_bin">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.concatenate_bin">[docs]</a>
+<span class="k">def</span> <span class="nf">concatenate_bin</span><span class="p">(</span><span class="n">bin_one</span><span class="p">,</span> <span class="n">bin_two</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Add safely a new dimension to the bin_size.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bin_one</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span><span class="p">((</span><span class="n">bin_one</span><span class="p">,</span> <span class="n">bin_two</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bin_one</span><span class="p">)</span>
+        <span class="n">new_tuple</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">new_tuple</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">bin_one</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="n">new_tuple</span><span class="p">[</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">bin_two</span>
+        <span class="k">return</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">new_tuple</span><span class="p">))</span></div>
+
+        
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="change_tuple_component">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.change_tuple_component">[docs]</a>
+<span class="k">def</span> <span class="nf">change_tuple_component</span><span class="p">(</span><span class="n">mytuple</span><span class="p">,</span> <span class="n">component_to_change</span><span class="p">,</span> <span class="n">newvalue</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return a new tuple with one component changed.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mytuple</span><span class="p">)</span>
+    <span class="n">new_tuple</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">new_tuple</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">mytuple</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+    <span class="n">new_tuple</span><span class="p">[</span><span class="n">component_to_change</span><span class="p">]</span> <span class="o">=</span> <span class="n">newvalue</span>
+    <span class="k">return</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">new_tuple</span><span class="p">))</span></div>
+
+        
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="all_possible_frequency_caligraphy">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.all_possible_frequency_caligraphy">[docs]</a>
+<span class="k">def</span> <span class="nf">all_possible_frequency_caligraphy</span><span class="p">(</span><span class="n">frequency</span><span class="p">):</span>
+    
+    <span class="n">freq</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">freq</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">freq</span><span class="o">/</span><span class="mi">10</span>
+        
+    <span class="k">while</span> <span class="n">freq</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">:</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">freq</span><span class="o">*</span><span class="mi">10</span>
+        
+    <span class="n">L_freq</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">freq</span><span class="o">*</span><span class="mi">10</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">freq</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">freq</span><span class="o">*</span><span class="mf">0.1</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">]]</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_freq</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="creat_name_for_MT_module_load">
+<a class="viewcode-back" href="../../Frog.html#Frog.toolbox.creat_name_for_MT_module_load">[docs]</a>
+<span class="k">def</span> <span class="nf">creat_name_for_MT_module_load</span><span class="p">(</span><span class="n">name_module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return a string with the full path to load the MT module. </span>
+<span class="sd">    </span>
+<span class="sd">    Today, the path is: Source_code/Molecules/the_file.py</span>
+<span class="sd">    </span>
+<span class="sd">    Note: This function has been made in case the global architecture of Frog changes.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span><span class="p">(</span><span class="s1">&#39;Frog.Molecules.&#39;</span> <span class="o">+</span> <span class="n">name_module</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

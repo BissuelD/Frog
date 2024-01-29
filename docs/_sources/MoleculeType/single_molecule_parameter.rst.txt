@@ -1,0 +1,55 @@
+.. _single_molecule_parameter_page:
+
+==========================
+Single Molecule Parameter
+==========================
+
+
+This object is fully defined in the molecular library file attached to the  MT. More informations about how to construct these quantity using the molecular library file are provided HERE. 
+
+It is important to be coherent between the topology of the MD and the single molecule parameter: since |frog| does not read the atom type name from the topology, you may have a case where there is no error due to geometrical mismatch, but the atomic assignation are wrong. Therefore, take some time to open your MD and to check that the 2 description matches. 
+
+If there is a difference of description, you can either redo your MD with the same description, or modify the molecular library file. 
+
+The single molecule parameter object contains:
+
+
+
+.. _autodoc_smparameter_name_mt:
+.. autoattribute:: Frog.class_modules.SingleMoleculeParameter.name_mt
+    :noindex:
+     
+|
+
+.. _autodoc_smparameter_nbr_atom:
+.. autoattribute:: Frog.class_modules.SingleMoleculeParameter.nbr_atom
+    :noindex:
+       
+|
+
+.. _autodoc_smparameter_L_type_atom:
+.. autoattribute:: Frog.class_modules.SingleMoleculeParameter.L_type_atom
+    :noindex:
+       
+|
+
+.. _autodoc_smparameter_size_typical_molecule:
+.. autoattribute:: Frog.class_modules.SingleMoleculeParameter.size_typical_molecule
+    :noindex:
+       
+|
+
+.. _autodoc_smparameter_max_distance_atom:
+.. autoattribute:: Frog.class_modules.SingleMoleculeParameter.max_distance_atom
+    :noindex:
+       
+|
+
+.. _autodoc_smparameter_d_molecular_orientation:
+.. autoattribute:: Frog.class_modules.SingleMoleculeParameter.d_molecular_orientation
+    :noindex:
+       
+|
+
+
+

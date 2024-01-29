@@ -1,0 +1,29 @@
+.. _MLF_Water_SPCE_page:
+
+==================
+Water: SPC/E
+==================
+
+To call this Molecule Type description in |frog|, use: ::
+
+    myMT = frog_class.MoleculeType(GP, 'SPCE', where_are_molecules)
+
+
+Description
+------------
+
+The mean position of the molecule is localised at the Oxygen atom. 
+
+
+Test performed
+--------------
+TODO
+
+
+Module
+------
+.. automodule:: Frog.Molecules.SPCE
+    :noindex:
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>5.4. Diagram Structure &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="6. Optical Analysis" href="../OpticalAnalysis/optical_analysis_index.html" />
+    <link rel="prev" title="5.3. Diagram analysis" href="diagram_analysis.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="diagram-structure">
+<span id="diagram-structure-page"></span><h1><span class="section-number">5.4. </span>Diagram Structure<a class="headerlink" href="#diagram-structure" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#reminder-about-data-structure" id="id1">Reminder about data structure</a></p></li>
+<li><p><a class="reference internal" href="#the-diagram-structure" id="id2">The diagram structure</a></p></li>
+<li><p><a class="reference internal" href="#diagram-parameter" id="id3">Diagram Parameter</a></p></li>
+<li><p><a class="reference internal" href="#single-diagram-parameter" id="id4">Single Diagram Parameter</a></p></li>
+</ul>
+</nav>
+<section id="reminder-about-data-structure">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink"><span class="section-number">5.4.1. </span>Reminder about data structure</a><a class="headerlink" href="#reminder-about-data-structure" title="Link to this heading">¶</a></h2>
+<p>Please see the MT structure page to be aware of how the analysis are stored in ||frog|.</p>
+<p>In short, an MT contains all the information regarding a set of molecule at a given MD frame. There are as many MT object as time step and molecule type declared.</p>
+<p>It contains all the parameters needed to performed the analysis, which does not depend on the time step, in the <a class="reference internal" href="../MoleculeType/mt_structure.html#autodoc-mt-mtparameter"><span class="std std-ref">Molecule Type Parameter object</span></a>.</p>
+<p>It contains a <a class="reference internal" href="../MoleculeType/mt_structure.html#autodoc-mt-l-molecule"><span class="std std-ref">list of all the molecule</span></a>: every molecule is described using a singlemolecule object. In this <a class="reference internal" href="../MoleculeType/mt_structure.html#single-molecule-object-page"><span class="std std-ref">Single Molecule object</span></a>, all the individual property which should be computed are stored: the mean position, the number of H-bond, the hyperpolarizability… In <a class="reference internal" href="diagram_list.html#diagram-list-page"><span class="std std-ref">the analysis available page</span></a>, is presented what singlemolecule attribute is generated for each analysis required. For instance, asking for a ‘beta’ analysis will create for each singlemolecule object an attribute ‘beta’ where the individual beta value will be stored for each time step.</p>
+<p>Finaly, the MT object contains the diagram corresponding to the analysis done for this molecule set. There are at least as many diagram as analysis performed.</p>
+</section>
+<section id="the-diagram-structure">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">5.4.2. </span>The diagram structure</a><a class="headerlink" href="#the-diagram-structure" title="Link to this heading">¶</a></h2>
+<p>Every analysis declared refers to a class, which inherite from the Diagram class. This diagram class defines the attributes presented bellow as well as basic function. Every analysis defines how to deal with the user-input, how to compute the individual quantity, how to add an individual quantity to the distribution… These informations relative to the analysis are presented in <a class="reference internal" href="diagram_list.html#diagram-list-page"><span class="std std-ref">this page</span></a>.</p>
+<p>Every diagram are attached to a Single Diagram Parameter object, contained in the <a class="reference internal" href="#autodoc-diagramparameter-l-diagram"><span class="std std-ref">myMT.mtparameter.dparamter.L_diagram</span></a> list. This object contains the parameter needed for the analysis and the discretization. This idea is that the sdparameter contains most of the time-invariant parameters for the diagram, while the diagram itself contains the time-dependant values – <em>i.e.</em> the results for every time step.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The diagram are directly stored in the MT object. Therefore, to call a diagram, you may want to look at the sdparamter first. To call the diagram relative to the sdparameter, use: <span class="incremental">getattr(myMT, sdparameter.name)</span></p>
+</div>
+<p>Here is what contains every diagram, due to the Diagram class inheritance:</p>
+<dl class="py attribute" id="autodoc-diagram-name">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">name</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The diagram name. Defined by the analysis it refers to, along with the discretization parameters and sometimes some parameters of the analysis.</p>
+<p class="rubric">Example</p>
+<p>If the analysis required is the ‘molecular orientation’ and the space-discreatization is made over the position of the molecule with respect to the laboratory z-axis, the name of the diagram will be <em>molecular_orientation_slice_z</em>.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-size">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">size</span></span></dt>
+<dd><p><strong>Type</strong> [tuple]</p>
+<p>The size of the distribution. The first element is the space discretization, the other refers to the observable discretization – and depends on the analysis performed.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-population">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">population</span></span></dt>
+<dd><p><strong>Type</strong> [integer]</p>
+<p>The total number of molecule that participate to this diagram. For the case where no geometrical discretization is performed, it is just (Number of molecule) X (Number of time). For the other geormetrical selection it can become more structure-dependent and time-dependent.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-value">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">value</span></span></dt>
+<dd><p><strong>Type</strong> [numpy array]</p>
+<p>The distribution of the observable across the geometrical selection. The size of the array is given by the size attribute. It is an non-normalized distribution: it contains only the number of molecule found to have the observable value in a given range. The normalization is up to the user. If you want to perform the normalization with respect to the total number of molecule which participated to this distribution, use the attribute population. If some geometrical selection is used (for instance along a laboratory axis), one can use the  axis_population attribute to normalized the space-discretize distribution with respect to the number of molecule which participated to the distribution for every space-bin. See axis_population attribute for more details.</p>
+<p class="rubric">Example</p>
+<p>For a density analysis along the z laboratory axis with a number of bin 100 ( input parameter: [‘density’, ‘Plane_xy’, [100]). The my_diagram.value attribute is a list of size 100 – given also by my_diagram.size. The mean position of the water molecule are computed for every frame, and the position along the z laboratory axis is discretize into 100 bin with respect to the box size in the z direction. Let’s say, the box size along the z direction is 150 A. Therefore, a molecule with mean position along the z axis 74 A corresponds to the 50th bin. Thus, for every molecule with a z mean position of 74 A, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> adds 1 in the 50th bin of my_diagram.value – i.e. my_diagram.value[49] since python list index starts from 0.</p>
+<p>Another example more complex using the molecular orientation. In this case, the input used to generate the diagram is [‘molecular_orientation’, ‘Plane_xy’, [100, 100], ‘independent’] in the input file. For a given molecule, Frog will perform two discretization: one regarding the mean position (like the previous case) and one regarding the molecular orientation. Let’s say the mean position of the molecule in the z laboratory axis is 89 A and the molecular orientation is [-0.89, 0.1, 0.42]. As for the above example, the space discretization uses 100 bin. The mean position 89 A correspond to the 60th bin. In order to discretize the molecular orientation (the observable), 100 bin is also used. The molecular orientation range from -1 to 1 (projections). Therefore, a molecular orientation of [-0.89, 0.1, 0.42] correspond to the bin 6, 56 and 72. Since the independent distribution is required here, the my_diagram.value will be a 100X3X100 array – given also by my_diagram.size. If Frog found a molecule with a z laboratory axis mean position of 89 A and a molecular orientation of [-0.89, 0.1, 0.42], it will add 1 to the elements:my_diagram.value[59][0][5], my_diagram.value[59][1][55] and my_diagram.value[59][2][71].</p>
+<p>Note: If the join distribution was asked, the my_diagram.value will be a 100X100X100X100 array – given also by my_diagram.size. In this case, the molecule would lead to only one element update: my_diagram.value[59][5][55][71].</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-valuesquare">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">valuesquare</span></span></dt>
+<dd><p><strong>Type</strong> [numpy array]</p>
+<p>At the end of a frame analysis, the attribute ‘value’ at the power 2 is stored in the attribute ‘valuesquare’. When merging the results of all the time step treated, the ‘value’ and ‘valuesquare’ of every diagram are summed respectively. This attribute can be used to compute the standard deviation later on for the distribution.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is assumed that the observable are correlated for a given frame. See HERE for more details.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-mean">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">mean</span></span></dt>
+<dd><p><strong>Type</strong> [float or list of float]</p>
+<p>For all the analysis type except the ‘density’ and the ‘rdf’ (for Radial Distribution Function), mean value and standard deviation are already available in the diagram object using the attribute mean and sd.</p>
+<p>The size of the mean and sd depend on the analysis performed. If space discretization is required, the mean and sd are computed with respect to the same geometrical selection.</p>
+<p class="rubric">Example</p>
+<p>The input used to generate the diagram is [‘molecular_orientation’, ‘Plane_xy’, [100, 100], ‘independent’]. The size of the value distribution is 100 X 3 X 100. The first 100 bin refers to the geometrical selection (along the z-axis of the laboratory frame), while the other 100 bin refers to the discretization of the molecular orientation of the molecule. In this case, the mean attribute size will be 100 x 3. For every z-slice, the mean value for the 3 independent orientation are computed for every molecule found within these slices.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If no space discretisation is required, the number of</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-sd">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">sd</span></span></dt>
+<dd><p><strong>Type</strong> [float or list of float]</p>
+<p>The standard deviation relative to the mean value of the ‘mean’ attribute. The size of the sd is the same as the mean.</p>
+<p>sd = sqrt[mean(value**2) - mean**2]</p>
+<p>If you are using time-uncorrelated frame, you may decrease this standard deviation:</p>
+<p>sd = sd/sqrt(Number time step)</p>
+<p>Or even more if you can define space-uncorrelation.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-axis-population">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">axis_population</span></span></dt>
+<dd><p><strong>Type</strong> [list of int]</p>
+<p>If space discretization is required and the mean value is computed, the number of molecule involve in each geometrical bin is tracked here.</p>
+<p class="rubric">Example</p>
+<p>If the slice_ij argument is used to discretize the result along a given laboratory axis, the axis_population will be an array of the size of the number of bin used to discretize this axis. It will contains the number of molecule that participated to the diagram for every slice. If you plot the axis_population you have something proportional to the density along the discretized axis.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-unit">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">unit</span></span></dt>
+<dd><p><strong>Type</strong> [unit]</p>
+<p>The unit of the observable, depends on the analysis performed. See the class unit for more information. ADD REF</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-axis-observable">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">axis_observable</span></span></dt>
+<dd><p><strong>Type</strong> [frog_axis]</p>
+<p>The x-axis of the discretize observable. You can use this axis to plot the distrubiton ‘value’ along the observable direction. See the class frog_axis for more information. ADD REF.</p>
+<p class="rubric">Example</p>
+<p>To plot the (normalized) distribution of an observable for a given geometrical selection bin (here the 0th):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">population</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>More examples can be found HERE.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagram-axis-space">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Diagram.</span></span><span class="sig-name descname"><span class="pre">axis_space</span></span></dt>
+<dd><p><strong>Type</strong> [frog_axis]</p>
+<p>The x-axis of the space selection. If no space selection is performed, this axis is useless. If you performed axis discretization, it will contains the position of the slices along the chosen axis. You can use this axis to plot the distrubiton ‘value’ along the geometrical discretization, or perform 2D plot along with the axis_observable axis. See the class frog_axis for more information. ADD REF.</p>
+<p class="rubric">Example</p>
+<p>To plot the mean value along the spacial discretization:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">sd</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>More examples can be found HERE.</p>
+</dd></dl>
+
+</section>
+<section id="diagram-parameter">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">5.4.3. </span>Diagram Parameter</a><a class="headerlink" href="#diagram-parameter" title="Link to this heading">¶</a></h2>
+<p id="diagram-parameter-page">The <a class="reference internal" href="../MoleculeType/mt_structure.html#autodoc-mtparameter-dparameter"><span class="std std-ref">dparameter</span></a> attribute is a Diagram Parameter object. It is contained in the mtparameter (which is a <a class="reference internal" href="../MoleculeType/mt_structure.html#autodoc-mt-mtparameter"><span class="std std-ref">Molecule Type Parameter object</span></a>) attribute of the Molecule Type Object. In Short: <span class="incremental">myMT.mtparameter.dparameter</span>.</p>
+<p>It is built when the diagram input are set by the user using the function <span class="incremental">myMT.read_diagram_input</span>, see <a class="reference internal" href="how_to_creat_diagram.html#how-to-creat-diagram-page"><span class="std std-ref">this page</span></a> for pratical examples. It contains information about the analysis and diagram required for this MT.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If ‘optical’ analysis are required, the parameters relative to these analysis are completed by the one provided in the Optcial Parameter object: <a class="reference internal" href="../MoleculeType/mt_structure.html#autodoc-mtparameter-optparameter"><span class="std std-ref">myMT.mtparameter.optparameter</span></a>.</p>
+</div>
+<p>Here are the available attribute of this object. Please note that you have no use to call or add them manually for a standard use of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>. This part is intented for advance user.</p>
+<dl class="py attribute" id="autodoc-diagramparameter-l-possible-diagram">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">DiagramParameter.</span></span><span class="sig-name descname"><span class="pre">L_possible_diagram</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>All the possible value of analysis/diagrams available in the code. Please note that if you want to develop another type of analysis, you have to add the name of the analysis in this list and also add a subclass of Diagram with the name: Dia_&lt;your analysis name &gt;. The way the subclass name is defined with the analysis name given in the function Frog.class_module.give_class_diagram_name.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagramparameter-l-diagram">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">DiagramParameter.</span></span><span class="sig-name descname"><span class="pre">L_diagram</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>All the Single Diagram Parameter object relative to the diagrams declared. See Single Diagram Parameter object for more information.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The number of analysis to performed is given by the function DiagramParameter.nbr_analysis – which is just len(L_diagram).</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagramparameter-is-rot-mat">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">DiagramParameter.</span></span><span class="sig-name descname"><span class="pre">IS_rot_mat</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Shortcut to help Frog know if the ‘rotational matrix’ for this MT should be computed. Many analysis required this matrix, therefore it is set not during the diagram initialization but later on during the checks, see Frog.class_molecule.end_initialize.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagramparameter-is-density">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">DiagramParameter.</span></span><span class="sig-name descname"><span class="pre">IS_density</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Shortcut to help Frog know which analysis should be performed. There is as many IS_ + analysis type as analysis type. For instance IS_density or IS_alpha. If this analysis is required, set to True, otherwise set to False.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagramparameter-special-selection">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">DiagramParameter.</span></span><span class="sig-name descname"><span class="pre">special_selection</span></span></dt>
+<dd><p><strong>Type</strong> [bool or list]</p>
+<p>The single diagram parameters defines which analysis should be performed to this MT, and how.</p>
+<p>This attribute defines which molecule of this MT should contribute to the analysis. The advantage is to speed up the calculation time: you may not be interested by all the molecules!
+Note that this selection applies to <em>all</em> the diagrams of this MT.</p>
+<p>The format of this attribute is very similar to the geometrical discretisation option when declaring a diagram. As an user, when adding a new list of diagram to performed, you can define this special geometrical selection using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">myMT</span><span class="o">.</span><span class="n">read_diagram_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_diagram_analysis_to_perform</span><span class="p">,</span> <span class="n">special_selection</span><span class="o">=</span><span class="n">my_special_selection</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here are the available values for <span class="incremental">my_special_selection</span>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">False</span> or <span class="incremental">True</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>No extra special selection is made. All the molecule of the MT contributes to all the analysis and diagrams.</p>
+<p>In this case, the DiagramParameter.special_selection object is set to False.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">[‘All’]</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>No extra special selection is made. All the molecule of the MT contributes to all the analysis and diagrams.</p>
+<p>In this case, the DiagramParameter.special_selection object is set to False.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">[‘Plane_ij’, bin_number, list_of_bin]</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>For each time step, the box is discretized along plane with the axis ij. bin_number number of bin is used. Every molecules are assigned to one of these bin according to there mean position. If this bin is within the list_of_bin, the molecule is analyse.</p>
+<p>In this case, the DiagramParameter.special_selection object is set to [axis where the space is decretize (0, 1 or 2), bin_number, list_of_bin]</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">[‘Layer’, nbr_layer, list_layer]</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>For each time step, the molecule are assigned to a layer, using ‘nbr_layer’ number of layer. If a molecule is in the layer number given by list_layer, it is treated analysis by Frog. Otherwise not.</p>
+<p>In this case,  the DiagramParameter.special_selection object is set to [10, 2*nbr_layer+1, list_layer]</p>
+<p class="rubric">Example</p>
+<p><span class="incremental">my_special_selection = [‘Plane_xy’, 100, [60, 61, 62, 63, 64, 65, 66]]</span></p>
+<p>The box in discretize along the z axis using 100 bins. Only the molecule within the 60 to 66 bin are analysed. Note that the list of authorized bin can not be continous.</p>
+<p class="rubric">Example</p>
+<p><span class="incremental">my_special_selection = [‘Layer’, 4, [-4, -3, 0, 1, 4]]</span></p>
+<p>Here, nbr_layer = 4. A molecule can be assigned to the layer number 4, 3, 2 or 1 for the upper interface (the 1st is the closest to the bulk phase, the 4th the farthest), to -4, -3, -2, -1 for the lower interface (the -4 is the farest from the bulk phase) or to 0 for the molecule in the bulk-like phase. Only molecule with layer number -4, -3, 0, 1 or 4 will be treated by Frog.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This condition is made before the one regarding the QM calculations parameters. If QM calculation should be made, a molecule has to respect both conditions (given in special_selection and the optical parameter parameters).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If a diagram uses a Plane type discretization and with the same direction as special_selection, then the diagram size will be modified. Indeed, one major use of this attribute is to reduce the size of the diagram. For example, if a Plane_xy with  100 bins is required for a digram, and <span class="incremental">my_special_selection = [‘Plane_xy’, 100, [60, 61, 62, 63, 64, 65, 66]]</span>, the size of the diagram object attributes along the geometrical dimension will be 7 instead of 100.
+In case the diagram (or special_selection) is Layer type, no size reallocation is done: the size of diagram using Layer type is often small anyway.
+In case there is no diagram spatial discretization, nothing happens to the diagram size.</p>
+<p>In any case, the diagram will be built only by the molecule respecting the special_selection requirement – and thus the analysis done within FROG are done only to these selected molecules.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For devellopers: the most concrete action of  DiagramParameter.special_selection is made in geometry_manager.special_selection_assignement_for_molecules. Use this function to update new option for this attribute.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-diagramparameter-l-allowed-molecule">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">DiagramParameter.</span></span><span class="sig-name descname"><span class="pre">L_allowed_molecule</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>Defined for each time step. Contain the molecule of this MT which should be treated according to the special_selection defined. If not special_selection is set, all the molecule can be treated.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For advance user: The logging.info has been disable for this attribute because too much print would be done: the list of all the molecule to compute for every time step. For debug sake, you can use the logging of this attribute setter, or in the first_part.treat_one_frame function (maybe better in the first_part.treat_one_frame because you can print more meaningfull info along with this list).</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="single-diagram-parameter">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">5.4.4. </span>Single Diagram Parameter</a><a class="headerlink" href="#single-diagram-parameter" title="Link to this heading">¶</a></h2>
+<p id="single-diagram-parameter-page">All the single parameter object are contained in the <a class="reference internal" href="#autodoc-diagramparameter-l-diagram"><span class="std std-ref">myMT.mtparameter.dparameter.L_diagram</span></a> list. See above for the dparameter object.</p>
+<p>They are built when the diagram input are set by the user using the function <span class="incremental">myMT.read_diagram_input</span>, see <a class="reference internal" href="how_to_creat_diagram.html#how-to-creat-diagram-page"><span class="std std-ref">this page</span></a> for pratical examples. Each sdparameter objects are attached to a diagram. The attributes of these sdparameter depend on the analysis required. In the <a class="reference internal" href="diagram_list.html#diagram-list-page"><span class="std std-ref">list of the available analysis</span></a> is details which sdparameter attributed are added for each analysis.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If ‘optical’ analysis are required, the parameters relative to these analysis are completed by the one provided in the Optcial Parameter object: <a class="reference internal" href="../MoleculeType/mt_structure.html#autodoc-mtparameter-optparameter"><span class="std std-ref">myMT.mtparameter.optparameter</span></a>.</p>
+</div>
+<p>Here are the available attribute of this object. Please note that you have no use to call or add them manually for a standard use of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>. This part is intented for advance user.</p>
+<dl class="py attribute" id="autodoc-singlediagramparameter-name">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleDiagramParameter.</span></span><span class="sig-name descname"><span class="pre">name</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The name of the diagramm.</p>
+<p>The name is composed buy several information. It always start with the analysis type, then the geometrical discretization used. From some analysis, the name can be futher update with other parameter.</p>
+<p>name = &lt;analysis_type&gt; + _ + &lt;discretization&gt; + other parameters</p>
+<p>See the analysis documentation for more information about how the name of the diagram are created.</p>
+<p class="rubric">Example</p>
+<p>If the input to built the diagram is :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Then, the name of this diagram will be ‘density_slice_z’.</p>
+<p>If no space discretization is required: [’density’, ’All’, [1]], the name is directly ‘density’.</p>
+<p class="rubric">Example</p>
+<p>For an input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;rdf&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xz&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="s1">&#39;Methanol_OPLSAA&#39;</span><span class="p">,</span> <span class="mf">10.2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The name will be ‘rdf_slice_y_Methanol_OPLSAA’</p>
+<p class="rubric">Example</p>
+<p>For an input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>With QM calculation at frequencies:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qmparameter</span><span class="o">.</span><span class="n">shg_response</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.05686</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Two diagram will be created with the name ‘beta_0.0’ and ‘beta_0.05686’.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The name of the diagram are fixed by the parameter. Therefore, you should not define several times the set of input parameter, leading to the same diagram name. Frog may crash in unexpected way. If you want to define very similar parameters to compare the resulting diagrams (with the same name), you should run several time Frog several times.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-singlediagramparameter-analysis-type">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleDiagramParameter.</span></span><span class="sig-name descname"><span class="pre">analysis_type</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The analysis type of this diagram. Should be in DiagramParameter.L_possible_diagram list.</p>
+<p>The analysis type is given by the first argument of the input parameter.</p>
+<p class="rubric">Example</p>
+<p>For an input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>The sdparameter associated analysis_type is ‘beta’.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-singlediagramparameter-discretization-type">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleDiagramParameter.</span></span><span class="sig-name descname"><span class="pre">discretization_type</span></span></dt>
+<dd><p><strong>Type</strong> [integer]</p>
+<p>A shortcut for the geometrical discretization used for the diagram. The geometrical discretization is given by the second argument of the input parameter.</p>
+<p>user input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">analysis</span> <span class="nb">type</span><span class="p">,</span> <span class="n">geometrical</span> <span class="n">discretization</span><span class="p">,</span> <span class="p">[</span><span class="nb">bin</span> <span class="n">number</span> <span class="k">for</span> <span class="n">the</span> <span class="n">geometrical</span> <span class="n">discretization</span><span class="p">,</span> <span class="n">other</span> <span class="nb">bin</span> <span class="n">number</span><span class="p">],</span> <span class="n">other</span> <span class="n">parameters</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Here are the available geometrical discretization type:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘Averaged’:</p></li>
+</ul>
+</div></blockquote>
+<p>No geometrical discretization. The bin number of the geometrical discretization should be 1.</p>
+<p>In this case, <span class="incremental">discretization_type = -1</span></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘Plane_ij’:</p></li>
+</ul>
+</div></blockquote>
+<p>Where i and j are x, y or z. In this case, the discretization is made over the last axis. If Plane_xy is required, the discretization along the z axis is done. The name of the diagram is updated with ‘slice_z’ in this case – see the name attribute of the SingleDiagramParameter object.</p>
+<p>In this case, <span class="incremental">discretization_type = k</span> where k = 0, 1, 2 for a discretization along the x, y or z laboratory axis.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Layer:</p></li>
+</ul>
+</div></blockquote>
+<p>The geometrical discretization is made using the pytim.ITIM module. The number of layer to discretize each interface has to be given using the &lt;bin number for the geometrical discretization&gt;. Note that in the current implementation, Frog support only 2 liquid/gas interfaces.</p>
+<p>In this case, <span class="incremental">discretization_type = 10</span></p>
+<p class="rubric">Example</p>
+<p>For an input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;rdf&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xz&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="s1">&#39;Methanol_OPLSAA&#39;</span><span class="p">,</span> <span class="mf">10.2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The discretization will be made over the y-axis. The bin number to discretize this axis is 100.</p>
+<p>For an input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">,</span> <span class="s1">&#39;Layer&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>The density discretization is made over 4 layer for each interfaces.</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See <a class="reference internal" href="how_to_creat_diagram.html#diagram-geometry-selection-page"><span class="std std-ref">this page</span></a> for more informations about the geometrical discretization of diagram.</p>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-singlediagramparameter-bin-size">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleDiagramParameter.</span></span><span class="sig-name descname"><span class="pre">bin_size</span></span></dt>
+<dd><p><strong>Type</strong> [tuple]</p>
+<p>The size of the diagram.value .</p>
+<p>The first bin size is relative to the geometrical discretization. If no discretization is performed, <span class="incremental">bin_size[0] = 1</span>.</p>
+<p>The other dimension are given by the user in the rest of the third argument along with the analysis required.</p>
+<p class="rubric">Example</p>
+<p>If the input to built the diagram is :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>The bin size is [100], since only geometrical selection dimension is required for the density analysis.</p>
+<p class="rubric">Example</p>
+<p>For an input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;rdf&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xz&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="s1">&#39;Methanol_OPLSAA&#39;</span><span class="p">,</span> <span class="mf">10.2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The bin size is [100, 30]. The 100 refers to the geometrical discretization, and the 30 to the observable discretization – the RDF value for each altitude.</p>
+<p class="rubric">Example</p>
+<p>For an input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>The bin size is [1, 27, 100]. The 1 refers to the geometrical discretization (none), the 27 to the 27 elements of the beta matrix. For each matrix components, 100 bins are used to discretize the value. Here the independent discribution are computed – i.e. the diagram have not the size 100^27 for obvious reasons…</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-singlediagramparameter-mean-size">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleDiagramParameter.</span></span><span class="sig-name descname"><span class="pre">mean_size</span></span></dt>
+<dd><p><strong>Type</strong> [tuple or bool]</p>
+<p>The size of the diagram.mean .</p>
+<p>It is the same size of the bin_size, whithout the last dimension – which is compressed into its average value.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some analysis have no ‘mean’ value because they are not easely defined – for instance the ‘average value of the RDF. In this case, mean_size = False</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-singlediagramparameter-l-reassignation-selection">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleDiagramParameter.</span></span><span class="sig-name descname"><span class="pre">L_reassignation_selection</span></span></dt>
+<dd><p><strong>Type</strong> [list or bool]</p>
+<p>If no special selection is required, this is False</p>
+<p>If a special selection is required, this list track the new position of the old bin: it is used to fill the diagram with the new size.</p>
+<p>Example: if the original binning is N_bin=10, and after the special selection only the first, 3rd and 8th bin are authorized. This means that the size of the diagram along the spatial direction was orginaly 10, and now it is only 3. In this case, L_reassignation_selection = [0, 3, 1, 3, 3, 3, 3, 2, 3, 3]. There are 3 authorized bin in total (real_space_discretization_bin_number=3), the 1st bin is now the first bin, the 3rd the second and the 8th the third. This reassignation is done in geometry_manager%discretization_space.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-singlediagramparameter-real-space-discretization-bin-number">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleDiagramParameter.</span></span><span class="sig-name descname"><span class="pre">real_space_discretization_bin_number</span></span></dt>
+<dd><p><strong>Type</strong> [integer]</p>
+<p>If a special condition is requested for the Diagram spatial discretization, real_space_discretization_bin_number is the number of bin that are authorized according to this special condition. Note that the current implementation only work for a Slice spatial discretization.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="diagram_index.html">5. Diagram</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_creat_diagram.html">5.1. How to create Diagram?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagram_list.html">5.2. Diagram available</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagram_analysis.html">5.3. Diagram analysis</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">5.4. Diagram Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Diagram/diagram_structure.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

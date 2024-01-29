@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2.3. Space Discretization &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.4. Mixture and structural analysis" href="tuto_mixture_md.html" />
+    <link rel="prev" title="2.2. Get started" href="get_started.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="space-discretization">
+<span id="tuto-space-discretization-page"></span><h1><span class="section-number">2.3. </span>Space Discretization<a class="headerlink" href="#space-discretization" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#goal-and-perquisite" id="id1">Goal and Perquisite:</a></p></li>
+<li><p><a class="reference internal" href="#parameter-file" id="id2">Parameter file:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#plane" id="id3">Plane</a></p></li>
+<li><p><a class="reference internal" href="#layer" id="id4">Layer</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#analysis" id="id5">Analysis:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#individual-values" id="id6">Individual values</a></p></li>
+<li><p><a class="reference internal" href="#diagrams" id="id7">Diagrams</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="goal-and-perquisite">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink"><span class="section-number">2.3.1. </span>Goal and Perquisite:</a><a class="headerlink" href="#goal-and-perquisite" title="Link to this heading">¶</a></h2>
+<p>This tutorial presents how to use the <a class="reference internal" href="../Diagram/how_to_creat_diagram.html#diagram-geometry-selection-page"><span class="std std-ref">different space discretization</span></a> available in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> to order the results in the Diagram.</p>
+<p>You should be familiar to the standard command presented in the <a class="reference internal" href="get_started.html#get-started-on-frog-tutorial-page"><span class="std std-ref">get started tutorial</span></a>.</p>
+<p>The file needed to run this tutorial are located at: <em>Frog/Doc/Tutorial_files/Traj/Tuto_get_strated</em> for the MD trajectory and <em>Frog/Doc/Tutorial_files/Space_discretization</em> for all the other documents.</p>
+<p>First is presented how to built the parameter file and then how to analyse the results.</p>
+</section>
+<section id="parameter-file">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">2.3.2. </span>Parameter file:</a><a class="headerlink" href="#parameter-file" title="Link to this heading">¶</a></h2>
+<p>The MD is net water in a liquid-gas equilibrium. The water forms a 2D slab along the laboratory XY-axis. The small Z has no water (vacuum), in the middle of theZ-axis is located the water (bulk phase) and the high Z has no water (vacuum). Therefore, in this MD there are 2 liquid-gas interfaces: one at the bottom and one at the top of the water slab.</p>
+<p>One can described a property (for instance the molecular orientation) with respect to the molecule position from these interfaces. In <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, two methods are available:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>using the molecule <strong>absolute</strong> position with respect to a laboratory axis: ‘Plane_ij’ geometrical selection</p></li>
+<li><p>using the molecule <strong>layer</strong> number with respect to the interface:’Layer’ geometrical selection.</p></li>
+</ul>
+</div></blockquote>
+<p>We will see in the analysis part what results is obtained, first let’s see how to required these kind of analysis in the parameter file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All the available analyse in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> can be run using <strong>any</strong> geometrical selection</p>
+</div>
+<section id="plane">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">2.3.2.1. </span>Plane</a><a class="headerlink" href="#plane" title="Link to this heading">¶</a></h3>
+<p>To require a plane selection, chose the axis from which the result will be averaged in the diagram parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L_diagram_analysis_to_perform</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;density&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">150</span><span class="p">]]]</span>
+</pre></div>
+</div>
+<p>In this case, the Z-laboratory axis is discretized using 150 bin. The molecule are regrouped using there Z-position, and the X and Y laboratory axis are averaged. The obtained diagram presents the result stored in 2D-slab. Let’s say that the MD box dimension is 20x20x150 Angstrom. In this case, each slab dimension is 20x20x1 Angstrom. There are 150 slabs, put in top of each other they discribe all the MD box. Molecule contributing to the i-th slab has it Z position between [i-1, i] Angstrom in this case.</p>
+<p>To define slab in the X axis, use ‘Plane_yz’, in the Y axis use ‘Plane_xz’ and in Z use ‘Plane_xy’.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can define a Plane geometrical selection even if the geometry of your system is bulk. Or define a X-slab even if the interface of your MD is in the Z-direction. You can for instance this kind of analysis to check symetry of your system: a bulk simulation should return identical slab values wathever the direction of the slab.</p>
+</div>
+</section>
+<section id="layer">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">2.3.2.2. </span>Layer</a><a class="headerlink" href="#layer" title="Link to this heading">¶</a></h3>
+<p>To require a plane selection, you have to initialize the <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-layer-which-radii-mt"><span class="std std-ref">GlobalParameter.layer_which_radii_MT</span></a> and the set the geometrical discretization to ‘Layer’ in the diagram parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">layer_which_radii_MT</span> <span class="o">=</span> <span class="s1">&#39;MT&#39;</span>
+<span class="n">L_diagram_analysis_to_perform</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;density&#39;</span><span class="p">,</span> <span class="s1">&#39;Layer&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">]]]</span>
+</pre></div>
+</div>
+<p>Contrarily to the Plane geometrical discretization, the Layer one is less flexible. Indeed, it is related to the structure of your system: it should detect automatically the interfaces. Therefore, contrarily to the Plane analysis, you cannot define in the parameter file the ‘’axis’’ of the discretization.</p>
+<p>The layer attribution is made thanks to the python module Pytim (<a class="reference external" href="https://marcello-sega.github.io/pytim/index.html">https://marcello-sega.github.io/pytim/index.html</a>). In the case coverated by <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, Pytim assign automatically for molecule at a 2D liquid-gas interface a layer. Among the many parameter available in Pytim, in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> the atomic radii used for this attribution can be tuned using the parameter  <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-layer-which-radii-mt"><span class="std std-ref">GlobalParameter.layer_which_radii_MT</span></a>. For a standard use, we recommand to set it to ‘MT’, the default value. The atomic radii for each molecule are attributed thanks to the MT defined in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>.</p>
+<p>The other parameter is the number of layer used to described each interface. In the upper example, 6 layer are used per interface. Therefore, for the upper interface, a molecule can be assigned to 6 layer, or to the bulk. In the case of water, each ‘layer’ takes approximatively 3 angstrom in the normal direction (Z axis). However, contrarilly to the Plane space discretization, this one takes into account the thermal fluctuation at the interface.</p>
+</section>
+</section>
+<section id="analysis">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">2.3.3. </span>Analysis:</a><a class="headerlink" href="#analysis" title="Link to this heading">¶</a></h2>
+<p>Let’s see what are the results of these 2 kind of discretization. Once the <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> calcullation is performed, run the analysis script in the same directory using jupyter notebook.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Ici je ne sais pas trop quoi mettre dans la page du wiki. J ai essayer de mettre pas mal d info dans le jupyter: ce n est pas la peine de faire des copier coller? L important c est que l utilisateur joue avec le notebook a mon sens. Ce qui suis dans le wiki est plus une presentation de ce qui est presente dans le notebook plutot que des ‘’vrai informations/explications’’.</p>
+</div>
+<p>In the beggining of the analysis script is explained how single molecule are treated according to the space discretization used. Then the obtain diagrams.</p>
+<section id="individual-values">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">2.3.3.1. </span>Individual values</a><a class="headerlink" href="#individual-values" title="Link to this heading">¶</a></h3>
+<p>In the analysis script is presented in more details that:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Plane</p></li>
+</ul>
+</div></blockquote>
+<p>The slice attribution depends on the axis that is used for the discretization, the box size and the molecule mean position. This attribution is made for every molecule, for every time step and for every diagram.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Layer</p></li>
+</ul>
+</div></blockquote>
+<p>A first layer attribution is made once for all the molecule at each time step using for maximal layer number <a class="reference internal" href="../GlobalParameter/none_user_defined.html#autodoc-gp-layer-nbr-max"><span class="std std-ref">GlobalParameter.layer_nbr_max</span></a>. Then, for every diagram, the layer number of the molecule is used for the discretization according to the mximal layer number of each diagram.</p>
+</section>
+<section id="diagrams">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">2.3.3.2. </span>Diagrams</a><a class="headerlink" href="#diagrams" title="Link to this heading">¶</a></h3>
+<p>For each analysis required in the parameter file, the obtained diagram are plotted. We recommand to take a special attention to the density diagram to understand what the layer represents.</p>
+<p>Finally, at the end of the analysis script, a short code presents how to pass from a diagram with N layer to a diagram with less layer.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_index.html">2. Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview.html">2.1. Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="get_started.html">2.2. Get started</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.3. Space Discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_mixture_md.html">2.4. Mixture and structural analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_optical_analysis_overview.html">2.5. Optical Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_quadrupole_long.html">2.6. Quadrupole and Long range QM/MM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html">2.7. Gamma calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read_frog_data.html">2.8. How to read results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html">2.9. Molecular Type Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Tutorials/tuto_space_discretization.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

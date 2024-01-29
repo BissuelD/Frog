@@ -1,0 +1,15 @@
+.. _how_to_install_frog_page:
+
+====================
+How to Install Frog?
+====================
+
+You can get the code, this wiki, tutorial and some tests from our :frog_github:`Githib page<>`.
+
+.. toctree::
+   :maxdepth: 2
+ 
+   ./installation
+   ./numerical_notes_and_requirements
+
+.. frog_on_gitlab has been removed from this menu    

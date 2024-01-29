@@ -1,0 +1,29 @@
+.. _MLF_Sodium_page:
+
+    
+    
+==================
+Na+: Full charge
+==================
+
+To call this Molecule Type description in |frog|, use: ::
+
+    myMT = frog_class.MoleculeType(GP, 'Sodium', where_are_molecules)
+
+Description
+------------
+
+
+
+Test performed
+--------------
+
+
+
+Module
+------
+.. automodule:: Frog.Molecules.Sodium
+    :noindex:
+    :members:
+    :undoc-members:
+    :show-inheritance:

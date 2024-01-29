@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>4.4.1.3. Water: SPC/E &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="4.4.1.4. Methanol: OPLS/All Atoms" href="../Simple_alcohol/Methanol_OPLSAA.html" />
+    <link rel="prev" title="4.4.1.2. Water: TIP4P2005 - O" href="Water_TIP4P2005_O.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="water-spc-e">
+<span id="mlf-water-spce-page"></span><h1><span class="section-number">4.4.1.3. </span>Water: SPC/E<a class="headerlink" href="#water-spc-e" title="Link to this heading">¶</a></h1>
+<p>To call this Molecule Type description in <img class="math" src="../../../../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">myMT</span> <span class="o">=</span> <span class="n">frog_class</span><span class="o">.</span><span class="n">MoleculeType</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="s1">&#39;SPCE&#39;</span><span class="p">,</span> <span class="n">where_are_molecules</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="description">
+<h2><span class="section-number">4.4.1.3.1. </span>Description<a class="headerlink" href="#description" title="Link to this heading">¶</a></h2>
+<p>The mean position of the molecule is localised at the Oxygen atom.</p>
+</section>
+<section id="test-performed">
+<h2><span class="section-number">4.4.1.3.2. </span>Test performed<a class="headerlink" href="#test-performed" title="Link to this heading">¶</a></h2>
+<p>TODO</p>
+</section>
+<section id="module">
+<h2><span class="section-number">4.4.1.3.3. </span>Module<a class="headerlink" href="#module" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">compute_hbonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_partner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_partner</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#compute_hbonds"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Define how to compute the ‘’hbonds’’ of this molecule type with a partner molecule type. The definition should depend on the partner molecule.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">compute_mean_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#compute_mean_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Define how to compute the ‘’mean position’’ of the molecule given its position.
+Here at the Oxygen atom position.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">compute_molecular_orientation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#compute_molecular_orientation"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Define how to compute the ‘’molecular orientation’’ of the molecule given its position. Here its the projection of the dipole moment on the laboratory axis.
+WARNING: THIS SHOULD RETURN VALUE BETWEEN -1 AND 1.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">compute_rotational_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L_pos</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#compute_rotational_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Define the matrix to go from the Molecular to the Laboratory frame: X_{lab} = Rot_matrix * X_{mol}</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">electrostatic_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pe_level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">electro_description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#electrostatic_description"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>The electrostatic description of this MT in an explicite PE environement.
+The same parameters as the MD are used: SPC/E.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">info_molecule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#info_molecule"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Basic information for a water MT.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">info_molecule_for_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#info_molecule_for_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Defines the radii of every atoms for the layer analysis. These value are used by the pytim module.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">info_molecule_typical_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#info_molecule_typical_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>This function is not ‘mandatory’. It is used within info_molecule.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">qm_target_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qmparameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qmdescription</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#qm_target_description"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>How to define the molecule in an QM box.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.Molecules.SPCE.</span></span><span class="sig-name descname"><span class="pre">typical_geometry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/Frog/Molecules/SPCE.html#typical_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Defines a typical geometry of this molecule.
+Should return a 3D numpy array.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../../../index.html">
+    <img class="logo" src="../../../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../mt_index.html">4. Molecule Type</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../how_to_create_mt.html">4.1. How to create MT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../mt_structure.html">4.2. Molecule Type structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../single_molecule_parameter.html">4.3. Single Molecule Parameter</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../available_mt.html">4.4. Available MT</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../../../../_sources/MoleculeType/MolecularLibraryFile/Solvant/Water/SPCE.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

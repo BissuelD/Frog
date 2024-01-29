@@ -1,0 +1,35 @@
+# test_value_fixed
+Optical diagrams with fixed molecular values (no QM calculations). 
+
+# test_qm
+Optical diagrams with qm-based molecular values, only QM calculations
+
+# test_value_fixed_qm
+Mixed cases of the two previous case: alpha or beta at the qm or fixed value level.
+2 cases: alpha QM and beta fixed, alpha fixed and beta QM.
+
+# test_read_frequency
+QM calculations for polarizability and hyperpolarizability with 2 frequency. Reading is also tested. 
+
+# test_read_frequency_quadrupole
+QM calculaiton for hyperpolarizability with 2 frequency at the quadrupole order. Reading is also tested. 
+
+# test_qm_redo_qm 
+QM calculation with GP.redo_QM = 'redo' and GP.pass_first_part = False. 
+Here the calculation should NOT continue up to the last part even though a fake QM result is given because it starts from the first part
+
+# test_qm_do_not_redo_qm
+QM calculation with GP.redo_QM = 'do_not_redo' and GP.pass_first_part = False. 
+Here the calculation should continue up to the last part once a fake QM result given even though it starts from the first part 
+
+# test_where_to_run_qm
+Different combinaison of selection for QM calculations. 
+1: Given by the Diagram definition: All type 
+2: Given by both the Diagram and where_to_run_QM: Plane type 
+3: Given by where_to_run_QM: Plane type
+4: Given by both the Diagram and where_to_run_QM: Layer type
+5: No overlap between Diagram and where_to_run_QM. Should give zero. 
+6: Given by where_to_run_QM: Layer type
+7: Given by where_to_run_QM and selection_tool: Layer type
+
+#END 

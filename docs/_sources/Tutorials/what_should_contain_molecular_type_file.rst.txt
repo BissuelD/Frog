@@ -1,0 +1,513 @@
+.. _what_should_contain_molecular_type_file_page:
+
+========================
+Molecular Type Module
+========================
+
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+
+
+
+Goal and Perquisite: 
+====================
+
+
+In this advanced tutorial we will see how to define a new molecular type in |frog|. 
+Depending on what you want to achieve with this new molecule, you may need to understand some deep |frog| architecture. 
+We warmly recommand to have a look to the other MT already defined. 
+
+
+Procedure:
+===========
+
+When you want to assign to a set of molecule a Molecule Type (MT) in the parameter file, |frog| looks at the file in is code source directory: Frog/Molecules. 
+The localisation may depend on how are install python modules in your computer/cluster. 
+To find out, try: :: 
+    
+    import importlib
+    import Frog
+    print(importlib.import_module('Frog.Molecules.Water_TIP4P2005'))
+    
+This will print the directory where your |frog| look for its MT modules. For instance: :: 
+
+    <module 'Frog.Molecules.Water_TIP4P2005' from '/home/glebreton/anaconda3/lib/python3.6/site-packages/Frog/Molecules/Water_TIP4P2005.py'>
+
+If you want to define a new MT, write a python file as described bellow in the directory 'home/glebreton/anaconda3/lib/python3.6/site-packages/Frog/Molecules'. 
+    
+.. note:: |frog| is an open-software which would benefit from any help. Do not hesitate to contact us if you have defined a new MT: we will add it in the new version for everyone! 
+
+
+In the following we will present all the mandatory function that should be defined in a MT:
+
+General informations: 
+    + info_molecule: General information
+    + info_molecule_for_layer: For Layer analysis
+    + typical_geometry: For test and visualisation
+    + compute_mean_position: What is the 'mean position' of this molecule, extremly important
+
+Structural analysis:
+    + compute_molecular_orientation: What is the 'molecular orientation'? 
+    + compute_hbonds: How to compute 'H-bond' with a patner molecule?
+    
+Optical properties:
+    + compute_rotational_matrix: How to define the molecular frame with respect to the laboratory one?
+    + electrostatic_description: How to described this molecule in an explicite PE environment? 
+    + qm_target_description: How to described at the QM level this molecule (atomic position, charges...)
+
+Of course you may define any other function which can be called by any the one defined above. |frog| should call one the ones presented above during its functionment. 
+
+.. warning:: The input/output type should be strictly respected in these mandatory function. Unexpected error may arrise otherwise. 
+
+.. note:: You may not defined all of them since they will be called only for certain type of analysis. But for the sake of compliness, please at least defined empty ones! 
+
+.. warning:: |frog| supose Angstrom as lenght unit! If your MD trajectory do not use angstrom, use :ref:`GP.MD_convertion_to_angstrom<autodoc_GP_MD_convertion_to_angstrom>` in your parameter file to convert.
+
+
+
+General informations
+======================
+
+info_molecule
+--------------
+
+|frog| would use this function in order to check if the trajectory read matches the definition set here. 
+Indeed, this function will initialized the :ref:`SingleMoleculeParameter<single_molecule_parameter_page>` (smparameter) object of this Molecule Type.
+
+It will set the name (which MUST be the same as the molecular module name), the number of atom, the atom type, the typical size of the molecule (used when computing environment) and the maximal allowed distance between atoms (max*distance*\ atom). 
+If molecular orientations are required, the number of value used to define this orientation should be given. 
+
+The input of this function is a SingleMoleculeParameter object, and return this object.
+
+The :ref:`smparameter.max_distance_atom<autodoc_smparameter_max_distance_atom>` is very important to prevent "cutted" molecule due to periodic boundary condition. 
+This value should be a list: [The ''reference'' atom, Value for atom 0, Value for atom 1, ...].
+Where "Value for atom 0" should be 'Ref' or the maximal distance allowed from the ''reference'' atom. 
+Note that the atom numerotation starts from 0. 
+If one atom of a molecular trajectory does not respect this maximal distance from the reference atom, FROG will try to move it using the box size of the MD simulation at the given time step. 
+Thus, it is important to be strict enough with respect to these distance -- being too restrictive will lead to crashes (with error message) if FROG fails to respect these conditions.
+
+It is important to be coherent between the topology of the MD and the molecular module: since |frog| does not read the atom type name from theto pology. 
+You may have a case where there is no error due to geometrical mismatch, but the atomic assignation are wrong.
+For example if a water molecule is defined as follow:
+
+.. code:: python
+
+    def info_molecule(smparameter):
+        '''
+        Basic information for a water MT.
+        '''
+        smparameter.name_mt = 'Water_TIP4P2005' # should be a string: the exact same name as the molecular file!
+        smparameter.nbr_atom = int(3) # should be an int. using len(smparameter.L_type_atom) could also be a robust definition
+        smparameter.L_type_atom = ['O', 'H', 'H'] # list of string. 
+        smparameter.size_typical_molecule = info_molecule_typical_size()  #in Angstrom in this example
+        smparameter.max_distance_atom = [0, 'Ref', 2, 2] # The definition of the ''reference'' atom, and the maximal allowed distance from it for the other atoms.
+        # Informations relative to the other fct defined
+        smparameter.d_molecular_orientation = 3 # should be an int. 
+        return(smparameter)
+        
+    def info_molecule_typical_size():
+        return(3.0)
+
+this means that the MD should encode the water position as [Oxygen, Hydrogen, Hydrogen]. 
+And if the topology file encodes the water position as: [Hydrogen, Hydrogen, Oxygen], |frog| would probably not crash due to
+geometrical mismatch (since the water molecule is very small)
+However, the calculation of other observable would make no sense.
+
+
+info_molecule_for_layer
+------------------------
+
+Define the VDW radii that will be used by pytim to define the 'layer' in a 2D interface., see :ref:`this page<diagram_space_discretization_layer_subpage>` for more information. 
+
+There should be as many radii as atom in the MT. Example for water:
+
+.. code:: python
+
+    def info_molecule_for_layer():
+        '''
+        Defines the radii of every atoms for the layer analysis. These value are used by the pytim module. 
+        '''
+        L_type_molecule_radii = [3.1589, 0, 0] # in angstrom since pytim uses angstrom
+        return(L_type_molecule_radii)
+
+typical_geometry
+-----------------
+
+|frog| would need to have a typical geometry for testing purpose available in the function "typical_geometry". 
+This function should not have any argument and return a two-dimensional list of the molecular position. 
+An example for water molecules:
+
+.. code:: python
+
+    def typical_geometry():
+        theta = 104.52*np.pi/180
+        d = 0.9572
+        L_pos = np.array([
+            [0, 0, 0],
+            [d*np.sin(theta/2), 0, d*np.cos(theta/2)], 
+            [d*np.sin(-theta/2), 0, d*np.cos(-theta/2)]
+                         ])
+        return(L_pos)
+
+compute_mean_position
+-------------------------
+
+The mean position of a molecule is very often used by the software: for the discretization of any observable with respect to a box-axis or for computing the local environment. 
+This function should take as an argument a two-dimensional list of the molecular position and return a 3D vector.
+Here is a simple example:
+
+.. code:: python
+
+    def compute_mean_position(L_pos):
+        return(L_pos[0])
+
+Here the mean position of the molecule is set to be the one of its first atom. 
+Below a more complicated one for the water TIP4P/2005 description. 
+The mean position is set to be the negative charge position
+
+.. code:: python
+
+    def compute_mean_position(L_pos):
+        vec_dipole = (L_pos[1]-L_pos[0])+(L_pos[2]-L_pos[0])
+        vec_dipole = vec_dipole/np.sqrt(np.sum(vec_dipole**2))
+        position_dipole = L_pos[0] + 0.1546*vec_dipole # unit: Angstrom
+        return(position_dipole)
+
+It is important to note that the input position of a molecule can be given in the laboratory or molecular frame.
+
+Structural analysis:
+=====================
+
+compute_molecular_orientation
+---------------------------------
+
+Define the "molecular orientation" of this molecule type. 
+The input is the molecule position in the laboratory frame. 
+The output should be an array with values between -1 and 1. 
+The size of the array should be the same as the :ref:`smparameter.d_molecular_orientation<autodoc_smparameter_d_molecular_orientation>` define in the info_molecule function. 
+
+For example, the molecular orientation of a water molecule is the projection of its dipole moment on the laboratory frame -- thus with a size of 3.
+
+.. code:: python
+
+    def compute_molecular_orientation(L_pos):
+        '''
+        WARNING: THIS SHOULD RETURN VALUE BETWEEN -1 AND 1. 
+        '''
+        vec_dipole = (L_pos[1]-L_pos[0])+(L_pos[2]-L_pos[0]) # ref centered around the oxygen atom
+        vec_dipole = vec_dipole/np.sqrt(np.sum(vec_dipole**2))
+        return(vec_dipole)
+
+compute_hbonds
+---------------
+
+**Function parameters**
+
+First, we would emphasise that this compute_hbonds function has been designed first to compute H-bonds but may be applied to other interaction involving 2 molecules.
+The requirement is that this observable only depends on the position of these 2 molecules (one is called 'target' and the other 'partner') from different molecule type (or from the same molecule type). 
+The output should be 2 times 2 positive integers. 
+For the case of H-bond: the number of "own" and "given" H-bonds for the target molecule and for the partner molecule. 
+
+Example: [1, 0], [0, 1] means that the target molecule owns 1 and gives 0 H-bond and the partner owns 0 and gives 1 H-bond.
+
+The inputs are:
+
+    + The position of the molecule of this molecule type <L_target>
+    + The name of another molecule type (can be the same) <name_partner>
+    + The position of the molecule with this another molecule type name <L_partner>
+    + Any parameter (should be an array)
+    + The optional argument info which should be a boolean.
+
+The positions of the target and partner molecule are given in the target molecule frame. 
+None of the molecule positions are cut. 
+In order to build the environment to find the 'partner' molecules, |frog| needs to know what is the maximal distance acceptable from the mean position of the target molecule. 
+Therefore, this function with the optional input "info=True" will be called at the initialization. 
+Hence, if this option "info" is set to True, the function must return only a float. 
+
+
+**Procedure**
+
+One important point is that |frog| will check if the compute_hbonds function of this molecule file can handle "H-bond" with the
+'partner' molecule type. 
+
+Therefore, during the initialization, |frog| will call the function of the target and
+partner molecule, with info=True. 
+
+If the compute_hbonds function knows, should return the maximal distance acceptable from the target and the partner (mean) position in order to consider this interaction (for instance H-bond).
+If the function compute_hbonds does not know how to handle this partner molecule type, it should return False.  
+Note that you can use variables from the parameter variable, which depends on the user-input directly, as
+shown in the example below.
+
+In the case the compute_hbonds of the molecule type does not know how to handle this interaction with the partner molecule type, |frog| will check on the partner molecular module compute_hbonds function if it can handle the target molecule type. 
+If it is so, it will switch the role of the target and partner molecule type. 
+
+For instance, for an user-input: ::
+    
+    # In the Molecule Type 'Water_TIP4P2005':
+    ['hbond', 'Averaged', [1, 5, 6], 'Chlore', [3.1, 60\*np.pi/180]]
+    
+Here the "target" and "partner" molecule types are Water_TIP4P2005 and Chlore respectively. 
+If the compute_hbonds of the Water_TIP4P2005 molecular module does not know how to handle the interaction with the Chlore molecule type, then |frog| will try to compute the H-bond for the Water_TIP4P2005 molecule type as if the input were: :: 
+
+    # In the Molecule Type 'Chlore':
+    ['hbond', 'Averaged', [1, 5, 6], 'Water_TIP4P2005', [3.1, 60\*np.pi/180]]
+
+During the treatment of the Water_TIP4P2005 molecule type, the compute_hbonds of the Chlore molecular module will be called where the "target" and "partner" molecule will be the Chlore and the Water_TIP4P2005 respectively. 
+Then, the output of the compute_hbonds of the Chlore molecular module will be switched in order to recover the good "target" and "partner" molecule type. 
+Finally, these switched outputs will be assigned to the Water_TIP4P2005 molecule.
+
+.. image:: h_bond_water_schema.png
+   :width: 300
+   :align: right
+   
+Note that if the initial partner molecule type is handled by the initial target molecule type, then target molecular function will be used.
+This implementation has been made in order to have the same function treating both molecule type without declaring it in both
+molecular modules.
+
+
+
+**H-bond implementation for water**
+
+The following example computes H-bond between 2 water molecules. 
+It takes as parameter the maximal acceptable distance between oxygen atoms and the maximal acceptable O--H--O angle (with respect to 180 degrees) in radian. 
+See the upper figure for a graphical example -- the shaded molecule is the "target" molecule.
+
+.. code:: python
+
+    def compute_hbonds(L_target, name_partner, L_partner, parameter, info = False):
+        '''
+        Define how to compute the ''hbonds'' of this molecule type with a partner molecule type. The definition should depend on the partner molecule.  
+        '''
+    if name_partner in ['Water_TIP4P2005']:
+        #[length O---O max, angle OH---O max] = parameter
+        if info: # Here is asked the maximal distance to consider an hbonds
+            return(parameter[0]+1)
+        
+        L_H = [1, 2]
+        if np.sqrt(np.sum((L_target[0] - L_partner[0])**2)) <= parameter[0]:
+            #Does the target molecule own an hbonds?
+            for H_partner in L_H: 
+                L_angle = np.array([L_partner[H_partner], L_target[0], L_partner[0]]) #O of the target, HO of the partner
+                angle = geometry_manager.compute_angle_3_atoms(L_angle) # the angle: O--HO
+                if np.abs(np.abs(angle)-np.pi) < parameter[1]:
+                    # The target molecule own an hbonds. The partner molecule give an hbonds
+                    return(np.array([1, 0]), np.array([0, 1]))
+            #Does the target molecule give an hbonds?
+            for H_target in L_H: 
+                L_angle = np.array([L_target[H_target], L_partner[0], L_target[0]]) #O of the partner, HO of the target
+                angle = geometry_manager.compute_angle_3_atoms(L_angle) # the angle: OH--H
+                if np.abs(np.abs(angle)-np.pi) < parameter[1]:
+                    # The target molecule give an hbonds. The partner molecule own an hbonds
+                    return(np.array([0, 1]), np.array([1, 0]))
+        # If the run arrives at this point, it means that no hbonds between the target and the partner molecules have been found
+        return(np.array([0, 0]), np.array([0, 0]))
+        else:
+            print('WARNING: The molecule type WATER_TIP4P2005 does not know how to compute hbonds with the molecule type: ' + name_partner +  '.') 
+            return(False)
+
+
+Optical properties:
+=====================
+
+
+compute_rotational_matrix
+-----------------------------
+
+Define how to generate a rotational matrix to pass from the "Molecular" frame to the Laboratory frame. 
+This is used in order to define the optical properties of this molecule type in the "Molecular" frame. 
+This function should take as input the position of the molecule in the laboratory frame and return a 3x3 rotational matrix. 
+
+.. note:: For some molecules, this "Molecular" frame can be ambiguous at some point if the molecule has many degrees of liberty.
+
+
+The example below is given for a water molecule.
+
+.. code:: python
+
+    def compute_rotational_matrix(L_pos):
+        '''
+        Define the matrix to go from the Molecular to the Laboratory frame: X_{lab} = Rot_matrix * X_{mol}
+        The x,y,z molecular frame is defined so that the x is in the O-H direction, the z in the permanent dipole position. 
+        The y is out of plane.
+        '''
+        vec_H1 = L_pos[1]-L_pos[0]
+        vec_H2 = L_pos[2]-L_pos[0]
+        
+        x_mol = np.array(vec_H1-vec_H2) 
+        x_mol = np.array(x_mol/np.sqrt(np.sum(x_mol**2))) # unit vector
+        
+        z_mol = np.array(vec_H1+vec_H2)
+        z_mol = np.array(z_mol/np.sqrt(np.sum(z_mol**2))) # unit vector
+        
+        y_mol = np.cross(z_mol, x_mol) # unit vector
+        y_mol = np.array(y_mol/np.sqrt(np.sum(y_mol**2))) # unit vector
+        
+        Rot_matrix = np.array([x_mol, y_mol, z_mol]) 
+        
+        return(Rot_matrix)
+
+
+
+.. _molecular_library_file_qm_description_function_page:
+
+QM Description
+--------------------------
+
+Define how to handle the molecule in a QM box: what are the atom type and the respective nucleus charge. 
+
+The inputs are:
+
+    + The qmparameter for this Molecule Type  (qmparameter) -- or the one of another molecule type in the case "PE + QM".
+    + The empty qmdescription of this molecule that should be filled (qmdescription).
+    + The position of the molecule as an optional input (L_pos).
+
+The QM description of the atom present in this molecule at the QM level and their position should be defined using the :ref:`qmdescription.L_atom_type<autodoc_qmdescription_L_atom_type>` and :ref:`qmdescription.L_coordinate<autodoc_qmdescription_L_coordinate>` respectively.
+
+The qmdescription.L_coordinate should contain the position of the atom listed in qmdescription.L_atom_type (see below). 
+The order of the atom (or the number of atom considered, type of atom, position...) used in the qmdescription can be different from the one provided by the MD trajectory. 
+In other words you may or may not set `qmdescription.L_coordinate = L_pos`.
+However, the description of the atomic position contains in qmdescription.L_coordinate should be coherent with the description
+given in qmdescription.L_atom_type.
+
+The qmdescription.L_atom_type type should be an array: the size is the number of different atom type. 
+Each atom type should be declared as:
+
+.. code:: python
+
+    [Charge of the nucleus, Number of atom of this atom type in this molecule, [['name of the first atom of this atom type', position of this atom in the coordinate list, ['name of the second atom of this atom type', position of this atom in the coordinate list], ...]. 
+
+Important remarks: the name of the different atoms of the same atom type can be different if the "PE + QM" is not used -- for instance:
+
+.. code:: python
+
+    [1, 2, [['H1', 1], ['H2', 2]]
+
+However, we do not recommend to do it since the same name should be used if the "PE + QM" option is set in order to merge different molecule properly in the same QM box -- for instance:
+
+.. code:: python
+
+    [1, 2, [['H', 1], ['H', 2]]
+
+Moreover, we recommend staying with the usual atom name in order to keep the merging simple.
+
+.. note:: The position is set as an optional argument so that example input can be easily generated by |frog| during the initialization using the mandatory typical_geometry function of this molecular module.
+
+Here an example for the water molecule:
+
+.. code:: python
+
+    def qm_target_description(qmparameter, qmdescription, L_pos=False):
+        '''
+        Define the QM description of this molecule type provided the molecule position.
+        '''
+        if qmparameter.type_basis != 'Global basis':
+            raise Exception('WARNING: No other way to defined basis have been defined yet for this molecule. Possible value: < Global basis >. We can also defined basis for each atoms (TODO).') 
+        
+        if isinstance(L_pos, bool) and not L_pos:
+            L_pos = typical_geometry()
+
+        qmdescription.L_coordinate = L_pos # Here L_pos=[position of the Oxygen, position of the Hydrogen, position of the Hydrogen]  
+        qmdescription.L_atom_type = [[8, 1, [['O', 0]]], [1, 2, [['H', 1], ['H', 2]]]]
+        return(qmdescription)
+
+
+.. _molecular_library_file_electrostatic_description_function_page:
+
+Electrostatic Description
+--------------------------
+
+To give a molecule an electrostatic description, the function `electrostatic_description` of an MT molecular module is called. 
+What are the charge? Are there dipole, quadrupole? 
+If polarizable environment are required, which polarizability should be used.
+    
+    
+**Parameters**
+    + pe_level : int
+
+If pe_level=0, it means that there is no polarization allowed between the dipole of different molecule that can modify their value. 
+In other words, the electrostatic description of this molecule will be the same regardless of its environment. 
+
+If pe_level=1, an induce dipole moment can be create for this molecule by its environment. 
+In this case, the :ref:`electrodescription.polarization_order<autodoc_electrodescription_polarization_order>`, :ref:`electrodescription.L_polarization_order_1_1<autodoc_electrodescription_L_polarization_order_1_1>` and :ref:`electrodescription.L_polarization_exclude<autodoc_electrodescription_L_polarization_exclude>` may be define by this function. 
+        
+        
+The pe_level is determine by the MT QMDescription using the parameter qmdescrption.pe_level, see :ref:`this page<electrostatic_embedding_PE_scheme>`. 
+
+
+    + electro_description : ElectrostaticDescription 
+
+An empty ElectrostaticDescription object which will be filled by this function, see :ref:`this page for more information about this object<electrostatic_description_object_page>`. 
+    
+    + L_pos : Bool or list
+
+The position of the molecule in any referential. 
+The ElectrostaticDescription is space-dependent. 
+If no molecular position is given, then the function should use the one available in  this molecular module function typical_geometry(). 
+This case is encounter at the beggining of the |frog| procedure: example of electrostatic description for every MT are produced. 
+    
+This electrostatic_description function returns the filled ElectrostaticDescription object.   
+        
+**Example**
+
+The full description of the argument that you can define for the electrostatic environment is given in the ElectrostaticDescription class definition. 
+Here is a minimal example for a TIP4P/2005 water description.
+
+Each hydrogen are described by a + 0.5564 charge, and the negative charge is held by a 'ghost' atom located at the charge_tip4p2005 position (see the code below). 
+The multipole order is thus 0 (point charge) with no polarizability:
+
+.. code:: python
+    
+    electro_description.multipole_order = 0
+    electro_description.polarization_order = 0
+
+There are 4 sites: the Oxygen atom, the gosh site ('X') with the negative charge, the 2 Hydrogens with the positive charge. Therefore:
+
+.. code:: python
+    
+    electro_description.L_localization_type = ['O', 'X', 'H', 'H'] 
+    electro_description.L_localization_site = [L_pos[0], charge_tip4p2005, L_pos[1], L_pos[2]]
+
+Note that the oxygen atom here may not be used at all since it does not held any charge. 
+However, for check purpose, it has been kept in the electrostatic description object so that it will be printed if the .xyz electrostatic representation is required by the user. 
+
+Finally, the charge of the site are set: 
+
+.. code:: python
+    
+    electro_description.L_charge_order_0 = [[2, -1.1128], [3, 0.5564], [4, 0.5564]]
+
+
+.. note:: Please be aware that contrarily to the rest of the code, the assignation of the electro_description.L_charge_order_0 (and the other attribute like this) starts from 1 and not from 0!
+
+For the sake of the example, let's assume that we want to define a polarizability, for pe_level = 1. 
+In this case, the water molecule are given polarizability (even though the TIP4P/2005 force field does not use one), therefore for this ElectrostaticDescription, electro_description.polarization_order = 1:  
+    
+.. code:: python
+    
+    if pe_level >= 1:
+        electro_description.polarization_order = 1
+        electro_description.L_polarization_order_1_1 = [[2, [9.8, 0.0, 0.0, 9.8, 0.0, 9.8]]] # polarizability diagonal: same value in the laboratory frame then in the molecular frame. 
+        electro_description.L_polarization_exclude = [[1, [2, 3, 4]], [2, [1, 3, 4]], [3, [1, 2, 4]], [4, [1, 2, 3]]]
+
+The polarizaiblity matrix is defined by electro_description.L_polarization_order_1_1. It should be a symmetric matrix. In this case, the matrix is diagronal: each value equal 9.8 a.u. The polarization site is located at the negative charge position. 
+    
+The last list define is the electro_description.L_polarization_exclude. 
+It says explicitly that the atom in this molecule cannot influence the dipole moment of the molecule itself. 
+This is a quite common assumption: the effect of the atom of a molecule are already taken into account in the permanent charge, dipole, quadrupole moment of the whole molecule. 
+
+
+Final remarks
+==============
+
+We hope that this tutorial helps you to write your own MTs. 
+We would like to emphasis that you really spend some time to test the output produced by |frog| with new MTs or parameters. 
+More specifically, we recommand to have a deep look at the PE environement created and in general to the |dalton| input files. 
+
+
+
+
+
+  
+    

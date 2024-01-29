@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2.2. Get started &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.3. Space Discretization" href="tuto_space_discretization.html" />
+    <link rel="prev" title="2.1. Overview" href="overview.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="get-started">
+<span id="get-started-on-frog-tutorial-page"></span><h1><span class="section-number">2.2. </span>Get started<a class="headerlink" href="#get-started" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#goal-and-perquisite" id="id2">Goal and Perquisite:</a></p></li>
+<li><p><a class="reference internal" href="#the-parameter-file" id="id3">The Parameter file:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#preliminary-recommendation" id="id4">Preliminary recommendation</a></p></li>
+<li><p><a class="reference internal" href="#header" id="id5">Header:</a></p></li>
+<li><p><a class="reference internal" href="#definition-of-global-parameter-gp" id="id6">Definition of Global Parameter (GP):</a></p></li>
+<li><p><a class="reference internal" href="#definition-of-molecule-type-mt" id="id7">Definition of Molecule Type (MT)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#run-frog" id="id8">Run Frog:</a></p></li>
+</ul>
+</nav>
+<section id="goal-and-perquisite">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">2.2.1. </span>Goal and Perquisite:</a><a class="headerlink" href="#goal-and-perquisite" title="Link to this heading">¶</a></h2>
+<p>This first tutorial is designed to help you run <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> with its most standard parameters.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that you should read the <a class="reference internal" href="overview.html#overview-tutorial-page"><span class="std std-ref">Overview</span></a> at the same time as you try this tutorial. This page present in concreate details what you should do to run <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> while the <a class="reference internal" href="overview.html#overview-tutorial-page"><span class="std std-ref">Overview</span></a> present the phylosophy of the code.</p>
+</div>
+<p>The file needed to run this tutorial are located at: <em>Frog/Doc/Tutorial_files/Traj/Tuto_get_strated</em> for the MD trajectory and <em>Frog/Doc/Tutorial_files/Get_started_tuto</em> for all the other documents. You should go in your shell to the <em>Frog/Doc/Tutorial_files/Get_started_tuto</em> directory, but you can also run everything in an other location.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Add the tutorial file in the module as well as the doc.</p>
+</div>
+<p>To install <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, see  <a class="reference internal" href="../Installation/installation.html#installation-page"><span class="std std-ref">Installation</span></a>.</p>
+<p>First is presented how to built the parameter file, then how to run <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> and understand</p>
+</section>
+<section id="the-parameter-file">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">2.2.2. </span>The Parameter file:</a><a class="headerlink" href="#the-parameter-file" title="Link to this heading">¶</a></h2>
+<p>We explain here how to read and configure the parameter file, here named: <em>parameters_example_get_started.py</em></p>
+<p>First of all, let’s describe the structure of the parameter file. There are at least 3 “blocs”:</p>
+<blockquote>
+<div><ul>
+<li><p>Header: Mandatory lines that initialised the important object of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>. You can copy-past these lines to every parameter file.</p></li>
+<li><p>Global Parameter (GP): The definition of the common parameter for this run. All the value relative to the Global Parameter should be initialised before the line: <span class="incremental">GP.MD_check_GP()</span>.</p></li>
+<li><p>As many block as there are Molecule Type (MT). The MTs define what you want to do (which analysis) for a set of ‘molecules’. In this exemple, there is only the water MT, so one MT block. The MT definition starts with the line: <span class="incremental">moleculetype = MoleculeType(GP, molecule_type_name, where_are_molecules)</span>. It ends with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">moleculetype</span><span class="o">.</span><span class="n">end_initialize</span><span class="p">(</span><span class="n">GP</span><span class="p">)</span>
+<span class="n">L_moleculetype</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">moleculetype</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+<section id="preliminary-recommendation">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">2.2.2.1. </span>Preliminary recommendation</a><a class="headerlink" href="#preliminary-recommendation" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>In the parameter file, the “blocs” order <strong>must not</strong> be changed.</p></li>
+<li><p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> have been designed to work with a constant number of molecule/atom of the MD. Moreover, the assignement given by the topology file should remain the same throughout all the trajectory. There is <strong>not safeguard</strong> regarding this in the code.</p></li>
+<li><p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> is a delicate software that should not allow you to define in the parameter file not available attribute or incompatible parameter. If <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> starts its run, it should go to the end without error – except if the MD trajectory behave badly though time. However, if you find a way to define incompatible set of parameters, please contact us.</p></li>
+<li><p>The attribute name of the GP and MTs object cannot be changed: only the value. Note also that many parameters are optional and have default value if not initialized by the user.</p></li>
+<li><p>We warmly recomand to define the localization of every file <em>absolutely</em>.</p></li>
+</ul>
+</section>
+<section id="header">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">2.2.2.2. </span>Header:</a><a class="headerlink" href="#header" title="Link to this heading">¶</a></h3>
+<p>The very first lines of the file are:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">Frog.class_GP</span> <span class="kn">import</span>  <span class="n">GlobalParameter</span>
+<span class="kn">from</span> <span class="nn">Frog.class_Molecule</span> <span class="kn">import</span> <span class="n">MoleculeType</span>
+
+<span class="n">GP</span> <span class="o">=</span> <span class="n">GlobalParameter</span><span class="p">()</span>
+<span class="n">L_moleculetype</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+</div>
+<p>The first two imports are not needed in general: it is just module that are usefull for the next step. But you may not use them if you want.</p>
+<p>The last 4 lines are mandatory. The 2 objects core object <strong>GlobalParameter</strong> (GP) and <strong>MoleculeType</strong> (MT) are imported. The GP object is initialized as well as the list containing all the MT object (<em>L_moleculetype</em>).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You shall use the name ‘GP’ and ‘L_moleculetype’.</p>
+</div>
+<p>The following lines of the parameter file defined first the GP, and then the MTs of your analysis.</p>
+</section>
+<section id="definition-of-global-parameter-gp">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">2.2.2.3. </span>Definition of Global Parameter (GP):</a><a class="headerlink" href="#definition-of-global-parameter-gp" title="Link to this heading">¶</a></h3>
+<p>The complete list of the attribute available of the GP are available <a class="reference internal" href="../GlobalParameter/gp_index.html#gp-index-page"><span class="std std-ref">here</span></a>.</p>
+<p>First of all, the definition regarding the MD trajectory have to be provided using the attributes <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-md-file-name-topology"><span class="std std-ref">GlobalParameter.MD_file_name_topology</span></a>, <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-md-file-name-traj"><span class="std std-ref">GlobalParameter.MD_file_name_traj</span></a> and <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-md-file-type"><span class="std std-ref">GlobalParameter.MD_file_type</span></a>. In this exemple:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_topology</span> <span class="o">=</span> <span class="s1">&#39;/home/fdupont/Software/Frog/Doc/Tutorial_files/Traj/Tuto_get_strated/system.data&#39;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_traj</span> <span class="o">=</span> <span class="s1">&#39;/home/fdupont/Software/Frog/Doc/Tutorial_files/Traj/Tuto_get_strated/traj_get_strated.dcd&#39;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">MD_file_type</span> <span class="o">=</span> <span class="s1">&#39;LAMMPS&#39;</span>
+</pre></div>
+</div>
+<p>Since the parameter file is a python file, the usual command lines can be used to create the variable. For instance, the above lines are equivalent to::</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/home/fdupont/Software/Frog/Doc/Tutorial_files/Traj/Tuto_get_strated&#39;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_topology</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;system.data&#39;</span><span class="p">)</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_traj</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;traj_get_strated.dcd&#39;</span><span class="p">)</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">MD_file_type</span> <span class="o">=</span> <span class="s1">&#39;LAMMPS&#39;</span>
+</pre></div>
+</div>
+<p><em>GP.MD_file_name_topology</em> is the path to the topology file which will be used to define what atom are contain in a ‘molecule’: <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> use the same assignment as the MD. <em>GP.MD_file_name_traj</em> is the path to the trajectory file. The <em>GP.MD_file_type</em> defines which type of tropology/trajectory couple are used. See <a class="reference internal" href="../Installation/numerical_notes_and_requirements.html#compatible-md-software"><span class="std std-ref">here</span></a> for more details.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> expects Angstrom unit. If your MD trajectory is written in another unit, use the parameter:  <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-md-convertion-to-angstrom"><span class="std std-ref">GlobalParameter.MD_convertion_to_angstrom</span></a> to convert.</p>
+</div>
+<p>Then, the number of time steps of the MD trajectory to treat is defined using <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-nbr-time-step"><span class="std std-ref">GlobalParameter.nbr_time_step</span></a> and <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-trotter-step"><span class="std std-ref">GlobalParameter.trotter_step</span></a>. Here:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">trotter_step</span> <span class="o">=</span> <span class="mi">4</span>
+</pre></div>
+</div>
+<p>The total number of time step treated will be 10, and every treated frame are separated by 3 frames – 1 frame over 4 will be treated. Here the frame number: 1, 5, 9, 13, 17, 21, 25, 29, 33 and 37.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> does not know what is the real time of the frames. It only refers to the time step.</p>
+</div>
+<p>To define where <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> stores it files and results, use the <a class="reference internal" href="../GlobalParameter/directory_management.html#gp-directory-management-page"><span class="std std-ref">directory management attribute of the GP</span></a>. For this tutorial, you may use only one: <a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-general-path"><span class="std std-ref">GlobalParameter.general_path</span></a>. In short, it defines the ‘main’ directory: the other files and directories will be contain in this one. If no other directory parameter are defined, the results are saved in the GP.general_path directory. The file used by <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> to performed the analysis are stored by default in GP.general_path/Molecule_times, see  <a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-mol-times"><span class="std std-ref">GlobalParameter.dir_mol_times</span></a>.</p>
+<p>For this example, set the GP.general_path where the parameter file is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">=</span> <span class="s1">&#39;/home/name/Software/Frog/Doc/Tutorial_files/Get_started_tuto&#39;</span>
+</pre></div>
+</div>
+<p>To speed up the calculation, one can define the number of cores which will be used during the run to parallelize the analysis using <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-nbr-parra"><span class="std std-ref">GlobalParameter.nbr_parra</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span> <span class="o">=</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>Here, FROG will try to use 2 cores:  each core will treat 5 frames in this example.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The parallelization is made over the time step treated, not space. Be aware that the RAM may become important, so do not overload your (personal) computer and try small GP.nbr_parra to start with. See <a class="reference internal" href="../Installation/numerical_notes_and_requirements.html#parralelization-frog-procedure-subpage"><span class="std std-ref">this page</span></a> for more informations.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you use parallelization, it is recommanded to cut the MD trajectory to not overload the RAM and for savety (of the MD trajectory file: otherwise it would be read by several core at the same time.). Set  <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-md-cut-trajectory"><span class="std std-ref">GlobalParameter.MD_cut_trajectory</span></a> to True – default value.</p>
+</div>
+<p>Finally, once all the GP attribute you wanted to defined have been set, you have to call the function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">MD_check_GP</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In order to end the GP definition. This function will check if the parameter make sens and intialize important varaible for the MT definitions.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>After this line, some attribute will still evolve on the GP object but we strongly recommend to <strong>not</strong> define directly other GP’s attributes.</p>
+</div>
+<p>Now that we have define the GP attributes, let’s initialize all the MT object.</p>
+</section>
+<section id="definition-of-molecule-type-mt">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">2.2.2.4. </span>Definition of Molecule Type (MT)</a><a class="headerlink" href="#definition-of-molecule-type-mt" title="Link to this heading">¶</a></h3>
+<p>The following procedure should be repeated for each new MT you would like to define. More information are available <a class="reference internal" href="../MoleculeType/how_to_create_mt.html#how-to-create-mt-page"><span class="std std-ref">here for the MT creation</span></a> and <a class="reference internal" href="../Diagram/how_to_creat_diagram.html#how-to-creat-diagram-page"><span class="std std-ref">here for the diagram definition</span></a>.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<blockquote>
+<div><ul class="simple">
+<li><p>Initialization:</p></li>
+</ul>
+</div></blockquote>
+<p>To define a Molecule Type (MT), you should first define its name and which molecule of the topology file is part of this definition.</p>
+<p>This is done by defining an object, called <em>moleculetype</em> using the class <em>MoleculeType</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">molecule_type_name</span> <span class="o">=</span> <span class="s1">&#39;Water_TIP4P2005&#39;</span>
+<span class="n">where_are_molecules</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+<span class="n">moleculetype</span> <span class="o">=</span> <span class="n">frog_class</span><span class="o">.</span><span class="n">MoleculeType</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">molecule_type_name</span><span class="p">,</span> <span class="n">where_are_molecules</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can of course use similary:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">moleculetype</span> <span class="o">=</span> <span class="n">frog_class</span><span class="o">.</span><span class="n">MoleculeType</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="s1">&#39;Water_TIP4P2005&#39;</span> <span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first argument is the previously defined GlobalParameter.</p>
+<p>The second argument <span class="incremental">molecule_type_name</span> indicates which type of molecule defines the MT. <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> call the molecular library file associated in the frog library (in the folder Frog/Molecules). The value of <em>molecule_type_name</em> have to correspond to one file in the library. If not, you may <a class="reference internal" href="what_should_contain_molecular_type_file.html#what-should-contain-molecular-type-file-page"><span class="std std-ref">have to create a new molecular module</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>the molecular library file in our example will be the file <em>Water_TIP4P2005.py</em>. It contains some key functions: for example, how to compute ‘mean position of the molecule’ or the ‘molecular orientation’. These function will be used in Frog to deal with each MT.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do not hesitate to send your own molecular library file for a new molecule or an update to an existing one: they are backbones of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>.</p>
+</div>
+<p>The third argument, <span class="incremental">where_are_molecules</span>, indicates that all molecules of the MD trajectory should be described by this ‘Water_TIP4P2005’ MT. If you have several species in the MD, you have to specify here which one are of part of this MT, see <a class="reference internal" href="../MoleculeType/how_to_create_mt.html#how-to-create-mt-page"><span class="std std-ref">here</span></a>.</p>
+<p>Finally, the line  <span class="incremental">moleculetype = frog_class.MoleculeType(GP, molecule_type_name, where_are_molecules)</span> defines the object <em>moleculetype</em> using the class  Frog.class_Molecule.MoleculeType.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can call the MT object ‘moleculetype’ otherwise. This important point is that is have to be added to the L_moleculetype list once defined.</p>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<blockquote>
+<div><ul class="simple">
+<li><p>Diagram initialization:</p></li>
+</ul>
+</div></blockquote>
+<p>Once the MT is defined, you can add the analysis to perform. To distinguish between the procedure where QM simulation are required from others, some analysis are called <em>structural</em> (without QM) and some <em>optical</em> (where QM calculation may be needed).</p>
+<p>For the <em>structural</em> analysis, a typical example of request is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">arg1</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+<span class="n">arg2</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;molecular_orientation&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="s1">&#39;independent&#39;</span><span class="p">]</span>
+<span class="n">L_diagram_analysis_to_perform</span><span class="o">=</span><span class="p">[</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">]</span>
+<span class="n">moleculetype</span><span class="o">.</span><span class="n">read_diagram_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span><span class="n">L_diagram_analysis_to_perform</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><em>arg1</em> (resp. <em>arg2</em>) contains parameter to define the first diagram (resp. second). Here, we would like to have the density and the molecular orientation in the laboratory frame. The generated diagram will be called density_slice_z and molecular_orientation_slice_z.  They contains the full distribution and the mean value of these observable with respect to the laboratory z-axis. For more information, see  <a class="reference internal" href="../Diagram/how_to_creat_diagram.html#how-to-creat-diagram-page"><span class="std std-ref">this page for the diagram creation</span></a>, <a class="reference internal" href="../Diagram/how_to_creat_diagram.html#diagram-geometry-selection-page"><span class="std std-ref">this one</span></a> for the geometrical discretization available and <a class="reference internal" href="tuto_space_discretization.html#tuto-space-discretization-page"><span class="std std-ref">this tutorial</span></a> for more example for geometrical discretization.</p>
+<p>For an <em>optical</em> analysis, you can compute the first hyperpolarizability in the laboratory frame (chi tensor) using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">arg3</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;chi&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]]</span>
+<span class="n">L_diagram_analysis_to_perform</span><span class="o">=</span><span class="p">[</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="p">,</span> <span class="n">arg3</span><span class="p">]</span>
+<span class="n">moleculetype</span><span class="o">.</span><span class="n">read_diagram_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span><span class="n">L_diagram_analysis_to_perform</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For more information about the available optical analysis, see <a class="reference internal" href="../OpticalAnalysis/overview_opt_analysis.html#overview-opt-analysis-page"><span class="std std-ref">this page</span></a> and <a class="reference internal" href="../OpticalAnalysis/optical_parameter.html#optical-parameter-page"><span class="std std-ref">this one</span></a>. Thus, this analysis required both the individual value of the hyperpolarizability in the molecular frame (noted beta) and the orientation of the molecule. The orientation is given by the MD trajectory along with the <span class="incremental">compute_rotational_matrix</span> function defined in the molecular library file relative to the MT. In this example, the hyperpolarizability is assumed to be <a class="reference internal" href="../Mathematics/beta_constant_and_NLO.html#beta-constant-and-nlo"><span class="std std-ref">a constant for every molecule of this MT</span></a>. However, if you want to compute it using electrostatic emebbeded QM scheme (it is more or less the initial goal of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>!), see <a class="reference internal" href="tuto_optical_analysis_overview.html#tuto-optical-analysis-overview-page"><span class="std std-ref">this tutorial</span></a>. But for this first tutorial, let’s use a constant beta:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">my_beta_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">my_beta_ref</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">moleculetype</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">beta_calculation_style</span><span class="o">=</span><span class="s1">&#39;fixed_for_all&#39;</span><span class="p">,</span> <span class="n">L_beta_ref</span><span class="o">=</span><span class="n">my_beta_ref</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The molecular hyperpolarizability (‘my_beta_ref’) defined here only affect the MT you are defining. You can assigned as many reference molecular hyperpolarizability as MT defined. Here, the molecular hyperpolarizability is set to zero except for one component <img class="math" src="../_images/math/f97bae710b14d57668ecb50af74a06fa4d2cdda0.png" alt="\beta_{zzz}=1"/>, for all the molecule assigned to this MT.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Enven if no <em>optical</em> analysis are defined, you necessary have to call the line: <span class="incremental">moleculetype.read_optic_properties_input(GP)</span></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In this case, no QM calculation will be performed since no optical analysis needs to be obtained at the QM level.</p>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<blockquote>
+<div><ul class="simple">
+<li><p>End the MT definition:</p></li>
+</ul>
+</div></blockquote>
+<p>When all the previous steps have been made, the MT parameters shall be checked using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">moleculetype</span><span class="o">.</span><span class="n">end_initialize</span><span class="p">(</span><span class="n">GP</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This step is designed to avoid incompatible parameters/request for this MT and to update some information to the GP.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>At this step, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> can stop and print error messages to explain why. This checking is not perfect and other crashes may happen later on. If you have any recommendation to help improving this safeguard do not hesitate!</p>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<blockquote>
+<div><ul class="simple">
+<li><p>Filling the list of MT.</p></li>
+</ul>
+</div></blockquote>
+<p>The MT can then be safely added to the list of molecule types:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L_moleculetype</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">moleculetype</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This procedure should be repeated for every MT you want to declare.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The list name <em>L_moleculetype</em> is mandatory for FROG. You shall add every MT defined in this list. The order does not matter.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>An MT per ‘real’ chemical species in your MD can be created but not only. For example, we can create two MT for two sets of the same chemical species (for instance water molecules) to define different analysis for each set of molecules . See <a class="reference internal" href="../MoleculeType/how_to_create_mt.html#how-to-create-mt-page"><span class="std std-ref">here</span></a> for more details. The only thing that is request is that every molecule present of the MD trajectory are assigned to exactly one MT.</p>
+</div>
+</section>
+</section>
+<section id="run-frog">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink"><span class="section-number">2.2.3. </span>Run Frog:</a><a class="headerlink" href="#run-frog" title="Link to this heading">¶</a></h2>
+<p>Once all this file configured, the request are fixed. You can now launch <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>!</p>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> is a Python3 software, if you have followed the installation procedure <a class="reference internal" href="../Installation/installation.html#id1"><span class="std std-ref">here</span></a>, it should be available as a package directly from your shell. In the shell, write:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ Frog parameters_example_get_started.py
+</pre></div>
+</div>
+<p>The software takes as argument the python file used to defined the parameters, here named <em>parameters_example_get_started.py</em>. You can use a different name for this file.</p>
+<p>During the run, many messages will be print to help you check what is going on. If an error occured, messages to help you understand the problem should be printed.
+For advance user, a log file is also generated in the same directory as the input parameter file. Its default name is ‘frog_log.txt’. If you want to change the name, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ Frog parameters_example_get_started.py --log_file the_log_file_name.txt
+</pre></div>
+</div>
+<p>The last message printed message should be ‘FROG run finished without error!’</p>
+<p>If you want to save what print <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> (in top of what is stored in the lof file), you can use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ Frog parameters_example_get_started.py &gt; frog_output.txt
+</pre></div>
+</div>
+<p>Nothing will be printed in the shell, and all the output are stored in the file  <em>frog_output.txt</em>.</p>
+<p>To analyze your result, see <a class="reference internal" href="read_frog_data.html#read-frog-data-page"><span class="std std-ref">this tutorial</span></a> and the jupyter notebook present in the tutorial directory: <em>get_started_analysis.ipynb</em> .</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_index.html">2. Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview.html">2.1. Overview</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.2. Get started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_space_discretization.html">2.3. Space Discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_mixture_md.html">2.4. Mixture and structural analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_optical_analysis_overview.html">2.5. Optical Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_quadrupole_long.html">2.6. Quadrupole and Long range QM/MM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html">2.7. Gamma calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read_frog_data.html">2.8. How to read results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html">2.9. Molecular Type Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Tutorials/get_started.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,22 @@
+# test1
+Every analysis with simple discretization options and parameters 
+
+# test2
+Every discretization option with simple diagrams. No special selection
+
+# test3a-f
+Every discretization option with simple diagrams. Special selection options 
+
+# test_molecular_orientation
+Molecular Orientation parameters. Tested for H2O and methanol in bulk. 
+
+# test_hbonds 
+H-bond parameters. Tested for H2O and methanol in bulk.
+
+# test_electric_field
+Electric field parameters. Tested for H2O and methanol in bulk.
+The first test tries the on_fly command only.
+The second test uses also the QM/MM part to compute the electric field. Another run is perform after this one, _next, to check that the electric field has been computed as expected. To do so, we copy fake QM results between the initial and the _next run to perform the third part of Frog run.
+
+# END
+# The optical diagrams are tested in the Optical folder

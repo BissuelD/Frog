@@ -1,0 +1,354 @@
+.. _qm_management_page:
+
+========================
+QM Management
+========================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+
+
+.. note:: Sans doute a reprendre et a ameliorer
+
+In this page we will present how to manage the pool of QM calculation to perform in the numerical terms. How to launch them on the cluster? How to parralilize several QM calculation on the same servor? 
+
+This page will not described at all how to required the QM claculation in |frog| nor they physical meaning. 
+
+
+.. _qm_management_general_procedure_subpage:
+
+-------------------
+General Procedure
+-------------------
+
+The different |dalton| parameters files are QM results localisation are defined by the function dalton_manager_module.build_QM_file_localization: 
+
+.. _autodoc_dalton_manager_module.build_QM_file_localization:
+.. autofunction:: Frog.dalton_manager_module.build_QM_file_localization
+    :noindex:
+
+|    
+
+First call
+----------
+Let's say that |frog| start from zero: after the reading of the parameter file, it starts it first part. 
+
+Using the :ref:`OpticalParameter.where_to_run_QM<autodoc_opticalparameter_where_to_run_QM>` and :ref:`OpticalParameter.selection_tool<autodoc_opticalparameter_selection_tool>` parameters, during the first part |frog| check if the molecule of each MT should undergo a QM calculation. For each time step, if a configuration should be QM treated, the directory where the input parameters are written is stored in the :ref:`OpticalParameter.L_QM_todo<autodoc_opticalparameter_L_QM_todo>`. 
+
+Then, at the begining of the second part, all the :ref:`OpticalParameter.L_QM_todo<autodoc_opticalparameter_L_QM_todo>` list of each time step are merged. The resulting list of all the QM calculation to performed is stored in the file *GP.dir_submission_file/job_to_perform.p*. 
+
+
+The total number of job to performed is distributed over several ''jobs'' using the :ref:`GlobalParameter.nbr_job_parr_QM<autodoc_gp_nbr_job_parr_QM>` and :ref:`GlobalParameter.max_submission_QM<autodoc_gp_max_submission_QM>`. For instance, if there are 1200 QM calculation to perform, if `GP.nbr_job_parr_QM=16` and `GP.max_submission_QM=50`, 50 jobs of 16 QM calculation will be created. Therefore, 1200-50*16=400 jobs are left to do. Each ''jobs'' used the file located at :ref:`GlobalParameter.file_template_script_run_QM<autodoc_gp_file_template_script_run_QM>` as a template. See the :ref:`next section<qm_management_template_script_subpage>` for more information about the  template and how the ''jobs'' are created. 
+
+In order to make easier the launching of all these 50 jobs, a file has been created at *GP.dir_submission_file/submit_job.sh* .  This file will launch every 'job' using the commande defined in :ref:`GlobalParameter.command_launch_job<autodoc_gp_command_launch_job>`. For instance, if you are using the SGE cluster manager, the command should be 'qsub'. If you are using slurm, use `GP.command_launch_job='sbatch'`.
+
+Therefore, to launch in all the 50 jobs in just one time, type in the console `bash GP.dir_submission_file/submit_job.sh` where the GP.dir_submission_file is the directory where is store this file -- or go to this file to run *submit_job.sh*.
+
+.. Warning:: Using this automatic procedure, you can very easely submite a lot of calculation to the cluster. Please think twice before running the *submit_job.sh* file!
+    
+At this point, you have numerous QM calculation running in the cluster. Before going any further, you have to wait to all the QM calculation to end. 
+
+.. note:: You can cancel some of the job if needed. It is not a problem since |frog| will check if all the job are finished or not anyway. If any QM calculation crashed or do not happened, it will be treated in the next loop, see bellow.
+
+Once all of the jobs launched ended, you can run again |frog|. 
+
+
+
+Loop over the second part
+--------------------------
+
+For this part, it is assumed that |frog| run on a set of directory created by a previous calculation which ended at the second part. The aim of this |frog| calculation is to end the previous one. Thus, very similar input parameters are used -- see below. 
+
+In this case, the directories:
+
+    + :ref:`GlobalParameter.dir_mol_times<autodoc_gp_dir_mol_times>` should contains the list of the MT for all the time step needed.
+    + :ref:`GlobalParameter.dir_torun_QM<autodoc_gp_dir_torun_QM>` should contains all the configuration that should be QM treated. It includes all the |dalton| input files, and maybe the results -- in the 'dalton_molecule_potential.out' file.
+    +  :ref:`GlobalParameter.dir_submission_file<autodoc_gp_dir_submission_file>` should contains the 'job_to_perform.p' file, which contains the list of the QM calculation to perform **during the last execution**.
+    
+The first part of the run has already been done. There is no need to redo it, and therefore the attribute :ref:`GlobalParameter.pass_first_part<autodoc_gp_pass_first_part>` should be set to True. This will skip the first part after the input parameter reading to launch directly the second part. 
+
+.. image:: stop-please-read.png
+   :width: 1200
+   :align: center
+   
+.. warning:: Therefore, it is **very important** that the parameters used in a run skipping the first part using GP.pass_first_part, and in the previous one (which generated the MTs used) are almost the same. You can change some GP attributes between the first |frog| run and the others, but not the ones regarding the MTs! The GP parrameter you can want safely are presented :ref:`here<gp_qm_management_numerical_parameter_subpage>`.
+
+At the begining of the second part, |frog| opens the list of QM calculation contains in *job_to_perform.p*. Then, for every configurations in this list, it will check if the QM calculation have been performed, and if the calculation ended correctly -- *i.e.* do not crashed: ended with the standard message.
+
+The QM calculation that have not been performed are stored in a new list, and a new *job_to_perform.p* file is created. For the new call of |frog|, the second part will thus start with this new  *job_to_perform.p* -- with fewer number of QM calculation to perform. Then, as in the first call, 'jobs' are created according to :ref:`GlobalParameter.nbr_job_parr_QM<autodoc_gp_nbr_job_parr_QM>` and :ref:`GlobalParameter.max_submission_QM<autodoc_gp_max_submission_QM>`. Each 'jobs' used the file located at :ref:`GlobalParameter.file_template_script_run_QM<autodoc_gp_file_template_script_run_QM>` as a template. Finaly, the 'jobs' can be launched at once using the file *GP.dir_submission_file/submit_job.sh* in the cluster. The command to submite a job on a cluster is still provided by :ref:`GlobalParameter.command_launch_job<autodoc_gp_command_launch_job>`. 
+
+.. note:: All these attributes regarding the management of the QM calculation **can** be changed from one |frog| call to another.
+
+Therefore, in your first call you can use very safe parameters (like `GP.nbr_job_parr_QM=1` and `GP.max_submission_QM=1`) to test how behave the QM calculations. Then in the next call send more QM calculations. 
+
+You have to loop over this procedure until all the QM calculation is performed: 
+
+    + Run |frog| with `GP.pass_first_part=True`
+    
+It will check the number of QM calculation left to do and writes a new *GP.dir_submission_file/job_to_perform.p* accordingly. Then create new ''jobs'' according to the GP parameters you have given to deal with the QM management. Create a new *GP.dir_submission_file/submit_job.sh*.
+
+    + Run *GP.dir_submission_file/submit_job.sh*
+    
+It will send all the 'jobs' to the cluster
+
+    + Wait until all the 'jobs' ended.
+    
+Resolution
+-------------
+
+Once all QM calculations have been done, the second part behaves differently. If no QM calculation are left to do, the second part end and the third part is launched. In this part, the optical properties are read from the QM results for all the configuration. 
+
+Then, all the diagrams are updates as usual and the merging over the frame is performed. At the end of the |frog| calculation, the file final output file are created in the :ref:`GlobalParameter.general_path<autodoc_gp_general_path>` directory. Now you can read the results using the post-processing files -- see **this tutorial** for instance. 
+
+
+.. _qm_management_template_script_subpage:
+
+-----------------
+Submision script
+-----------------
+
+In this section, we will see what should be the :ref:`GlobalParameter.file_template_script_run_QM<autodoc_gp_file_template_script_run_QM>` and how the 'jobs' are created. Let's first see how to deal with one QM calculation per jobs (mono-core calculation). Then how to create jobs that will compute several QM calculations per servor (multi-core calculations). Finally, we will see how to define the scratch directory for the |dalton| calculations using :ref:`GlobalParameter.scratch_dir<autodoc_gp_scratch_dir>`.
+
+Template for a single QM calculation
+------------------------------------
+
+The :ref:`GlobalParameter.file_template_script_run_QM<autodoc_gp_file_template_script_run_QM>` should be a file which contains all the information needed for a jobs submission in your cluster. You can find examples HERE for a SGE cluster manager. For instance, the GP.file_template_script_run_QM is the file *template_run_dalton_mono.sh*: :: 
+
+    #/bin/bash
+    #$ -S /bin/bash
+    ### Jobs name
+    #$ -N QM_calculations_frog
+    ### Queue list
+    #$ -q h48*,h6* 
+    ### parallel environnement & nslots
+    #$ -pe mpi32_debian 32
+    ### Load the SGE environment
+    #$ -cwd
+    #$ -V
+    
+    cd ${SGE_O_WORKDIR}
+    ### Load the Dalton software
+    module purge
+    module load Dalton/2018.2-full-debian9
+    export OMP_NUM_THREADS=1
+    HOSTFILE=${TMPDIR}/machines
+
+    ### The scratch directory for Dalton
+    SCRATCH_DIR=/tmp/glebreto
+
+In this case, the template required for the queue  h48* and h6* all a servor of 32 cores. Then, its load the |dalton| script and initialize some varaible relative to this cluster. 
+
+Let's say that there are 2 QM calculations to perform. If a a single QM calculation per jobs is required, *i.e.* the attribute :ref:`GlobalParameter.nbr_job_parr_QM<autodoc_gp_nbr_job_parr_QM>` is equal to 1, 2 jobs is needed. If :ref:`GlobalParameter.max_submission_QM<autodoc_gp_max_submission_QM>` is larger then 2, 3 files will be written in the :ref:`GlobalParameter.dir_submission_file<autodoc_gp_dir_submission_file>`: 
+
++ *template_run_dalton_mono_0.sh* and *template_run_dalton_mono_1.sh*
+
+which will have the same beggining as *template_run_dalton_mono.sh*, but with at the end: :: 
+
+    export DALTON_TMPDIR=GP.scratch_dir
+    mkdir -p $SCRATCH_DIR
+    dalton -w / -o GP.dir_torun_QM/MT_name/Time_T/Molecule_I/dalton_molecule_potential.out GP.dir_torun_QM/MT_name/Time_T/Molecule_I/dalton.dal GP.dir_torun_QM/MT_name/Time_T/Molecule_I/molecule.mol GP.dir_torun_QM/MT_name/Time_T/Molecule_I/potential.pot > GP.dir_torun_QM/MT_name/Time_T/Molecule_I/output_dalton.txt
+    rm -rf $SCRATCH_DIR
+
+For instance, if: 
+    - GP.scratch_dir='$SCRATCH_DIR'
+    - GP.dir_torun_QM='/home/glebreton/Frog_test/Mono/QM_Simulations'
+    - The MT of this configuration is 'Water_TIP4P2005'
+    - The time step of this configuration is 0
+    - The molecule number is 1
+
+The end of the *template_run_dalton_mono_0.sh* will be: ::
+    
+    export DALTON_TMPDIR=$SCRATCH_DIR
+    mkdir -p $SCRATCH_DIR
+    dalton -w / -o /home/glebreton/Frog_test/Mono/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/dalton_molecule_potential.out /home/glebreton/Frog_test/Mono/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/dalton.dal /home/glebreton/Frog_test/Mono/Single_core/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/molecule.mol /home/glebreton/Frog_test/Mono/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/potential.pot > /home/glebreton/Frog_test/Mono/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/output_dalton.txt
+    rm -rf $SCRATCH_DIR
+    
+
+The first line defines the scratch directory for |dalton|, see the last section. The second and last line create and delete this scratch directory. The line starting with 'dalton' run the QM calculation using the inputs located at the configuration directory, and store the results in the same directory using the file name *dalton_molecule_potential.out*. Another output file named *output_dalton.txt* is also created at the configuration location where additional |dalton| output are stored.
+
+
+In this case, all the servors is used to run the dalton application. Today, this means that only a single core is used, but that all the RAM of servors is reserved. If you want to required only a single core of a servors (be aware that you may not have all the RAM), use as a template something like: ::
+
+    #/bin/bash
+    #$ -S /bin/bash
+    ### Jobs name
+    #$ -N QM_calculations_frog
+    ### Queue list
+    #$ -q mono*
+    ### Load the SGE environment
+    #$ -cwd
+    #$ -V
+    
+    cd ${SGE_O_WORKDIR}
+    ### Load the Dalton software
+    module purge
+    module load Dalton/2018.2-full-debian9
+
+    ### The scratch directory for Dalton
+    SCRATCH_DIR=/tmp/glebreto
+
+The rest of the file will be the same. 
+
+
++ *submit_job.sh*
+
+This file will look like: ::
+    
+    #!/bin/bash 
+    
+    GP.command_launch_job GP.dir_submission_file/GP.file_template_script_run_QM + _0.sh
+    GP.command_launch_job GP.dir_submission_file/GP.file_template_script_run_QM + _1.sh
+    
+For instance:
+
+    - GP.command_launch_job='qsub' for the SGE cluster manager -- see :ref:`GlobalParameter.command_launch_job<autodoc_gp_command_launch_job>`.
+    - GP.dir_submission_file='/home/glebreton/Frog_test/Mono/Submission_script'
+    - GP.file_template_script_run_QM='template_run_dalton_mono.sh'
+
+The *submit_job.sh* is: ::
+
+    #!/bin/bash 
+    
+    qsub /home/glebreton/Frog_test/Mono/Submission_script/template_run_dalton_mono_0.sh
+    qsub /home/glebreton/Frog_test/Mono/Submission_script/template_run_dalton_mono_1.sh
+
+Running this script using the bash command in the shell will launch all the 'jobs' -- in this case 2 jobs. 
+
+If the number of QM calculation to do is smaller then GP.nbr_job_parr_QM times GP.max_submission_QM, only GP.max_submission_QM jobs will be created with GP.nbr_job_parr_QM QM calculation per jobs. The rest of the QM calculation will be treated in the next |frog| run -- see the above section. 
+
+Template for a multiple QM calculation
+----------------------------------------
+
+If you want to perform 'M' QM calculation per jobs (*i.e.* per servor), set the GP.nbr_job_parr_QM to M. The first requisit is that the GP.file_template_script_run_QM has at least this number of core. Otherwise, you will have a competition between the QM calculation, which will turn the jobs way slower. Moreover, you may have RAM crashes. Don't run more QM calculations then the number of CPU available. 
+
+For instance, for a SGE calculation, this kind of scripts, let's call it *template_run_dalton_multi.sh*: :: 
+
+    #/bin/bash
+    #$ -S /bin/bash
+    ### Jobs name
+    #$ -N QM_calculations_frog
+    ### Queue list
+    #$ -q h48*,h6* 
+    ### parallel environnement & nslots
+    #$ -pe mpi32_debian 32
+    ### Load the SGE environment
+    #$ -cwd
+    #$ -V
+    
+    cd ${SGE_O_WORKDIR}
+    ### Load the Dalton software
+    module purge
+    module load Dalton/2018.2-full-debian9
+    export OMP_NUM_THREADS=1
+    HOSTFILE=${TMPDIR}/machines
+
+    ### The scratch directory for Dalton
+    SCRATCH_DIR=/tmp/glebreto
+
+requires a servor with 32 cores. Therefore, you can run 32 QM calculation in one jobs maximum.
+
+.. note:: |frog| do not check if the number of available cores is larger then GP.nbr_job_parr_QM.
+
+For instance, let's say that we want to perform 2 QM calculations per jobs -- and not 32 because we want to assure that enough RAM is available. If the number of QM calculation to perform is 2, 3 files will be written in the :ref:`GlobalParameter.dir_submission_file<autodoc_gp_dir_submission_file>`: 
+
++ *template_run_dalton_multi_1.sh* 
+
+which will have the same beggining as *template_run_dalton_multi.sh*, but with at the end: :: 
+
+    export DALTON_TMPDIR=$SCRATCH_DIR
+    mkdir -p $SCRATCH_DIR
+    parallel -j M < GP.dir_submission_file/QM_to_do_1
+    rm -rf $SCRATCH_DIR
+
+The line with the 'parallel' start in parallel the QM calculation using the file located at GP.dir_submission_file/QM_to_do_J, where J is the number of jobs to launch. There are as many *template_run_dalton_multi_J.sh* as *QM_to_do_J*. For instance, if: 
+
+    - M = 2, the number of jobs per cores
+    - GP.dir_submission_file='/home/glebreton/Frog_test/Multi/Submission_script'
+
+The end of the *template_run_dalton_multi_1.sh* is: ::
+
+    export DALTON_TMPDIR=$SCRATCH_DIR
+    mkdir -p $SCRATCH_DIR
+    parallel -j 2 < /home/glebreton/Frog_test/Multi/Submission_script/QM_to_do_1
+    rm -rf $SCRATCH_DIR
+    
++ *QM_to_do_1* 
+
+contains the list of the QM calculation that the jobs have to perform. The structure of this file is: ::
+
+    dalton -w / -o Localisation_1/dalton_molecule_potential.out Localisation_1/dalton.dal Localisation_1/molecule.mol Localisation_1/potential.pot > Localisation_1/output_dalton.txt
+    dalton -w / -o Localisation_2/dalton_molecule_potential.out Localisation_2/dalton.dal Localisation_2/molecule.mol Localisation_2/potential.pot > Localisation_2/output_dalton.txt
+    dalton -w / -o Localisation_3/dalton_molecule_potential.out Localisation_3/dalton.dal Localisation_3/molecule.mol Localisation_3/potential.pot > Localisation_3/output_dalton.txt
+    ...
+    dalton -w / -o Localisation_M/dalton_molecule_potential.out Localisation_M/dalton.dal Localisation_M/molecule.mol Localisation_M/potential.pot > Localisation_M/output_dalton.txt
+
+where the Localisation_I is the directory for a QM configuration: GP.dir_torun_QM/MT_name/Time_T/Molecule_N. For instance, if: 
+
+    - 2 QM calculation have to be performed 
+    - GP.dir_torun_QM='/home/glebreton/Frog_test/Multi/QM_Simulations' 
+    - The molecule type is 'Water_TIP4P2005', 
+    - The time step is 0
+    - The molecule number is 1 and 10
+
+The *QM_to_do_1* will be: ::
+
+    dalton -w / -o /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/dalton_molecule_potential.out /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/dalton.dal /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/molecule.mol /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/potential.pot > /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_1/output_dalton.txt
+    dalton -w / -o /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_10/dalton_molecule_potential.out /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_10/dalton.dal /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_10/molecule.mol /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_10/potential.pot > /home/glebreton/Frog_test/Multi/QM_Simulations/Water_TIP4P2005/Time_0/Molecule_10/output_dalton.txt
+    
++ *submit_job.sh*
+
+This file is completly equivalent to the case where only one QM calculation per jobs is perform. There are as many line as jobs to launch. To end the example: 
+    
+    - GP.command_launch_job='qsub' for the SGE cluster manager -- see :ref:`GlobalParameter.command_launch_job<autodoc_gp_command_launch_job>`.
+    - there are only one jobs to launch: *template_run_dalton_multi_1.sh* 
+    - GP.dir_submission_file='/home/glebreton/Frog_test/Multi/Submission_script'
+
+Therefore, the *submit_job.sh* will be: ::
+    
+    #!/bin/bash 
+    
+    qsub /home/glebreton/Frog_test/Multi/Submission_script/template_run_dalton_mono_1.sh
+    
+
+.. _qm_management_scratch_dir_subpage:
+
+Choose the scratch directory
+-----------------------------
+
+Without going too much details, a |dalton| run takes inout parameters (the dalton.dal, molecule.mol and potential.pot files), uses many temporary file to perform the QM calculations, and returns several files. In |frog|, only the one containing the main main resultats is used to extract the optical property: the dalton_molecule_potential.out file. 
+
+The inputs file are quite small and are read once. The final output file is also small. However, the temporary file can be large, especially for large basis set. Therefore, it is important to use a place to store them that are easely accessible, for instance in a RAM-like location (or a /scratch if your cluster has one). 
+
+To locate these temporary file, you can use the DALTON_TMPDIR native variable, which is defined when you call the dalton module in your cluster. 
+
+.. note:: In |frog| we use rather DALTON_TMPDIR than `dalton -t temp_dir` because it can be modified more easely in the sumisson script for each job. However it should represent the same thing. 
+
+It is inside the submission script for a job that this varaible is defined using: 
+    - :ref:`GlobalParameter.scratch_dir<autodoc_gp_scratch_dir>`
+    
+    - What is already written in :ref:`GlobalParameter.file_template_script_run_QM<autodoc_gp_file_template_script_run_QM>`
+   
+.. note:: The scratch directory for all the QM calculation of a jobs is the same. 
+
+.. warning:: By default, the scratch directory is deleted at the end of a job. If you are running several jobs at once, the localisation of each scratch directory should be different! 
+
+For instance, you can define to use a |dalton| scratch directory that depends on the node/servor you are running on. In the GP.file_template_script_run_QM, write for instance: ::
+
+    LOCAL_DIR=/tmp/glebreto
+
+where the /tmp refers here to the intern memory of the node. You can define the LOCAL_DIR using automatical procedure (written in bash) depending on your cluster architecture. Once the LOCAL_DIR is defined in the GP.file_template_script_run_QM, using GP.scratch_dir='$LOCAL_DIR', a job will look like: ::
+
+    LOCAL_DIR=/tmp/glebreto 
+    export DALTON_TMPDIR=$LOCAL_DIR
+    mkdir -p $SCRATCH_DIR
+    parallel -j M < GP.dir_submission_file/QM_to_do_1
+    rm -rf $SCRATCH_DIR
+    
+The advantage of this method is that it is left to the user to define the scratch directory using bash command in the GP.file_template_script_run_QM. It is flexible and should be adaptable to your cluster. 
+
+.. note:: If you want to start with a simple example, set GP.scratch_dir to a directory, you will see the temporary |dalton| file be written there. 
+
+
+
+

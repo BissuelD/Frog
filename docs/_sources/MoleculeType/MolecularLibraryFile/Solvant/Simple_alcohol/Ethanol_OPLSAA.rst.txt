@@ -1,0 +1,30 @@
+.. _MLF_Ethanol_OPLSAA_page:
+
+    
+    
+=========================
+Ethanol: OPLS/All Atoms
+=========================
+
+
+To call this Molecule Type description in |frog|, use: ::
+
+    myMT = frog_class.MoleculeType(GP, 'Ethanol_OPLSAA', where_are_molecules)
+    
+    
+Description
+------------
+
+
+Test performed
+--------------
+
+
+
+Module
+------
+.. automodule:: Frog.Molecules.Ethanol_OPLSAA
+    :noindex:
+    :members:
+    :undoc-members:
+    :show-inheritance:

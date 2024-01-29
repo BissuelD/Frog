@@ -1,0 +1,81 @@
+.. _gp_usual_parameters_page:
+
+=================
+Usual Parameters
+=================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+In this page is presented the mandatory parameters for all run, along with the most common ones. 
+
+
+
+To deal with the MD trajectory
+------------------------------
+
+|
+
+.. _autodoc_gp_MD_file_name_topology:
+.. autoattribute:: Frog.class_GP.GlobalParameter.MD_file_name_topology
+
+|
+
+.. _autodoc_gp_MD_file_name_traj:
+.. autoattribute:: Frog.class_GP.GlobalParameter.MD_file_name_traj
+
+|
+
+.. _autodoc_gp_MD_file_type:
+.. autoattribute:: Frog.class_GP.GlobalParameter.MD_file_type
+
+|
+
+.. _autodoc_gp_MD_convertion_to_angstrom:
+.. autoattribute:: Frog.class_GP.GlobalParameter.MD_convertion_to_angstrom
+
+|
+
+.. _autodoc_gp_MD_cut_trajectory:
+.. autoattribute:: Frog.class_GP.GlobalParameter.MD_cut_trajectory
+
+|
+
+.. _autodoc_gp_nbr_time_step:
+.. autoattribute:: Frog.class_GP.GlobalParameter.nbr_time_step
+
+|
+
+.. _autodoc_gp_trotter_step:
+.. autoattribute:: Frog.class_GP.GlobalParameter.trotter_step
+
+|
+
+.. _autodoc_gp_env_authorised_pbc_condition:
+.. autoattribute:: Frog.class_GP.GlobalParameter.env_authorised_pbc_condition
+
+|
+
+.. _autodoc_gp_layer_which_radii_MT:
+.. autoattribute:: Frog.class_GP.GlobalParameter.layer_which_radii_MT
+
+|
+
+Functionement parameters
+------------------------
+
+|
+
+.. _autodoc_gp_nbr_parra:
+.. autoattribute:: Frog.class_GP.GlobalParameter.nbr_parra
+
+|
+
+.. _autodoc_gp_pass_first_part:
+.. autoattribute:: Frog.class_GP.GlobalParameter.pass_first_part
+
+|
+
+
+

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2.9. Molecular Type Module &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3. Global Parameter" href="../GlobalParameter/gp_index.html" />
+    <link rel="prev" title="2.8. How to read results" href="read_frog_data.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="molecular-type-module">
+<span id="what-should-contain-molecular-type-file-page"></span><h1><span class="section-number">2.9. </span>Molecular Type Module<a class="headerlink" href="#molecular-type-module" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#goal-and-perquisite" id="id1">Goal and Perquisite:</a></p></li>
+<li><p><a class="reference internal" href="#procedure" id="id2">Procedure:</a></p></li>
+<li><p><a class="reference internal" href="#general-informations" id="id3">General informations</a></p>
+<ul>
+<li><p><a class="reference internal" href="#info-molecule" id="id4">info_molecule</a></p></li>
+<li><p><a class="reference internal" href="#info-molecule-for-layer" id="id5">info_molecule_for_layer</a></p></li>
+<li><p><a class="reference internal" href="#typical-geometry" id="id6">typical_geometry</a></p></li>
+<li><p><a class="reference internal" href="#compute-mean-position" id="id7">compute_mean_position</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#structural-analysis" id="id8">Structural analysis:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#compute-molecular-orientation" id="id9">compute_molecular_orientation</a></p></li>
+<li><p><a class="reference internal" href="#compute-hbonds" id="id10">compute_hbonds</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#optical-properties" id="id11">Optical properties:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#compute-rotational-matrix" id="id12">compute_rotational_matrix</a></p></li>
+<li><p><a class="reference internal" href="#qm-description" id="id13">QM Description</a></p></li>
+<li><p><a class="reference internal" href="#electrostatic-description" id="id14">Electrostatic Description</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#final-remarks" id="id15">Final remarks</a></p></li>
+</ul>
+</nav>
+<section id="goal-and-perquisite">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink"><span class="section-number">2.9.1. </span>Goal and Perquisite:</a><a class="headerlink" href="#goal-and-perquisite" title="Link to this heading">¶</a></h2>
+<p>In this advanced tutorial we will see how to define a new molecular type in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>.
+Depending on what you want to achieve with this new molecule, you may need to understand some deep <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> architecture.
+We warmly recommand to have a look to the other MT already defined.</p>
+</section>
+<section id="procedure">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">2.9.2. </span>Procedure:</a><a class="headerlink" href="#procedure" title="Link to this heading">¶</a></h2>
+<p>When you want to assign to a set of molecule a Molecule Type (MT) in the parameter file, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> looks at the file in is code source directory: Frog/Molecules.
+The localisation may depend on how are install python modules in your computer/cluster.
+To find out, try:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">Frog</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;Frog.Molecules.Water_TIP4P2005&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>This will print the directory where your <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> look for its MT modules. For instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;Frog.Molecules.Water_TIP4P2005&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/home/glebreton/anaconda3/lib/python3.6/site-packages/Frog/Molecules/Water_TIP4P2005.py&#39;</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>If you want to define a new MT, write a python file as described bellow in the directory ‘home/glebreton/anaconda3/lib/python3.6/site-packages/Frog/Molecules’.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> is an open-software which would benefit from any help. Do not hesitate to contact us if you have defined a new MT: we will add it in the new version for everyone!</p>
+</div>
+<p>In the following we will present all the mandatory function that should be defined in a MT:</p>
+<dl class="simple">
+<dt>General informations:</dt><dd><ul class="simple">
+<li><p>info_molecule: General information</p></li>
+<li><p>info_molecule_for_layer: For Layer analysis</p></li>
+<li><p>typical_geometry: For test and visualisation</p></li>
+<li><p>compute_mean_position: What is the ‘mean position’ of this molecule, extremly important</p></li>
+</ul>
+</dd>
+<dt>Structural analysis:</dt><dd><ul class="simple">
+<li><p>compute_molecular_orientation: What is the ‘molecular orientation’?</p></li>
+<li><p>compute_hbonds: How to compute ‘H-bond’ with a patner molecule?</p></li>
+</ul>
+</dd>
+<dt>Optical properties:</dt><dd><ul class="simple">
+<li><p>compute_rotational_matrix: How to define the molecular frame with respect to the laboratory one?</p></li>
+<li><p>electrostatic_description: How to described this molecule in an explicite PE environment?</p></li>
+<li><p>qm_target_description: How to described at the QM level this molecule (atomic position, charges…)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Of course you may define any other function which can be called by any the one defined above. <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> should call one the ones presented above during its functionment.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The input/output type should be strictly respected in these mandatory function. Unexpected error may arrise otherwise.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You may not defined all of them since they will be called only for certain type of analysis. But for the sake of compliness, please at least defined empty ones!</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> supose Angstrom as lenght unit! If your MD trajectory do not use angstrom, use <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-md-convertion-to-angstrom"><span class="std std-ref">GP.MD_convertion_to_angstrom</span></a> in your parameter file to convert.</p>
+</div>
+</section>
+<section id="general-informations">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">2.9.3. </span>General informations</a><a class="headerlink" href="#general-informations" title="Link to this heading">¶</a></h2>
+<section id="info-molecule">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">2.9.3.1. </span>info_molecule</a><a class="headerlink" href="#info-molecule" title="Link to this heading">¶</a></h3>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> would use this function in order to check if the trajectory read matches the definition set here.
+Indeed, this function will initialized the <a class="reference internal" href="../MoleculeType/single_molecule_parameter.html#single-molecule-parameter-page"><span class="std std-ref">SingleMoleculeParameter</span></a> (smparameter) object of this Molecule Type.</p>
+<p>It will set the name (which MUST be the same as the molecular module name), the number of atom, the atom type, the typical size of the molecule (used when computing environment) and the maximal allowed distance between atoms (max*distance*atom).
+If molecular orientations are required, the number of value used to define this orientation should be given.</p>
+<p>The input of this function is a SingleMoleculeParameter object, and return this object.</p>
+<p>The <a class="reference internal" href="../MoleculeType/single_molecule_parameter.html#autodoc-smparameter-max-distance-atom"><span class="std std-ref">smparameter.max_distance_atom</span></a> is very important to prevent “cutted” molecule due to periodic boundary condition.
+This value should be a list: [The ‘’reference’’ atom, Value for atom 0, Value for atom 1, …].
+Where “Value for atom 0” should be ‘Ref’ or the maximal distance allowed from the ‘’reference’’ atom.
+Note that the atom numerotation starts from 0.
+If one atom of a molecular trajectory does not respect this maximal distance from the reference atom, FROG will try to move it using the box size of the MD simulation at the given time step.
+Thus, it is important to be strict enough with respect to these distance – being too restrictive will lead to crashes (with error message) if FROG fails to respect these conditions.</p>
+<p>It is important to be coherent between the topology of the MD and the molecular module: since <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> does not read the atom type name from theto pology.
+You may have a case where there is no error due to geometrical mismatch, but the atomic assignation are wrong.
+For example if a water molecule is defined as follow:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">info_molecule</span><span class="p">(</span><span class="n">smparameter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Basic information for a water MT.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">smparameter</span><span class="o">.</span><span class="n">name_mt</span> <span class="o">=</span> <span class="s1">&#39;Water_TIP4P2005&#39;</span> <span class="c1"># should be a string: the exact same name as the molecular file!</span>
+    <span class="n">smparameter</span><span class="o">.</span><span class="n">nbr_atom</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># should be an int. using len(smparameter.L_type_atom) could also be a robust definition</span>
+    <span class="n">smparameter</span><span class="o">.</span><span class="n">L_type_atom</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">]</span> <span class="c1"># list of string.</span>
+    <span class="n">smparameter</span><span class="o">.</span><span class="n">size_typical_molecule</span> <span class="o">=</span> <span class="n">info_molecule_typical_size</span><span class="p">()</span>  <span class="c1">#in Angstrom in this example</span>
+    <span class="n">smparameter</span><span class="o">.</span><span class="n">max_distance_atom</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Ref&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="c1"># The definition of the &#39;&#39;reference&#39;&#39; atom, and the maximal allowed distance from it for the other atoms.</span>
+    <span class="c1"># Informations relative to the other fct defined</span>
+    <span class="n">smparameter</span><span class="o">.</span><span class="n">d_molecular_orientation</span> <span class="o">=</span> <span class="mi">3</span> <span class="c1"># should be an int.</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">smparameter</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">info_molecule_typical_size</span><span class="p">():</span>
+    <span class="k">return</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>this means that the MD should encode the water position as [Oxygen, Hydrogen, Hydrogen].
+And if the topology file encodes the water position as: [Hydrogen, Hydrogen, Oxygen], <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> would probably not crash due to
+geometrical mismatch (since the water molecule is very small)
+However, the calculation of other observable would make no sense.</p>
+</section>
+<section id="info-molecule-for-layer">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">2.9.3.2. </span>info_molecule_for_layer</a><a class="headerlink" href="#info-molecule-for-layer" title="Link to this heading">¶</a></h3>
+<p>Define the VDW radii that will be used by pytim to define the ‘layer’ in a 2D interface., see <a class="reference internal" href="../Diagram/how_to_creat_diagram.html#diagram-space-discretization-layer-subpage"><span class="std std-ref">this page</span></a> for more information.</p>
+<p>There should be as many radii as atom in the MT. Example for water:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">info_molecule_for_layer</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Defines the radii of every atoms for the layer analysis. These value are used by the pytim module.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">L_type_molecule_radii</span> <span class="o">=</span> <span class="p">[</span><span class="mf">3.1589</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1"># in angstrom since pytim uses angstrom</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_type_molecule_radii</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="typical-geometry">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">2.9.3.3. </span>typical_geometry</a><a class="headerlink" href="#typical-geometry" title="Link to this heading">¶</a></h3>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> would need to have a typical geometry for testing purpose available in the function “typical_geometry”.
+This function should not have any argument and return a two-dimensional list of the molecular position.
+An example for water molecules:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">typical_geometry</span><span class="p">():</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="mf">104.52</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="mf">0.9572</span>
+    <span class="n">L_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">d</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="o">/</span><span class="mi">2</span><span class="p">)],</span>
+        <span class="p">[</span><span class="n">d</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="o">-</span><span class="n">theta</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="o">-</span><span class="n">theta</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
+                     <span class="p">])</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_pos</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="compute-mean-position">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">2.9.3.4. </span>compute_mean_position</a><a class="headerlink" href="#compute-mean-position" title="Link to this heading">¶</a></h3>
+<p>The mean position of a molecule is very often used by the software: for the discretization of any observable with respect to a box-axis or for computing the local environment.
+This function should take as an argument a two-dimensional list of the molecular position and return a 3D vector.
+Here is a simple example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_mean_position</span><span class="p">(</span><span class="n">L_pos</span><span class="p">):</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Here the mean position of the molecule is set to be the one of its first atom.
+Below a more complicated one for the water TIP4P/2005 description.
+The mean position is set to be the negative charge position</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_mean_position</span><span class="p">(</span><span class="n">L_pos</span><span class="p">):</span>
+    <span class="n">vec_dipole</span> <span class="o">=</span> <span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">vec_dipole</span> <span class="o">=</span> <span class="n">vec_dipole</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vec_dipole</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">position_dipole</span> <span class="o">=</span> <span class="n">L_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.1546</span><span class="o">*</span><span class="n">vec_dipole</span> <span class="c1"># unit: Angstrom</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">position_dipole</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It is important to note that the input position of a molecule can be given in the laboratory or molecular frame.</p>
+</section>
+</section>
+<section id="structural-analysis">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink"><span class="section-number">2.9.4. </span>Structural analysis:</a><a class="headerlink" href="#structural-analysis" title="Link to this heading">¶</a></h2>
+<section id="compute-molecular-orientation">
+<h3><a class="toc-backref" href="#id9" role="doc-backlink"><span class="section-number">2.9.4.1. </span>compute_molecular_orientation</a><a class="headerlink" href="#compute-molecular-orientation" title="Link to this heading">¶</a></h3>
+<p>Define the “molecular orientation” of this molecule type.
+The input is the molecule position in the laboratory frame.
+The output should be an array with values between -1 and 1.
+The size of the array should be the same as the <a class="reference internal" href="../MoleculeType/single_molecule_parameter.html#autodoc-smparameter-d-molecular-orientation"><span class="std std-ref">smparameter.d_molecular_orientation</span></a> define in the info_molecule function.</p>
+<p>For example, the molecular orientation of a water molecule is the projection of its dipole moment on the laboratory frame – thus with a size of 3.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_molecular_orientation</span><span class="p">(</span><span class="n">L_pos</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    WARNING: THIS SHOULD RETURN VALUE BETWEEN -1 AND 1.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">vec_dipole</span> <span class="o">=</span> <span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="p">(</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># ref centered around the oxygen atom</span>
+    <span class="n">vec_dipole</span> <span class="o">=</span> <span class="n">vec_dipole</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vec_dipole</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">vec_dipole</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="compute-hbonds">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink"><span class="section-number">2.9.4.2. </span>compute_hbonds</a><a class="headerlink" href="#compute-hbonds" title="Link to this heading">¶</a></h3>
+<p><strong>Function parameters</strong></p>
+<p>First, we would emphasise that this compute_hbonds function has been designed first to compute H-bonds but may be applied to other interaction involving 2 molecules.
+The requirement is that this observable only depends on the position of these 2 molecules (one is called ‘target’ and the other ‘partner’) from different molecule type (or from the same molecule type).
+The output should be 2 times 2 positive integers.
+For the case of H-bond: the number of “own” and “given” H-bonds for the target molecule and for the partner molecule.</p>
+<p>Example: [1, 0], [0, 1] means that the target molecule owns 1 and gives 0 H-bond and the partner owns 0 and gives 1 H-bond.</p>
+<p>The inputs are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The position of the molecule of this molecule type &lt;L_target&gt;</p></li>
+<li><p>The name of another molecule type (can be the same) &lt;name_partner&gt;</p></li>
+<li><p>The position of the molecule with this another molecule type name &lt;L_partner&gt;</p></li>
+<li><p>Any parameter (should be an array)</p></li>
+<li><p>The optional argument info which should be a boolean.</p></li>
+</ul>
+</div></blockquote>
+<p>The positions of the target and partner molecule are given in the target molecule frame.
+None of the molecule positions are cut.
+In order to build the environment to find the ‘partner’ molecules, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> needs to know what is the maximal distance acceptable from the mean position of the target molecule.
+Therefore, this function with the optional input “info=True” will be called at the initialization.
+Hence, if this option “info” is set to True, the function must return only a float.</p>
+<p><strong>Procedure</strong></p>
+<p>One important point is that <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will check if the compute_hbonds function of this molecule file can handle “H-bond” with the
+‘partner’ molecule type.</p>
+<p>Therefore, during the initialization, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will call the function of the target and
+partner molecule, with info=True.</p>
+<p>If the compute_hbonds function knows, should return the maximal distance acceptable from the target and the partner (mean) position in order to consider this interaction (for instance H-bond).
+If the function compute_hbonds does not know how to handle this partner molecule type, it should return False.
+Note that you can use variables from the parameter variable, which depends on the user-input directly, as
+shown in the example below.</p>
+<p>In the case the compute_hbonds of the molecule type does not know how to handle this interaction with the partner molecule type, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will check on the partner molecular module compute_hbonds function if it can handle the target molecule type.
+If it is so, it will switch the role of the target and partner molecule type.</p>
+<p>For instance, for an user-input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># In the Molecule Type &#39;Water_TIP4P2005&#39;:</span>
+<span class="p">[</span><span class="s1">&#39;hbond&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="s1">&#39;Chlore&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">3.1</span><span class="p">,</span> <span class="mi">60</span>\<span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Here the “target” and “partner” molecule types are Water_TIP4P2005 and Chlore respectively.
+If the compute_hbonds of the Water_TIP4P2005 molecular module does not know how to handle the interaction with the Chlore molecule type, then <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will try to compute the H-bond for the Water_TIP4P2005 molecule type as if the input were:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># In the Molecule Type &#39;Chlore&#39;:</span>
+<span class="p">[</span><span class="s1">&#39;hbond&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="s1">&#39;Water_TIP4P2005&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">3.1</span><span class="p">,</span> <span class="mi">60</span>\<span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>During the treatment of the Water_TIP4P2005 molecule type, the compute_hbonds of the Chlore molecular module will be called where the “target” and “partner” molecule will be the Chlore and the Water_TIP4P2005 respectively.
+Then, the output of the compute_hbonds of the Chlore molecular module will be switched in order to recover the good “target” and “partner” molecule type.
+Finally, these switched outputs will be assigned to the Water_TIP4P2005 molecule.</p>
+<a class="reference internal image-reference" href="../_images/h_bond_water_schema.png"><img alt="../_images/h_bond_water_schema.png" class="align-right" src="../_images/h_bond_water_schema.png" style="width: 300px;" /></a>
+<p>Note that if the initial partner molecule type is handled by the initial target molecule type, then target molecular function will be used.
+This implementation has been made in order to have the same function treating both molecule type without declaring it in both
+molecular modules.</p>
+<p><strong>H-bond implementation for water</strong></p>
+<p>The following example computes H-bond between 2 water molecules.
+It takes as parameter the maximal acceptable distance between oxygen atoms and the maximal acceptable O–H–O angle (with respect to 180 degrees) in radian.
+See the upper figure for a graphical example – the shaded molecule is the “target” molecule.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_hbonds</span><span class="p">(</span><span class="n">L_target</span><span class="p">,</span> <span class="n">name_partner</span><span class="p">,</span> <span class="n">L_partner</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Define how to compute the &#39;&#39;hbonds&#39;&#39; of this molecule type with a partner molecule type. The definition should depend on the partner molecule.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<span class="k">if</span> <span class="n">name_partner</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Water_TIP4P2005&#39;</span><span class="p">]:</span>
+    <span class="c1">#[length O---O max, angle OH---O max] = parameter</span>
+    <span class="k">if</span> <span class="n">info</span><span class="p">:</span> <span class="c1"># Here is asked the maximal distance to consider an hbonds</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">parameter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">L_H</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">L_target</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">L_partner</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">parameter</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="c1">#Does the target molecule own an hbonds?</span>
+        <span class="k">for</span> <span class="n">H_partner</span> <span class="ow">in</span> <span class="n">L_H</span><span class="p">:</span>
+            <span class="n">L_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">L_partner</span><span class="p">[</span><span class="n">H_partner</span><span class="p">],</span> <span class="n">L_target</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">L_partner</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="c1">#O of the target, HO of the partner</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="n">geometry_manager</span><span class="o">.</span><span class="n">compute_angle_3_atoms</span><span class="p">(</span><span class="n">L_angle</span><span class="p">)</span> <span class="c1"># the angle: O--HO</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">parameter</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="c1"># The target molecule own an hbonds. The partner molecule give an hbonds</span>
+                <span class="k">return</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+        <span class="c1">#Does the target molecule give an hbonds?</span>
+        <span class="k">for</span> <span class="n">H_target</span> <span class="ow">in</span> <span class="n">L_H</span><span class="p">:</span>
+            <span class="n">L_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">L_target</span><span class="p">[</span><span class="n">H_target</span><span class="p">],</span> <span class="n">L_partner</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">L_target</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="c1">#O of the partner, HO of the target</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="n">geometry_manager</span><span class="o">.</span><span class="n">compute_angle_3_atoms</span><span class="p">(</span><span class="n">L_angle</span><span class="p">)</span> <span class="c1"># the angle: OH--H</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">parameter</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="c1"># The target molecule give an hbonds. The partner molecule own an hbonds</span>
+                <span class="k">return</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+    <span class="c1"># If the run arrives at this point, it means that no hbonds between the target and the partner molecules have been found</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: The molecule type WATER_TIP4P2005 does not know how to compute hbonds with the molecule type: &#39;</span> <span class="o">+</span> <span class="n">name_partner</span> <span class="o">+</span>  <span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="optical-properties">
+<h2><a class="toc-backref" href="#id11" role="doc-backlink"><span class="section-number">2.9.5. </span>Optical properties:</a><a class="headerlink" href="#optical-properties" title="Link to this heading">¶</a></h2>
+<section id="compute-rotational-matrix">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink"><span class="section-number">2.9.5.1. </span>compute_rotational_matrix</a><a class="headerlink" href="#compute-rotational-matrix" title="Link to this heading">¶</a></h3>
+<p>Define how to generate a rotational matrix to pass from the “Molecular” frame to the Laboratory frame.
+This is used in order to define the optical properties of this molecule type in the “Molecular” frame.
+This function should take as input the position of the molecule in the laboratory frame and return a 3x3 rotational matrix.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For some molecules, this “Molecular” frame can be ambiguous at some point if the molecule has many degrees of liberty.</p>
+</div>
+<p>The example below is given for a water molecule.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">compute_rotational_matrix</span><span class="p">(</span><span class="n">L_pos</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Define the matrix to go from the Molecular to the Laboratory frame: X_{lab} = Rot_matrix * X_{mol}</span>
+<span class="sd">    The x,y,z molecular frame is defined so that the x is in the O-H direction, the z in the permanent dipole position.</span>
+<span class="sd">    The y is out of plane.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">vec_H1</span> <span class="o">=</span> <span class="n">L_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">vec_H2</span> <span class="o">=</span> <span class="n">L_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">x_mol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vec_H1</span><span class="o">-</span><span class="n">vec_H2</span><span class="p">)</span>
+    <span class="n">x_mol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x_mol</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x_mol</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span> <span class="c1"># unit vector</span>
+
+    <span class="n">z_mol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vec_H1</span><span class="o">+</span><span class="n">vec_H2</span><span class="p">)</span>
+    <span class="n">z_mol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">z_mol</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">z_mol</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span> <span class="c1"># unit vector</span>
+
+    <span class="n">y_mol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">z_mol</span><span class="p">,</span> <span class="n">x_mol</span><span class="p">)</span> <span class="c1"># unit vector</span>
+    <span class="n">y_mol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_mol</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y_mol</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span> <span class="c1"># unit vector</span>
+
+    <span class="n">Rot_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x_mol</span><span class="p">,</span> <span class="n">y_mol</span><span class="p">,</span> <span class="n">z_mol</span><span class="p">])</span>
+
+    <span class="k">return</span><span class="p">(</span><span class="n">Rot_matrix</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="qm-description">
+<span id="molecular-library-file-qm-description-function-page"></span><h3><a class="toc-backref" href="#id13" role="doc-backlink"><span class="section-number">2.9.5.2. </span>QM Description</a><a class="headerlink" href="#qm-description" title="Link to this heading">¶</a></h3>
+<p>Define how to handle the molecule in a QM box: what are the atom type and the respective nucleus charge.</p>
+<p>The inputs are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The qmparameter for this Molecule Type  (qmparameter) – or the one of another molecule type in the case “PE + QM”.</p></li>
+<li><p>The empty qmdescription of this molecule that should be filled (qmdescription).</p></li>
+<li><p>The position of the molecule as an optional input (L_pos).</p></li>
+</ul>
+</div></blockquote>
+<p>The QM description of the atom present in this molecule at the QM level and their position should be defined using the <a class="reference internal" href="../OpticalAnalysis/qm_box.html#autodoc-qmdescription-l-atom-type"><span class="std std-ref">qmdescription.L_atom_type</span></a> and <a class="reference internal" href="../OpticalAnalysis/qm_box.html#autodoc-qmdescription-l-coordinate"><span class="std std-ref">qmdescription.L_coordinate</span></a> respectively.</p>
+<p>The qmdescription.L_coordinate should contain the position of the atom listed in qmdescription.L_atom_type (see below).
+The order of the atom (or the number of atom considered, type of atom, position…) used in the qmdescription can be different from the one provided by the MD trajectory.
+In other words you may or may not set <span class="incremental">qmdescription.L_coordinate = L_pos</span>.
+However, the description of the atomic position contains in qmdescription.L_coordinate should be coherent with the description
+given in qmdescription.L_atom_type.</p>
+<p>The qmdescription.L_atom_type type should be an array: the size is the number of different atom type.
+Each atom type should be declared as:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">Charge</span> <span class="n">of</span> <span class="n">the</span> <span class="n">nucleus</span><span class="p">,</span> <span class="n">Number</span> <span class="n">of</span> <span class="n">atom</span> <span class="n">of</span> <span class="n">this</span> <span class="n">atom</span> <span class="nb">type</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">molecule</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;name of the first atom of this atom type&#39;</span><span class="p">,</span> <span class="n">position</span> <span class="n">of</span> <span class="n">this</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">coordinate</span> <span class="nb">list</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;name of the second atom of this atom type&#39;</span><span class="p">,</span> <span class="n">position</span> <span class="n">of</span> <span class="n">this</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">coordinate</span> <span class="nb">list</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Important remarks: the name of the different atoms of the same atom type can be different if the “PE + QM” is not used – for instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;H1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;H2&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>However, we do not recommend to do it since the same name should be used if the “PE + QM” option is set in order to merge different molecule properly in the same QM box – for instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Moreover, we recommend staying with the usual atom name in order to keep the merging simple.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The position is set as an optional argument so that example input can be easily generated by <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> during the initialization using the mandatory typical_geometry function of this molecular module.</p>
+</div>
+<p>Here an example for the water molecule:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">qm_target_description</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">,</span> <span class="n">qmdescription</span><span class="p">,</span> <span class="n">L_pos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Define the QM description of this molecule type provided the molecule position.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">type_basis</span> <span class="o">!=</span> <span class="s1">&#39;Global basis&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: No other way to defined basis have been defined yet for this molecule. Possible value: &lt; Global basis &gt;. We can also defined basis for each atoms (TODO).&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L_pos</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L_pos</span><span class="p">:</span>
+        <span class="n">L_pos</span> <span class="o">=</span> <span class="n">typical_geometry</span><span class="p">()</span>
+
+    <span class="n">qmdescription</span><span class="o">.</span><span class="n">L_coordinate</span> <span class="o">=</span> <span class="n">L_pos</span> <span class="c1"># Here L_pos=[position of the Oxygen, position of the Hydrogen, position of the Hydrogen]</span>
+    <span class="n">qmdescription</span><span class="o">.</span><span class="n">L_atom_type</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]]]</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">qmdescription</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="electrostatic-description">
+<span id="molecular-library-file-electrostatic-description-function-page"></span><h3><a class="toc-backref" href="#id14" role="doc-backlink"><span class="section-number">2.9.5.3. </span>Electrostatic Description</a><a class="headerlink" href="#electrostatic-description" title="Link to this heading">¶</a></h3>
+<p>To give a molecule an electrostatic description, the function <span class="incremental">electrostatic_description</span> of an MT molecular module is called.
+What are the charge? Are there dipole, quadrupole?
+If polarizable environment are required, which polarizability should be used.</p>
+<dl class="simple">
+<dt><strong>Parameters</strong></dt><dd><ul class="simple">
+<li><p>pe_level : int</p></li>
+</ul>
+</dd>
+</dl>
+<p>If pe_level=0, it means that there is no polarization allowed between the dipole of different molecule that can modify their value.
+In other words, the electrostatic description of this molecule will be the same regardless of its environment.</p>
+<p>If pe_level=1, an induce dipole moment can be create for this molecule by its environment.
+In this case, the <a class="reference internal" href="../OpticalAnalysis/electrostatic_embedding.html#autodoc-electrodescription-polarization-order"><span class="std std-ref">electrodescription.polarization_order</span></a>, <a class="reference internal" href="../OpticalAnalysis/electrostatic_embedding.html#autodoc-electrodescription-l-polarization-order-1-1"><span class="std std-ref">electrodescription.L_polarization_order_1_1</span></a> and <a class="reference internal" href="../OpticalAnalysis/electrostatic_embedding.html#autodoc-electrodescription-l-polarization-exclude"><span class="std std-ref">electrodescription.L_polarization_exclude</span></a> may be define by this function.</p>
+<p>The pe_level is determine by the MT QMDescription using the parameter qmdescrption.pe_level, see <a class="reference internal" href="../OpticalAnalysis/electrostatic_embedding.html#electrostatic-embedding-pe-scheme"><span class="std std-ref">this page</span></a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>electro_description : ElectrostaticDescription</p></li>
+</ul>
+</div></blockquote>
+<p>An empty ElectrostaticDescription object which will be filled by this function, see <a class="reference internal" href="../OpticalAnalysis/electrostatic_embedding.html#electrostatic-description-object-page"><span class="std std-ref">this page for more information about this object</span></a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>L_pos : Bool or list</p></li>
+</ul>
+</div></blockquote>
+<p>The position of the molecule in any referential.
+The ElectrostaticDescription is space-dependent.
+If no molecular position is given, then the function should use the one available in  this molecular module function typical_geometry().
+This case is encounter at the beggining of the <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> procedure: example of electrostatic description for every MT are produced.</p>
+<p>This electrostatic_description function returns the filled ElectrostaticDescription object.</p>
+<p><strong>Example</strong></p>
+<p>The full description of the argument that you can define for the electrostatic environment is given in the ElectrostaticDescription class definition.
+Here is a minimal example for a TIP4P/2005 water description.</p>
+<p>Each hydrogen are described by a + 0.5564 charge, and the negative charge is held by a ‘ghost’ atom located at the charge_tip4p2005 position (see the code below).
+The multipole order is thus 0 (point charge) with no polarizability:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">electro_description</span><span class="o">.</span><span class="n">multipole_order</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">electro_description</span><span class="o">.</span><span class="n">polarization_order</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>There are 4 sites: the Oxygen atom, the gosh site (‘X’) with the negative charge, the 2 Hydrogens with the positive charge. Therefore:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">electro_description</span><span class="o">.</span><span class="n">L_localization_type</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">]</span>
+<span class="n">electro_description</span><span class="o">.</span><span class="n">L_localization_site</span> <span class="o">=</span> <span class="p">[</span><span class="n">L_pos</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">charge_tip4p2005</span><span class="p">,</span> <span class="n">L_pos</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">L_pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Note that the oxygen atom here may not be used at all since it does not held any charge.
+However, for check purpose, it has been kept in the electrostatic description object so that it will be printed if the .xyz electrostatic representation is required by the user.</p>
+<p>Finally, the charge of the site are set:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">electro_description</span><span class="o">.</span><span class="n">L_charge_order_0</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.1128</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mf">0.5564</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mf">0.5564</span><span class="p">]]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please be aware that contrarily to the rest of the code, the assignation of the electro_description.L_charge_order_0 (and the other attribute like this) starts from 1 and not from 0!</p>
+</div>
+<p>For the sake of the example, let’s assume that we want to define a polarizability, for pe_level = 1.
+In this case, the water molecule are given polarizability (even though the TIP4P/2005 force field does not use one), therefore for this ElectrostaticDescription, electro_description.polarization_order = 1:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">pe_level</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">electro_description</span><span class="o">.</span><span class="n">polarization_order</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">electro_description</span><span class="o">.</span><span class="n">L_polarization_order_1_1</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mf">9.8</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">9.8</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">9.8</span><span class="p">]]]</span> <span class="c1"># polarizability diagonal: same value in the laboratory frame then in the molecular frame.</span>
+    <span class="n">electro_description</span><span class="o">.</span><span class="n">L_polarization_exclude</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]]</span>
+</pre></div>
+</div>
+<p>The polarizaiblity matrix is defined by electro_description.L_polarization_order_1_1. It should be a symmetric matrix. In this case, the matrix is diagronal: each value equal 9.8 a.u. The polarization site is located at the negative charge position.</p>
+<p>The last list define is the electro_description.L_polarization_exclude.
+It says explicitly that the atom in this molecule cannot influence the dipole moment of the molecule itself.
+This is a quite common assumption: the effect of the atom of a molecule are already taken into account in the permanent charge, dipole, quadrupole moment of the whole molecule.</p>
+</section>
+</section>
+<section id="final-remarks">
+<h2><a class="toc-backref" href="#id15" role="doc-backlink"><span class="section-number">2.9.6. </span>Final remarks</a><a class="headerlink" href="#final-remarks" title="Link to this heading">¶</a></h2>
+<p>We hope that this tutorial helps you to write your own MTs.
+We would like to emphasis that you really spend some time to test the output produced by <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> with new MTs or parameters.
+More specifically, we recommand to have a deep look at the PE environement created and in general to the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> input files.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_index.html">2. Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview.html">2.1. Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="get_started.html">2.2. Get started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_space_discretization.html">2.3. Space Discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_mixture_md.html">2.4. Mixture and structural analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_optical_analysis_overview.html">2.5. Optical Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_quadrupole_long.html">2.6. Quadrupole and Long range QM/MM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html">2.7. Gamma calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read_frog_data.html">2.8. How to read results</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.9. Molecular Type Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Tutorials/what_should_contain_molecular_type_file.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

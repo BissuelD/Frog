@@ -1,0 +1,19 @@
+.. _diagram_analysis_page:
+
+==================
+Diagram analysis
+==================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+
+
+Principe des axes
+
+
+Appeler dans un fichier 
+
+
+exemple de plot
+

@@ -1,0 +1,58 @@
+.. _gp_qm_management_page:
+
+==============
+QM Management
+==============
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+
+Scientific parameter
+---------------------
+
+.. _autodoc_gp_redo_QM:
+.. autoattribute:: Frog.class_GP.GlobalParameter.redo_QM
+
+|
+
+.. _autodoc_gp_preference_functional:
+.. autoattribute:: Frog.class_GP.GlobalParameter.preference_functional
+
+|
+
+.. _gp_qm_management_numerical_parameter_subpage:
+
+Numerical parameter
+--------------------
+
+You can change the following parameter from |frog| call to |frog| call to deal with the submission of QM calculation safely:
+
+.. _autodoc_gp_file_template_script_run_QM:
+.. autoattribute:: Frog.class_GP.GlobalParameter.file_template_script_run_QM
+
+|
+
+.. _autodoc_gp_scratch_dir:
+.. autoattribute:: Frog.class_GP.GlobalParameter.scratch_dir
+
+|
+
+.. _autodoc_gp_max_submission_QM:
+.. autoattribute:: Frog.class_GP.GlobalParameter.max_submission_QM
+
+|
+
+.. _autodoc_gp_nbr_job_parr_QM:
+.. autoattribute:: Frog.class_GP.GlobalParameter.nbr_job_parr_QM
+
+|
+
+.. _autodoc_gp_command_launch_job:
+.. autoattribute:: Frog.class_GP.GlobalParameter.command_launch_job
+
+|
+
+
+
+

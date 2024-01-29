@@ -1,0 +1,658 @@
+.. _read_frog_data_page:
+
+======================
+How to read results
+======================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+The aim of this tutorial is to provide informations and example to read,
+plot and analyse the data provided by Frog at the end of the simulation.
+Today, Frog returns pickle file as final output and no other
+possibilities are available.
+
+This tutorial will use several jupyter notebook file since many options
+are presented. We strongly advice you to try the command line as you
+read this document using these notebook.
+
+Note: These procedure works in other python environment then jupyter
+notebook. Jupyter notebook is available in most python distribution --
+try ``$ jupyter notebook`` in your shell to open it!
+
+First, you will probably need some standard library, let's load them:
+
+.. code:: python
+
+    import numpy as np
+    import matplotlib.pyplot as plt 
+    import sys
+
+Then, let's load the Frog module we need: ``frog_data_analysis``. We may
+also need other Frog module, therefore we will update the path to the
+current Frog version using:
+
+.. code:: python
+
+    path = '/home/fdupond/Software/Frog'
+    sys.path.append(path + '/Source')
+    sys.path.append(path + '/Source/Molecules')
+    sys.path.append(path + '/Source/Class')
+
+    import frog_data_analysis
+
+Where ``path`` should point to the directory where Frog is install. If
+you have already updated your python path permanently, the first 4 lines
+are not required.
+
+Now, that we have initialize your python environment, let's first load
+the Frog results and then plot the diagram. In the last part of the
+tutorial, we will see how to load some specific molecular value -- for
+advanced user. (je dit ''advanced user'' car cette partie est plus
+delicate!)
+
+Open the pickle results
+-----------------------
+
+In order to load the results from the pickle file to a more humain
+readable format in python, we will use the function ``load_result`` of
+the ``frog_data_analysis`` module. This function will return the General
+Parameter object (GP) and the list of the merged Molecule Type (MT).
+Here is an example:
+
+.. code:: python
+
+    directory = '/home/fdupond/Software/Frog/Doc/Tutorial_files/Get_started_tuto'
+    GP, L_moleculetype_result = frog_data_analysis.load_result(directory, name_result='L_moleculetype_result.p', what_to_print=['general info', 'diagram info'])
+
+Where ``directory`` is the localization of the results file,
+``name_result`` is an optional argument in case the name of the merged
+MT list is not *L\ *moleculetype*\ result.p* and ``what_to_print`` the
+last optional argument to make this function print some useful
+information about this file. Note that you can call these print function
+using:
+
+.. code:: python
+
+    frog_data_analysis.print_general_info(GP, L_moleculetype_result)
+    frog_data_analysis.print_diagram_info(GP, L_moleculetype_result)
+
+After loading the results.
+
+At this point, you have loaded the object ``GP`` which contains broad
+information about the MD files used by the Frog analysis, and
+``L_moleculetype_result`` which contains the results of the Frog run.
+The diagrams available contains the information of all the time step
+treated (also called 'merged' diagram) and the molecular information of
+the first time step treated -- see the last part of this tutorial for
+more information.
+
+These function are here to remind you the MT type defined and the
+**precise** name of the diagram available for each of them. Frog has
+been designed so that the information you need (most of the time) are
+present in the diagram objects. Let's see how to use them.
+
+Plot the diagrams
+-----------------
+
+General procedure
+~~~~~~~~~~~~~~~~~
+
+How to load any diagram?
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+First, a short reminder about how the diagram has been created and their
+structure.
+
+In the parameter file, you have first define the General Parameter,
+which is load in the ``frog_data_analysis.load_result`` function, and
+then the different Molecule Type. For every MT, you have define the
+diagram to perform using the
+``moleculetype.read_diagram_input``\ function. These diagrams are
+contain in the ``L_moleculetype_result`` object. We will see in the last
+part how to call them directly, in this section we will use the
+function: ``frog_data_analysis.return_diagram``. Here is an example
+using the tutorial 'get started', the procedure explained here is
+already implemented in the notebook *get\ *started*\ analysis.ipynb* of
+this directory.
+
+Let's remind what MT and what diagram are available for this run using:
+``frog_data_analysis.print_diagram_info(GP, L_moleculetype_result)``
+
+Returns:
+
+.. code:: 
+
+    ############## Some information about the diagram available: ##############
+
+    Here is the list of the available MT:  ['Water_TIP4P2005']
+    For every MT, here are the available diagram:
+    MT:  Water_TIP4P2005
+    name of the diagram, population
+    density_slice_z 17000
+    molecular_orientation_slice_z 17000
+    chi 17000
+
+There is 1 MT named 'Water*TIP4P2005' and 3 diagram available:
+'density*\ slice\ *z', 'molecular*\ orientation\ *slice*\ z' and 'chi' .
+Let's load the density analysis of this MT using:
+
+.. code:: python
+
+    MT_name = 'Water_TIP4P2005'
+    name_diagram = 'density_slice_z'
+    my_diagram = frog_data_analysis.return_diagram(GP, L_moleculetype_result, MT_name, name_diagram)
+
+The object ``my_diagram`` is a diagram of type 'Dia*density' -- try out
+\`type(my*\ diagram)\`. This diagram object return contains all the
+information needed.
+
+What contains a diagram object?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here is a list of the attribute name you can from any diagram object:
+
+-  value: The discretized value of the observable required. It is an
+   **non-normalized** distribution. We will explain in more details what
+   it contains later on and for every type of analysis.
+
+-  valuesquare: usefull?
+
+-  size: The size of the 'value' argument. For instance (100, 3, 50)
+   means that the 'value' array has a 100X3X50 size. This first argument
+   always refers to the space discretization.
+
+-  population: an integer with the total number of molecule which have
+   contributed to this distribution.
+
+-  unit: the unit object corresponding to the ``value`` attribute. All
+   the diagram are 'population', except for the density analysis, since
+   it refers to the number of occurrence of the observable within a
+   certain range of value. We will explain it in more detail in the
+   following unit section.
+
+-  axis\_space: The axis representing the space discretization.
+
+-  axis\_observable: The axis representing the observable
+   discretization.
+
+Axis:
+'''''
+
+For all the space-discretize diagram, the attribute
+``my_diagram.axis_space`` contain a 'frog*axis' object which correspond
+to the relative axis discretization values. For instance, we wanted to
+have the density along the z-laboratory axis using 100 bin for the
+discretization -- done using the argument \`['density', 'Plane*\ xy',
+[100]]``in the function``\ moleculetype.read\ *diagram*\ input\ ``of the input file. Therefore, the``\ my\ *diagram.axis*\ space\ ``of this diagram represent the z-axis discretize in 100 bin. The``\ my\ *diagram.axis*\ space.value\`
+is a list going from 0 to the *z*-box size at the time step 0 with 100
+elements.
+
+Please note that if the box size changes during the MD simulation, the
+discretization along the laboratory axis will follows this evolution
+(*i.e.* the bin-length used to construct ``my_diagram.value`` may
+change). However, for simplicity, the ``my_diagram.axis_space.value``
+will be based only on the first frame.
+
+For all the diagram type, **except** the 'density', the attribute
+``my_diagram.axis_observable`` contains a 'frog*axis' object which
+correspond to the relative observable discretization values. For
+instance, we wanted to have the chi tensor discretized over 50 bins --
+done using the arguement ``['chi', 'Averaged', [1, 50], [-10, 10]]`` in
+the function
+\`moleculetype.read*\ diagram\ *input\ ``of the input file. In this case, the extra argument [-10, 10] holds for the minimal and maximal authorised value for every tensor components (in atomic units). Therefore, The``\ my*\ diagram.axis\_observable\`.value
+is a list going from -10 to 10 with 50 elements.
+
+value:
+''''''
+
+The ``my_diagram.value`` is the occurrence of the molecular value,
+discretized according to the parameters. For instance, see the file
+*get\ *started*\ analysis.ipynb* of the 'get started' tutorial, in the
+case of an input: ``['density', 'Plane_xy', [100]]`` , the
+``my_diagram.value`` is a list with the size 100 -- given also by
+``my_diagram.size``. The mean position of the water molecule are
+computed for every frame, and the position along the *z* laboratory axis
+is discretize into 100 bin with respect to the box size in the z
+direction. In this example, the box size along the z direction is 150 A.
+Therefore, a molecular z mean position is 74 A corresponds to the 50th
+bin. Thus, for every molecule with a z mean position of 74 A, Frog will
+add 1 in the 50th bin of ``my_diagram.value`` -- *i.e.*
+``my_diagram.value[49]`` since python list index starts from 0.
+
+Here us another example more complex using the molecular orientation,
+see the file *get\ *started*\ analysis.ipynb* of the 'get started'
+tutorial. In this case, the input used to generate the diagram is
+``['molecular_orientation', 'Plane_xy', [100, 100], 'independent']`` in
+the input file. For a given molecule, Frog will perform two
+discretization: one regarding the mean position (like the previous case)
+and one regarding the molecular orientation. Let's say the mean position
+of the molecule in the z laboratory axis is 89 A and the molecular
+orientation is [-0.89, 0.1, 0.42]. As for the above example, the space
+discretization uses 100 bin. The mean position 89 A correspond to the
+60th bin. In order to discretize the molecular orientation (the
+observable), 100 bin is also used. The molecular orientation range from
+-1 to 1 (projections). Therefore, a molecular orientation of [-0.89,
+0.1, 0.42] correspond to the bin 6, 56 and 72. Since the independent
+distribution is required here, the ``my_diagram.value`` will be a
+100X3X100 array -- given also by ``my_diagram.size``. If Frog found a
+molecule with a z laboratory axis mean position of 89 A and a molecular
+orientation of [-0.89, 0.1, 0.42], it will add 1 to the
+elements:\ ``my_diagram.value[59][0][5]``,
+``my_diagram.value[59][1][55]`` and ``my_diagram.value[59][2][71]`` .
+
+Note: if the join distribution was asked, the ``my_diagram.value`` will
+be a 100X100X100X100 array -- given also by ``my_diagram.size``. In this
+case, the molecule would lead to only one element update:
+``my_diagram.value[59][5][55][71]``.
+
+Mean value and standard deviation:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For all the analysis type **except** the 'density' and the 'rdf' (for
+Radial Distribution Function), mean value and standard deviation are
+already available in the diagram object:
+
+-  mean: The mean value of the observable. This value can depend on an
+   space axis if the diagram is space-discretized.
+
+-  sd: The standard deviation of the observable. This value can depend
+   on an space axis if the diagram is space-discretized. Remarque: if
+   only one molecule contribute to this value, the standard deviation
+   has been set to zero.
+
+-  axis\_population: In the case the analysis is space-discretize, this
+   list show the number of molecule which have contribute to this
+   distribution **for each space-bin**. This list is used to normalized
+   the mean and sd value for space-discretized analysis.
+
+For instance, let's take the space-averaged molecular orientation of the
+'Mixture MD' tutorial, see the file *mixture\ *md*\ analysis.ipynb* for
+the analysis jupyter notebook. For the 'Water*TIP4P2005' MT, the
+molecular orientation has 3 dimension. Therefore, the dimension of the
+\`my*\ diagram.mean\ ``and``\ my\ *diagram.sd\ ``is 3. Please note that the unit of the 'mean' and 'sd' is the same as the one of the``\ my*\ diagram.axis\_observable\ ``axis. Here, the mean and the sd are **normalized** with respect to the number of molecule with have contributed -- *i.e.* space and time using the``\ population\`
+attribute.
+
+If the molecular orientation of the 'Water*TIP4P2005' MT is now also
+space-discretize as in the tutorial 'get started', see the
+\*get*\ started\ *analysis.ipynb\* file. In this case, the space
+discretization is made over 100 bin. Therefore, the dimension of the
+mean and sd is 100x3 and represent the average of the observable (the
+molecular orientation) in function of the position of the molecule. As
+for the previous case of non-space-discretized analysis, the mean and sd
+are **normalized** with respect to the number of molecule with have
+contributed -- *i.e.* for a given part of space and time using the
+\`axis*\ population\ ``. If you want to know how many molecule has contributed to each space-bin, you can plot the``\ axis\_population\`
+using for example:
+
+.. code:: python
+
+    plt.plot(my_diagram.axis_space.value, my_diagram.axis_population)
+    plt.xlabel(my_diagram.axis_space.unit.print_unit())
+    plt.ylabel('Population in Molecule')
+    plt.title('Number of molecule used to compute the mean value wrt the altitude')
+
+This ``axis_population`` is in fact close to a density in many cases.
+
+Now let's plot the mean value of the molecular orientation 1st dimension
+with respect to the altitude using:
+
+.. code:: python
+
+    plt.plot(my_diagram.axis_space.value, my_diagram.mean.T[0])
+    plt.xlabel(my_diagram.axis_space.unit.print_unit())
+    plt.ylabel(my_diagram.axis_observable.unit.print_unit())
+
+If you want to plot the mean value with error bars using the standard
+deviation:
+
+.. code:: python
+
+    plt.errorbar(my_diagram.axis_space.value, my_diagram.mean.T[0], yerr=my_diagram.sd.T[0], label='orientation mean', fmt = 'k', marker='o', mfc='k', ms=1, mew=1, linewidth=1)
+    plt.xlabel(my_diagram.axis_space.unit.print_unit())
+    plt.ylabel(my_diagram.axis_observable.unit.print_unit())
+
+Note that here the error bars is equal to the standard deviation.
+
+As for the previous plot example, we use the function
+``print_unit()``\ of a unit object. Let's have a look at the unit object
+briefly.
+
+unit:
+'''''
+
+Both the observable represented by ``my_diagram.value`` and the axis
+``my_diagram.axis_observable`` and ``my_diagram.axis_space`` have an
+unit. Here are the unit component already defines in Frog, in
+parenthesis the default value:
+
+-  length: [Angstrom], for instance the space-axis.
+
+-  population: [molecule] , for instance the density or the radial
+   distribution function analysis.
+
+-  potential: [V], for the electric field analysis.
+
+-  polarizability: [atomic unit], for the alpha and iota analysis.
+
+-  hyperpolarizability: [atomic unit], for the beta and chi analysis.
+
+-  The molecular orientation has a special unit named ''projection'',
+   ranged from -1 to 1.
+
+-  The H-bond has a special unit name H-bond. The H-bond are very
+   special since they are defined for each molecular pair. Therefore, it
+   just represent the 'own' and 'given' H-bond, the frog unit is
+   therefore somehow useless.
+
+All the ``my_diagram.value`` object have a 'population' unit, by default
+in number of molecule, except the density analysis where the
+``my_diagram.value`` is a population.length^{-3}, default unit
+molecule.A^{-3}. This unit is encoded in the ``my_diagram.unit`` object.
+
+If the analysis is space discretized, the ``my_diagram.axis_space`` axis
+as for unit length and default value Angstrom, encoded in
+``my_diagram.axis_space.unit`` .
+
+The ``my_diagram.axis_observable`` unit depends on the analysis type:
+
+-  Density: The ``my_diagram.axis_observable``\ does not exist, this is
+   an exception -- see bellow.
+
+-  Molecular Orientation: the unit is 'Projection', since the value is
+   ranged from -1 to 1 and has no real ''physical'' meaning.
+
+-  H-bond: the unit is 'H-bonds' and has no real ''physical'' meaning.
+   It just represent the number of H-bond own and given.
+
+-  RDF: the unit is a population [Molecule].
+
+-  Electric Field: the unit is potential/length [V/A].
+
+-  Alpha and Iota (polarizabilities): the unit is polarizabilities
+   (TODO, mais il me semble que c est un volume physiquement parlant)
+   [atomic unit].
+
+-  Beta and Chi (hyperpolarizabilities): the unit is
+   hyperpolarizabilities (TODO) [atomic unit].
+
+This unit is stored in ``my_diagram.axis_observable.unit``
+
+In order to print the actual unit value of an unit object, use the
+function ``unit.print_unit()``.
+
+You can change any unit using the function
+``my_diagram.switch_unit_diagram`` which takes several arguments. For
+instance,let's take the case of the density analysis of the 'get
+started' tutorial, see the *get\ *started*\ analysis.ipynb* file. You
+can plot the density with respect to the space using:
+
+.. code:: python
+
+    plt.plot(my_diagram.axis_space.value, my_diagram.value/GP.nbr_time_step)
+    plt.xlabel(my_diagram.axis_space.unit.print_unit())
+    plt.ylabel(my_diagram.unit.print_unit())
+
+Here, the space axis is in Angstrom and the density in Molecule.A^{-3}
+by default -- these unit are printed using
+``my_diagram.axis_space.unit.print_unit()`` and
+``my_diagram.unit.print_unit()``\ respectively. If you want to change
+the space axis unit to nm, use:
+
+.. code:: python
+
+    my_diagram.switch_unit_diagram('axis_space', 'length', 'nm', custom_change=False, molar_mass=False)
+
+In the first argument specifies what object the function should change
+the unit. It can be either 'distribution', for the ``my_diagram.value``,
+'axis*observable', for the \`my*\ diagram.axis\ *observable\`, or
+'axis*\ space' for the ``my_diagram.axis_space``. In the second argument
+specifies what unit component should be changed. The possible value are:
+'population', 'potential', 'polarizability', 'hyperpolarizability', or
+'length'. The third argument specifies the new unit of this unit
+component. For instance, you can change the 'population' unit component
+to 'Molecule', 'Mol', 'g' or 'kg', and the 'length' unit component to
+'m', 'dm', 'cm', 'mm', 'mu', 'nm' or 'A'. Note that if you want to act
+to the population, you should provide the molar mass of the molecule
+(g/mol) using the optional argument 'molar\_mass'.
+
+Once the unit of the distribution/axis is change, a coefficient to
+switch the value of these object is provided and automatically apply.
+The unit given are coherent to the value provided. Note that if you
+change the observable axis, it also change the mean and standard
+deviation (if they exist). (TODO: exemple a donner dans un fichier. Pour
+l instant je n en ai pas eu besoin a vrai dire).
+
+If we want to plot the density in Kg.dm^{-3} (Kg/L), we have to call two
+time the ``switch_unit_diagram`` function: one for the 'population' part
+of the density, and one for the 'length'. For instance:
+
+.. code:: python
+
+    my_diagram.switch_unit_diagram('distribution', 'population', 'kg', custom_change=False, molar_mass=18)
+    my_diagram.switch_unit_diagram('distribution', 'length', 'dm', custom_change=False, molar_mass=False)
+
+Now, we can plot again the density with respect to the altitude with the
+same line:
+
+.. code:: python
+
+    plt.plot(my_diagram.axis_space.value, my_diagram.value/GP.nbr_time_step)
+    plt.xlabel(my_diagram.axis_space.unit.print_unit())
+    plt.ylabel(my_diagram.unit.print_unit())
+
+but this time the x-axis (space) is in nm and the y-axis (density) is in
+Kg.dm^{-3}.
+
+Some remarks on the normalization:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You may have notice that in order to plot the density, a normalization
+of the ``my_diagram.value`` by the number of time step
+``GP.nbr_time_step`` is needed. This is due to the fact that the
+``my_diagram.value`` are not normalized with respect to the number of
+time step in any case by default -- contrary to the mean values.
+Indeed,, we advice to keep track of the number of molecule used to
+obtained any value. You can use ``my_diagram.population`` to print the
+number of molecule which have contributed to the diagram. Moreover, you
+can plot the number of molecule used to computed space-discretize mean
+value using the ``my_diagram.axis_population``,for instance:
+
+.. code:: python
+
+    plt.plot(my_diagram.axis_space.value, my_diagram.axis_population)
+    plt.xlabel(my_diagram.axis_space.unit.print_unit())
+    plt.ylabel('Population used to compute mean')
+
+Moreover, we recomand to sometime **not normalised** the
+``my_diagram.value`` distribution with the number of time step to have
+the actual number of occurrence. It may help you to check if a behaviour
+is only due to noise or is statistically relevant.
+
+How to plot the different analysis?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Je ne sais pas a quel point j ai besoin de rentrer dans les details ici.
+J espere que ce qui a deja ete explique permet de comprendre la suite.
+
+For simplicity sake, we will use some notation to refers to the
+different discretization. N refers to the space discretization -- the
+size of ``my_diagram.axis_space.value``. If the analysis is not
+space-discretized, N=1. M refers to the observable discretization -- the
+size of ``my_diagram.axis_observable.value``. A last dimension D can be
+needed for some analysis -- for instance, the hyperpolarizability have
+27 components, therefore D=27.
+
+Density
+^^^^^^^
+
+Very special case: no mean, no sd and no axis\ *observable. If the
+density is not space discretized, to get the mean density you should
+use:
+\`my*\ diagram.value/GP.nbr\ *time*\ step\ ``which is a 1 element array. If the density is space discretized, use also``\ my\ *diagram.value/GP.nbr*\ time\_step\`
+which is a N element array. Then you can plot it using:
+
+.. code:: python
+
+    plt.plot(my_diagram.axis_space.value, my_diagram.value/GP.nbr_time_step)
+    plt.xlabel(my_diagram.axis_space.unit.print_unit())
+    plt.ylabel(my_diagram.unit.print_unit())
+
+To get the mean density over the all space, you can use for instance:
+``np.sum(my_diagram.value/GP.nbr_time_step)/len(my_diagram.value)``.
+
+The unit of the density is population.length^{-3} [molecule.A^{-3}].
+
+Molecular orientation
+^^^^^^^^^^^^^^^^^^^^^
+
+The dimension depend on the MT. For instance for the Water\ *TIP4P2005
+MT, 3 dimension are needed, for the Methanol*\ OPLSAA, 6 dimensions are
+needed -- let's call this dimension D. The dimension of the mean and the
+sd is equal to NXD. If the independent distribution is required, the
+dimension of the ``my_diagram.value`` is NXDXM while if the join
+probability is required is goes to NXD^M.
+
+The unit of the density is 'Projection'.
+
+H-bond
+^^^^^^
+
+Since the H-bond values should be small (less then 10 H-bond per
+molecule for instance), the join distribution of own and given H-bond is
+computed. The user can even defines two different number of
+discretization for the own and given H-bond M and M'. The size of the
+``my_diagram.value`` object is NxMxM'. The mean and sd is a Nx2 array --
+the column is for the own and the second for the given H-bond.
+
+To plot the own and given distribution, you can use:
+
+.. code:: python
+
+    plt.plot(my_diagram.axis_observable.value, my_diagram.value[0][:][0], label='Own')
+    plt.plot(my_diagram.axis_observable.value2, my_diagram.value[0][:][1], label='Given')
+    plt.xlabel(my_diagram.axis_observable.unit.print_unit())
+    plt.ylabel(my_diagram.unit.print_unit())
+    plt.legend()
+    plt.title('H-bond between water-methanol')
+
+Please note that for the H-bond the ``my_diagram.axis_observable``\ has
+2 value: one for the own and for the given H-bond.
+
+You can print the mean with the standard deviation using:
+
+.. code:: python
+
+    print('Mean value:', my_diagram.mean, 'sd: ', my_diagram.sd, 'unit: ', my_diagram.axis_observable.unit.print_unit())
+
+The unit of the H-bond is 'H-bonds'.
+
+Radial Distribution Function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There is no mean nor sd for the RDF. The size of the the
+``my_diagram.value`` object is NxM. It represent the number of partner
+molecule found for a given distance away from the target MT. The result
+for all the time and for all the molecule of this MT are summed in the
+``my_diagram.value`` . To get the averaged value per molecule, normalise
+using ``my_diagram.population`` as:
+
+.. code:: 
+
+    plt.plot(my_diagram.axis_observable.value, my_diagram.value[0]/my_diagram.population)
+    plt.xlabel(my_diagram.axis_observable.unit.print_unit())
+    plt.ylabel(my_diagram.unit.print_unit())
+    plt.title('Raw RDF for water-water')
+
+The RDF unit is a population (molecule).
+
+However, to have the usual RDF, this number of molecule found for a
+given distance should be normalized with respect to the homogenous case.
+See the 'Mixture MD' tutorial, the *mixture\ *md*\ analysis.ipynb* file.
+First, let's load the density analysis of this same MT and compute the
+mean density in molecule.A^{-3}:
+
+.. code:: python
+
+    MT_name = 'Water_TIP4P2005'
+    name_diagram = 'density_slice_z'
+    my_diagram_density = frog_data_analysis.return_diagram(GP, L_moleculetype_result, MT_name, name_diagram)
+
+    # make sure it is the good unit!
+    my_diagram_density.switch_unit_diagram('axis_space', 'length', 'A', custom_change=False, molar_mass=False)
+    my_diagram_density.switch_unit_diagram('distribution', 'population', 'Molecule', custom_change=False, molar_mass=18)
+    my_diagram_density.switch_unit_diagram('distribution', 'length', 'A', custom_change=False, molar_mass=False)
+
+    density_mean = np.sum(my_diagram_density.value/GP.nbr_time_step)/len(my_diagram_density.value)
+    print(density_mean, my_diagram_density.unit.print_unit())
+
+In the homogeneous case, the RDF is:
+
+.. code:: python
+
+    d_molecules = my_diagram.axis_observable.value
+    L_volume_wrt_d = ((4*np.pi*d_molecules**2)*(d_molecules[1]-d_molecules[0])) # 4 \pi R^2 dR 
+    L_homogenous_rdf = density_mean*L_volume_wrt_d # in number of molecule
+
+Thus, the normalised RDF is:
+
+.. code:: python
+
+    plt.plot(my_diagram.axis_observable.value, my_diagram.value[0]/L_homogenous_rdf/my_diagram.population)
+    plt.xlabel(my_diagram.axis_observable.unit.print_unit())
+    plt.ylabel(my_diagram.unit.print_unit())
+    plt.title('Normalized RDF for water-water')
+
+Electric Field
+^^^^^^^^^^^^^^
+
+A discuter
+
+Polarizabilities
+^^^^^^^^^^^^^^^^
+
+Since the polarizabilities (alpha or iota analysis) are 3x3 tensor, D=9.
+The size of the the ``my_diagram.value`` object is NxDxM (Nx9xM). To
+call any *ij* tensor element, use the correspondence: x=0, y=1, z=2 and
+call the (i+3xj) element of the the ``my_diagram.value`` . For instance,
+for the yx tensor element, you should use: the 1+3x0 elements of
+``my_diagram.value`` , ie
+``my_diagram.value[something][1][otherthing]``. To plot the distribution
+for one tensor component and for a given altitude (bin number *z*), use:
+
+.. code:: python
+
+    # the yx tensor element:
+    i = 1 # y
+    j = 0 # x
+    z = 50 # an altitude 
+    plt.plot(my_diagram.axis_observable.value, my_diagram.value[z][i+j*3][:])
+
+The mean and sd value have the dimension: Nx3x3. To plot the mean value
+with respect to the altitude, use:
+
+.. code:: python
+
+    # the xz tensor element:
+    i = 0 # x
+    j = 2 # z 
+    plt.plot(my_diagram.axis_space.value, my_diagram.mean.T[i][j])
+
+The unit is 'polarizability', by default in atomic unit.
+
+Hyperpolarizabilities
+^^^^^^^^^^^^^^^^^^^^^
+
+Same as for the polarizability. D=27 instead of 9 and the mean and sd
+have one extra dimension. (si le paragraph d avant est comprehensible,
+je ferais un equivalent)
+
+Advance: open any molecular value
+---------------------------------
+
+-  Ouvrir un fichier en particulier
+
+-  Livre une molecule
+
+-  Faire une autocorrelation en temps

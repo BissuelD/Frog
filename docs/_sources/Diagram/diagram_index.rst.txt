@@ -1,0 +1,39 @@
+.. _diagram_index_page:
+
+========
+Diagram
+========
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+The analysis available for every MT are entengled with the way they are returned by |frog|: diagram. 
+
+The idea is that if you have to performe meangfull averaging, you may have to sample over thousands of configuration. Returning all the individual values would not make much sens, and one want rather to deal with the distribution, mean or standard deviation. 
+
+Moreover, numerically speacking, |frog| can run in parrallele over time treated. Therefore, performing the data analysis of the individual quantities within this parrallele scheme is efficient. As for an MD run, the observable are (very often) computed along with the dynamics, in |frog| the averaging of the individual quantities is performed along with their calculations. 
+
+The diagram contains: 
+
+    + The :ref:`mean<autodoc_diagram_mean>` value of the observable and its :ref:`standard deviation<autodoc_diagram_sd>`.
+    
+    + The :ref:`distribution<autodoc_diagram_value>` 
+   
+The numerical details about the diagram structure and construction are available :ref:`here<how_to_creat_diagram_page>`. The available analysis and how to use them are available :ref:`here<diagram_list_page>`.
+
+Maybe the most important option of the diagram is the geometrical selection. Indeed, you can perform space-averaging. For instance, you can performe the averaging of an observable with respect to the position of the molecule with respect to the MD box. This geometrical selection is available for all the observable and detailed :ref:`here<diagram_geometry_selection_page>`.
+
+Finally, pratical example about how to plot and use the diagram once the |frog| run is performed are presented :ref:`here<diagram_analysis_page>`.
+
+
+
+.. toctree::
+    :maxdepth: 2  
+    
+    ./how_to_creat_diagram
+    ./diagram_list
+    ./diagram_analysis
+    ./diagram_structure
+    
+   

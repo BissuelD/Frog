@@ -1,0 +1,27 @@
+.. _effective_electro_field:
+
+==================================
+Effective Electromagnetic Field
+==================================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+    
+This part is not implemented yet, but the |frog| authors would like very much to had develloped it. Here are the basic equations and the ideas needed to do it. 
+
+
+Scientific Principle
+====================
+
+Mettre ref Agren
+
+Numerical Procedure
+====================
+
+Calculer EEF dans fake QM et apres le store.
+
+
+
+

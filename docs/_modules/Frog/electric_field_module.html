@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog.electric_field_module &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Frog.electric_field_module</h1><div class="highlight"><pre>
+<span></span><span class="c1">##############################################################################</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    FROG: FROm molecular dynamics to second harmonic Generation             #</span>
+<span class="c1">#    Copyright (C) 2024                                                      #</span>
+<span class="c1">#    Author list                                                             #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    Guillaume Le Breton                                                     #</span>
+<span class="c1">#    Oriane Bonhomme                                                         #</span>
+<span class="c1">#    Emmanuel Benichou                                                       #</span>
+<span class="c1">#    Claire Loison                                                           #</span>
+<span class="c1">#                                                                            # </span>
+<span class="c1">#    This program is free software: you can redistribute it and/or modify    #</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by    #</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or       #</span>
+<span class="c1">#    (at your option) any later version.                                     #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is distributed in the hope that it will be useful,         #</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #</span>
+<span class="c1">#    GNU General Public License for more details.                            #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License       # </span>
+<span class="c1">#    along with this program.  If not, see &lt;https://www.gnu.org/licenses/    #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">##############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+
+<span class="n">epsilon_0</span> <span class="o">=</span> <span class="mf">8.85418</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">12</span><span class="p">)</span> <span class="c1"># unite SI</span>
+
+<span class="kn">import</span> <span class="nn">Frog.toolbox</span> <span class="k">as</span> <span class="nn">toolbox</span>
+<span class="c1"># import Frog.universe_manager as universe_manager </span>
+<span class="kn">import</span> <span class="nn">Frog.universe_manager</span> <span class="c1"># probleme with this import because universe manager also use this module, the &#39;as&#39; statement has to be dropped</span>
+
+<span class="kn">from</span> <span class="nn">Frog.class_modules</span> <span class="kn">import</span> <span class="n">SingleMoleculeParameter</span> <span class="k">as</span> <span class="n">SingleMoleculeParameter</span>
+<span class="kn">import</span> <span class="nn">Frog.class_OpticalParameter</span> <span class="c1">#import ElectrostaticDescription as ElectrostaticDescription</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################   </span>
+
+<div class="viewcode-block" id="compute_electric_field_from_electro_description">
+<a class="viewcode-back" href="../../Frog.html#Frog.electric_field_module.compute_electric_field_from_electro_description">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_electric_field_from_electro_description</span><span class="p">(</span><span class="n">electro_description</span><span class="p">,</span> <span class="n">pos_of_interest</span><span class="p">):</span>
+    <span class="c1"># input: position in angstrom, charge in e. output in V/A</span>
+    <span class="n">L_E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">L_dE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">electro_description</span><span class="o">.</span><span class="n">L_localization_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="c1">#meaning that the electrostatic environement is empty:</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">L_E</span><span class="p">,</span> <span class="n">L_dE</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_description</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_description</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">charge_number</span><span class="p">,</span> <span class="n">charge_value</span> <span class="o">=</span> <span class="n">electro_description</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span>
+            <span class="c1"># print(electro_description.L_charge_order_0[trotter], len(electro_description.L_localization_site))</span>
+            <span class="n">pos_charge</span> <span class="o">=</span> <span class="n">electro_description</span><span class="o">.</span><span class="n">L_localization_site</span><span class="p">[</span><span class="n">charge_number</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># to convert angstrom in atomic unit # start at 1 instead of 0... </span>
+            <span class="c1"># print(&#39;charge number&#39;, charge_number, &#39;charge value&#39;, charge_value, &#39;charge position&#39;, pos_charge)</span>
+            <span class="n">E</span><span class="p">,</span> <span class="n">dE</span> <span class="o">=</span> <span class="n">electric_field_from_one_order_0_description</span><span class="p">(</span><span class="n">pos_of_interest</span><span class="p">,</span> <span class="n">charge_value</span><span class="p">,</span> <span class="n">pos_charge</span><span class="p">)</span>
+            <span class="n">L_E</span> <span class="o">=</span> <span class="n">L_E</span> <span class="o">+</span> <span class="n">E</span>
+            <span class="n">L_dE</span> <span class="o">=</span> <span class="n">L_dE</span> <span class="o">+</span> <span class="n">dE</span>
+    <span class="c1"># L_E = L_E*1/(4*np.pi*epsilon_0)*1.6*10**(-19)*10**(20)   # 1.6*10**(-19) is for the charge , *1/(4*np.pi*epsilon_0) common to all and *10**(20) to go to V/m  </span>
+     <span class="c1">#  14.380095556394412 =  1/(4*np.pi*epsilon_0)*1.6*10**(-19)*10**(10)</span>
+    <span class="c1"># L_E = L_E*14.380095556394412  # 1.6*10**(-19) is for the charge , *1/(4*np.pi*epsilon_0) common to all and *10**(10) to go to V/A     </span>
+    <span class="c1"># L_dE = L_dE*14.380095556394412</span>
+    
+    <span class="n">L_E</span> <span class="o">=</span> <span class="n">L_E</span><span class="o">*</span><span class="mf">14.399645476684757</span> <span class="c1"># to go from custom unit to V/A</span>
+    <span class="n">L_dE</span> <span class="o">=</span> <span class="n">L_dE</span><span class="o">*</span><span class="mf">14.399645476684757</span>
+    
+    <span class="k">if</span> <span class="n">electro_description</span><span class="o">.</span><span class="n">multipole_order</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: not yet implemented for electric field calcultion!&#39;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    if electro_description.polarization_order &gt;= 1:</span>
+<span class="sd">        raise Exception(&#39;WARNING: not yet implemented for electric field calcultion!&#39;)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># print(L_E)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_E</span><span class="p">,</span> <span class="n">L_dE</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################   </span>
+
+<div class="viewcode-block" id="compute_electric_field_on_fly">
+<a class="viewcode-back" href="../../Frog.html#Frog.electric_field_module.compute_electric_field_on_fly">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_electric_field_on_fly</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">pbc</span><span class="p">,</span> <span class="n">molecule_type_module</span><span class="p">,</span> <span class="n">moleculetype</span><span class="p">,</span> <span class="n">sdparameter</span><span class="p">,</span> <span class="n">residue_nbr</span><span class="p">,</span> <span class="n">mean_position</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    TODO</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">L_E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">L_dE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    
+    <span class="c1"># 1st step: Find the first shell neighborgs number:</span>
+    <span class="n">L_list_name_MT</span><span class="p">,</span> <span class="n">L_neighbourhood_names_number</span> <span class="o">=</span> <span class="n">Frog</span><span class="o">.</span><span class="n">universe_manager</span><span class="o">.</span><span class="n">built_environment_first_shell_number</span><span class="p">(</span><span class="n">residue_nbr</span><span class="p">,</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">max_distance</span><span class="p">,</span> <span class="n">GP</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_list_name_MT</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">L_E</span><span class="p">,</span> <span class="n">L_dE</span><span class="p">)</span>
+    
+    <span class="c1"># 2nd step: check the neighbors position and duplicate them if needed. </span>
+    <span class="n">L_neighbourhood_names_number_new</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">L_environment</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">K_MT_name</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_list_name_MT</span><span class="p">)):</span>
+        <span class="n">L_neighbourhood_names_number_new</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="n">name_neigh_temp</span> <span class="o">=</span> <span class="n">L_list_name_MT</span><span class="p">[</span><span class="n">K_MT_name</span><span class="p">]</span>
+        <span class="n">module_neigh_temp</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">toolbox</span><span class="o">.</span><span class="n">creat_name_for_MT_module_load</span><span class="p">(</span><span class="n">name_neigh_temp</span><span class="p">))</span>
+        <span class="n">smparameter</span> <span class="o">=</span> <span class="n">module_neigh_temp</span><span class="o">.</span><span class="n">info_molecule</span><span class="p">(</span><span class="n">SingleMoleculeParameter</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">res_neigh</span> <span class="ow">in</span> <span class="n">L_neighbourhood_names_number</span><span class="p">[</span><span class="n">K_MT_name</span><span class="p">]:</span> <span class="c1"># goes over the neighborgs molecule of this molecule type</span>
+            <span class="n">L_molecule_neigh_toadd</span> <span class="o">=</span> <span class="n">Frog</span><span class="o">.</span><span class="n">universe_manager</span><span class="o">.</span><span class="n">single_neighbour_return_position</span><span class="p">(</span><span class="n">residue_nbr</span><span class="p">,</span> <span class="n">mean_position</span><span class="p">,</span> <span class="n">res_neigh</span><span class="p">,</span> <span class="n">module_neigh_temp</span><span class="p">,</span> <span class="n">smparameter</span><span class="p">,</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">max_distance</span><span class="p">,</span> <span class="n">GP</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">pbc</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_molecule_neigh_toadd</span><span class="p">)</span> <span class="o">!=</span><span class="mi">0</span> <span class="p">:</span>
+                <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_molecule_neigh_toadd</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">electro_description_single_neigh</span> <span class="o">=</span> <span class="n">module_neigh_temp</span><span class="o">.</span><span class="n">electrostatic_description</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Frog</span><span class="o">.</span><span class="n">class_OpticalParameter</span><span class="o">.</span><span class="n">ElectrostaticDescription</span><span class="p">(),</span> <span class="n">L_pos</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">L_molecule_neigh_toadd</span><span class="p">[</span><span class="n">trotter</span><span class="p">]))</span>
+                
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_description_single_neigh</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_description_single_neigh</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="n">charge_number</span><span class="p">,</span> <span class="n">charge_value</span> <span class="o">=</span> <span class="n">electro_description_single_neigh</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span>
+                            <span class="n">pos_charge</span> <span class="o">=</span> <span class="n">electro_description_single_neigh</span><span class="o">.</span><span class="n">L_localization_site</span><span class="p">[</span><span class="n">charge_number</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># start at 1 instead of 0... </span>
+                            <span class="c1"># print(&#39;charge number&#39;, charge_number, &#39;charge value&#39;, charge_value, &#39;charge position&#39;, pos_charge)</span>
+                            <span class="n">E</span><span class="p">,</span> <span class="n">dE</span> <span class="o">=</span> <span class="n">electric_field_from_one_order_0_description</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">charge_value</span><span class="p">,</span> <span class="n">pos_charge</span><span class="p">)</span> <span class="c1"># note that the postion where the electric field is computed is at [0, 0, 0] since the neigbors have been recentered in the molecule frame. </span>
+                            <span class="n">L_E</span> <span class="o">=</span> <span class="n">L_E</span> <span class="o">+</span> <span class="n">E</span>
+                            <span class="n">L_dE</span> <span class="o">=</span> <span class="n">L_dE</span> <span class="o">+</span> <span class="n">dE</span>
+    <span class="c1"># L_E = L_E*1/(4*np.pi*epsilon_0)*1.6*10**(-19)*10**(20)   # 1.6*10**(-19) is for the charge , *1/(4*np.pi*epsilon_0) common to all and *10**(20) to go to V/m  </span>
+    <span class="c1">#  14.380095556394412 =  1/(4*np.pi*epsilon_0)*1.6*10**(-19)*10**(10)</span>
+                    <span class="k">if</span> <span class="n">electro_description_single_neigh</span><span class="o">.</span><span class="n">multipole_order</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: not yet implemented for electric field calcultion!&#39;</span><span class="p">)</span>
+<span class="w">                    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                    if electro_description_single_neigh.polarization_order &gt;= 1:</span>
+<span class="sd">                        raise Exception(&#39;WARNING: not yet implemented for electric field calcultion!&#39;)</span>
+<span class="sd">                    &#39;&#39;&#39;</span>
+    <span class="n">L_E</span> <span class="o">=</span> <span class="n">L_E</span><span class="o">*</span><span class="mf">14.399645476684757</span>  <span class="c1"># 1.6*10**(-19) is for the charge , *1/(4*np.pi*epsilon_0) common to all and *10**(10) to go to V/A     </span>
+    <span class="n">L_dE</span> <span class="o">=</span> <span class="n">L_dE</span><span class="o">*</span><span class="mf">14.399645476684757</span>       
+    <span class="k">return</span><span class="p">(</span><span class="n">L_E</span><span class="p">,</span> <span class="n">L_dE</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################   </span>
+
+
+<div class="viewcode-block" id="electric_field_from_one_order_0_description">
+<a class="viewcode-back" href="../../Frog.html#Frog.electric_field_module.electric_field_from_one_order_0_description">[docs]</a>
+<span class="k">def</span> <span class="nf">electric_field_from_one_order_0_description</span><span class="p">(</span><span class="n">pos_of_interest</span><span class="p">,</span> <span class="n">charge_value</span><span class="p">,</span> <span class="n">pos_charge</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return the electric field generated by a point charge. Note that some prefactor may be add depending of the unit. </span>
+<span class="sd">    dE[j][i] = d E_i / d x_j </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">dE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">v_r_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos_of_interest</span><span class="o">-</span><span class="n">pos_charge</span><span class="p">)</span>
+    <span class="n">v_r_i_2</span> <span class="o">=</span> <span class="n">v_r_i</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">r_i_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v_r_i_2</span><span class="p">)</span>
+    <span class="n">r_i_3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r_i_2</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">charge_value</span><span class="o">*</span><span class="n">v_r_i</span><span class="o">/</span><span class="n">r_i_3</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">dE</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">charge_value</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">r_i_3</span><span class="p">)</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">r_i_3</span><span class="o">*</span><span class="n">r_i_2</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dE</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">charge_value</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">r_i_3</span><span class="o">*</span><span class="n">r_i_2</span><span class="p">))</span>
+            
+    <span class="k">return</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">dE</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="add_single_contribution_electric_field_pbc">
+<a class="viewcode-back" href="../../Frog.html#Frog.electric_field_module.add_single_contribution_electric_field_pbc">[docs]</a>
+<span class="k">def</span> <span class="nf">add_single_contribution_electric_field_pbc</span><span class="p">(</span><span class="n">electro_description</span><span class="p">,</span> <span class="n">L_box_vector</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compute the electric field generated by a (single) molecule electrostatic description at the zero order, and its periodic images. The results is given in atomic unit. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># input: position in angstrom, charge in e. output in atomic unit</span>
+    <span class="n">L_E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">L_dE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">electro_description</span><span class="o">.</span><span class="n">L_localization_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="c1">#meaning that the electrostatic environement is empty:</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">L_E</span><span class="p">,</span> <span class="n">L_dE</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_description</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_description</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">charge_number</span><span class="p">,</span> <span class="n">charge_value</span> <span class="o">=</span> <span class="n">electro_description</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span>
+            <span class="c1"># print(charge_number, charge_value, electro_description.L_localization_site) </span>
+            <span class="n">pos_charge</span> <span class="o">=</span> <span class="n">electro_description</span><span class="o">.</span><span class="n">L_localization_site</span><span class="p">[</span><span class="n">charge_number</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># start at 1 instead of 0... </span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L_box_vector</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_box_vector</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                <span class="n">dE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">box_vector</span> <span class="ow">in</span> <span class="n">L_box_vector</span><span class="p">:</span>
+                    <span class="c1">#pos_of_interest = np.zeros([0, 0, 0])</span>
+                    <span class="c1">#v_r_i = np.array(pos_of_interest-(pos_charge+box_vector))*0.529177210903 # to convert angstrom in atomic unit</span>
+                    <span class="n">v_r_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">pos_charge</span><span class="o">+</span><span class="n">box_vector</span><span class="p">))</span><span class="o">/</span><span class="mf">0.529177210903</span> <span class="c1"># to convert angstrom in atomic unit # the target position where we want to compute this electric field is at (0,0,0) since the configuration is centered. </span>
+                    <span class="n">v_r_i_2</span> <span class="o">=</span> <span class="n">v_r_i</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="n">r_i_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v_r_i_2</span><span class="p">)</span>
+                    <span class="n">r_i_3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r_i_2</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span>
+                    <span class="n">E</span> <span class="o">+=</span> <span class="n">v_r_i</span><span class="o">/</span><span class="n">r_i_3</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                                <span class="n">dE</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">r_i_3</span><span class="p">)</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">r_i_3</span><span class="o">*</span><span class="n">r_i_2</span><span class="p">))</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">dE</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">r_i_3</span><span class="o">*</span><span class="n">r_i_2</span><span class="p">))</span>
+                <span class="n">L_E</span> <span class="o">+=</span> <span class="n">charge_value</span><span class="o">*</span><span class="n">E</span>
+                <span class="n">L_dE</span> <span class="o">+=</span> <span class="n">charge_value</span><span class="o">*</span><span class="n">dE</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">v_r_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="o">-</span><span class="n">pos_charge</span><span class="p">)</span><span class="o">/</span><span class="mf">0.529177210903</span> <span class="c1"># to convert angstrom in atomic unit # the target position where we want to compute this electric field is at (0,0,0) since the configuration is centered.</span>
+                <span class="n">v_r_i_2</span> <span class="o">=</span> <span class="n">v_r_i</span><span class="o">**</span><span class="mi">2</span>
+                <span class="n">r_i_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">v_r_i_2</span><span class="p">)</span>
+                <span class="n">r_i_3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">r_i_2</span><span class="p">)</span><span class="o">**</span><span class="mi">3</span>
+                <span class="n">L_E</span> <span class="o">+=</span> <span class="n">charge_value</span><span class="o">*</span><span class="n">v_r_i</span><span class="o">/</span><span class="n">r_i_3</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                            <span class="n">L_dE</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">charge_value</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">r_i_3</span><span class="p">)</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">r_i_3</span><span class="o">*</span><span class="n">r_i_2</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">L_dE</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">charge_value</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">v_r_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">r_i_3</span><span class="o">*</span><span class="n">r_i_2</span><span class="p">))</span>
+                
+            <span class="c1"># print(&#39;charge number&#39;, charge_number, &#39;charge value&#39;, charge_value, &#39;charge position&#39;, pos_charge)</span>
+            
+    <span class="k">if</span> <span class="n">electro_description</span><span class="o">.</span><span class="n">multipole_order</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: not yet implemented for electric field calcultion!&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">electro_description</span><span class="o">.</span><span class="n">polarization_order</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: not yet implemented for electric field calcultion!&#39;</span><span class="p">)</span>
+    <span class="c1"># print(L_E)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_E</span><span class="p">,</span> <span class="n">L_dE</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+    
+    
+<div class="viewcode-block" id="to_store_electric_field">
+<a class="viewcode-back" href="../../Frog.html#Frog.electric_field_module.to_store_electric_field">[docs]</a>
+<span class="k">def</span> <span class="nf">to_store_electric_field</span><span class="p">(</span><span class="n">electric_field_lab</span><span class="p">,</span> <span class="n">d_electric_field_lab</span><span class="p">,</span> <span class="n">rot_matrix</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;direct&#39;</span><span class="p">,</span> <span class="n">E_long</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dE_long</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Used as a shortcut to store the obtained electric field and derivative in the smolecule object. </span>
+<span class="sd">    </span>
+<span class="sd">    The electric field stored can depend on the style use. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">electric_field_mol</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">rotate_1st_order_tensor</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="n">electric_field_lab</span><span class="p">)</span>
+    <span class="n">d_electric_field_mol</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">rotate_2nd_order_tensor</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="n">d_electric_field_lab</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;direct&#39;</span><span class="p">:</span>
+        <span class="n">L_value_electric_field</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+        <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">electric_field_lab</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d_electric_field_lab</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">1</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">electric_field_mol</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d_electric_field_mol</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">style</span> <span class="o">==</span> <span class="s1">&#39;direct+long&#39;</span><span class="p">:</span>
+        <span class="n">E_long_mol</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">rotate_1st_order_tensor</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="n">E_long</span><span class="p">)</span>
+        <span class="n">dE_long_mol</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">rotate_2nd_order_tensor</span><span class="p">(</span><span class="n">rot_matrix</span><span class="p">,</span> <span class="n">dE_long</span><span class="p">)</span>
+        
+        
+        <span class="n">L_value_electric_field</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+        <span class="c1">#direct</span>
+        <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">electric_field_lab</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d_electric_field_lab</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">electric_field_mol</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d_electric_field_mol</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1">#long</span>
+        <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">E_long</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dE_long</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">E_long_mol</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">L_value_electric_field</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="mi">3</span><span class="o">+</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dE_long_mol</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: the style used to store the electric field in the smolecule object is not understood. Code probleme: this error should not happen...&#39;</span><span class="p">)</span>
+        
+    <span class="k">return</span><span class="p">(</span><span class="n">L_value_electric_field</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+    
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

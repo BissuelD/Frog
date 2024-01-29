@@ -1,0 +1,8 @@
+__pycache__
+.ipynb_checkpoints
+_modules
+_sources
+_static
+_templates
+_build
+dist

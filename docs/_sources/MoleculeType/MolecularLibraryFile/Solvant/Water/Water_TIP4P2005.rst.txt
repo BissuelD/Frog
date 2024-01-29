@@ -1,0 +1,29 @@
+.. _MLF_Water_TIP4P2005_page:
+
+==================
+Water: TIP4P2005
+==================
+
+To call this Molecule Type description in |frog|, use: ::
+
+    myMT = frog_class.MoleculeType(GP, 'Water_TIP4P2005', where_are_molecules)
+
+
+Description
+------------
+
+The mean position of the molecule is localised at the position of the negative charge.
+
+
+Test performed
+--------------
+TODO
+
+
+Module
+------
+.. automodule:: Frog.Molecules.Water_TIP4P2005
+    :noindex:
+    :members:
+    :undoc-members:
+    :show-inheritance:

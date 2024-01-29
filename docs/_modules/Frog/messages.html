@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog.messages &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Frog.messages</h1><div class="highlight"><pre>
+<span></span><span class="c1">##############################################################################</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    FROG: FROm molecular dynamics to second harmonic Generation             #</span>
+<span class="c1">#    Copyright (C) 2024                                                      #</span>
+<span class="c1">#    Author list                                                             #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    Guillaume Le Breton                                                     #</span>
+<span class="c1">#    Oriane Bonhomme                                                         #</span>
+<span class="c1">#    Emmanuel Benichou                                                       #</span>
+<span class="c1">#    Claire Loison                                                           #</span>
+<span class="c1">#                                                                            # </span>
+<span class="c1">#    This program is free software: you can redistribute it and/or modify    #</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by    #</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or       #</span>
+<span class="c1">#    (at your option) any later version.                                     #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is distributed in the hope that it will be useful,         #</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #</span>
+<span class="c1">#    GNU General Public License for more details.                            #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License       # </span>
+<span class="c1">#    along with this program.  If not, see &lt;https://www.gnu.org/licenses/    #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">##############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">Frog.dalton_manager_module</span> <span class="k">as</span> <span class="nn">dalton_manager_module</span>
+<span class="kn">import</span> <span class="nn">Frog.toolbox</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="message_with_hashtag">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.message_with_hashtag">[docs]</a>
+<span class="k">def</span> <span class="nf">message_with_hashtag</span><span class="p">(</span><span class="n">nbr_hashtag</span><span class="p">,</span> <span class="n">nbr_line_hashtag</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Print the message with extra #. </span>
+<span class="sd">    Exemple: main_part_message_block(30, 1, &#39;hello everyone&#39;) will print:</span>
+<span class="sd">    </span>
+<span class="sd">    \##############################</span>
+<span class="sd">    \####### hello everyone #######</span>
+<span class="sd">    \##############################</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">left_todo</span> <span class="o">=</span> <span class="n">nbr_hashtag</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">left_todo</span><span class="o">%</span><span class="mi">2</span> <span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">left_todo</span> <span class="o">+=</span> <span class="mi">1</span> 
+        <span class="n">nbr_hashtag</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">left_todo</span> <span class="o">=</span> <span class="n">left_todo</span><span class="o">//</span><span class="mi">2</span>
+    
+    <span class="c1"># First and last raw of #</span>
+    <span class="k">if</span> <span class="n">nbr_line_hashtag</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">line_of_hashtag</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nbr_hashtag</span><span class="p">):</span>
+            <span class="n">line_of_hashtag</span> <span class="o">+=</span> <span class="s1">&#39;#&#39;</span> 
+    
+    <span class="c1"># Line with the message</span>
+    <span class="n">b_temp</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">left_todo</span><span class="p">):</span>
+        <span class="n">b_temp</span> <span class="o">+=</span> <span class="s1">&#39;#&#39;</span> 
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">b_temp</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span>  <span class="n">message</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">b_temp</span>
+    
+    <span class="k">if</span> <span class="n">nbr_line_hashtag</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nbr_line_hashtag</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">line_of_hashtag</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">msg</span>  <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">line_of_hashtag</span> 
+            
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">msg</span>  <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="initial_msg_welcome">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.initial_msg_welcome">[docs]</a>
+<span class="k">def</span> <span class="nf">initial_msg_welcome</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Opening message of the software. Please keep this function the clearest and simplest possible: use sub-functions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">frog_title</span><span class="p">()</span> 
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="n">frog_logo</span><span class="p">()</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="n">frog_authors</span><span class="p">()</span> 
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="n">frog_licence</span><span class="p">()</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Important remarks to keep in mind:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">strong_remarks</span><span class="p">()</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;Starting time: &#39;</span>  <span class="o">+</span> <span class="n">Frog</span><span class="o">.</span><span class="n">toolbox</span><span class="o">.</span><span class="n">return_time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="frog_title">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.frog_title">[docs]</a>
+<span class="k">def</span> <span class="nf">frog_title</span><span class="p">():</span>
+    <span class="n">title</span> <span class="o">=</span>  <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">title</span> <span class="o">+=</span> <span class="s1">&#39;                          FROG                          </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">title</span> <span class="o">+=</span> <span class="s1">&#39; FROm molecular dynamics to second harmonic Generation  </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">title</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">title</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="frog_logo">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.frog_logo">[docs]</a>
+<span class="k">def</span> <span class="nf">frog_logo</span><span class="p">():</span>
+    <span class="n">logo</span> <span class="o">=</span> <span class="s1">&#39;               _________\_______          </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;             _/                 \         </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;          __/                    \        </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;       __/   ____           ___   \       </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;      /_____/__  \_________/__ \  |       </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;            /o \           /o \ \/        </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;            \__/           \__/ /         </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;          _/                    \__       </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;        _/                         \      </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;       /         __/\__            |      </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;      |                            /      </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;      |   ________________        /       </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;      \__/                \_/  __/        </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;         \___      v          /           </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;             \______      ___/            </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">logo</span> <span class="o">+=</span><span class="s1">&#39;              |             /             </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">logo</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="frog_authors">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.frog_authors">[docs]</a>
+<span class="k">def</span> <span class="nf">frog_authors</span><span class="p">():</span>
+    <span class="n">author_list</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">List of Authors: </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">author_list</span> <span class="o">+=</span><span class="s1">&#39;Guillaume Le Breton, guillaume_le_breton@live.fr </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">author_list</span> <span class="o">+=</span><span class="s1">&#39;Oriane Bonhomme oriane.bonhomme@univ-lyon1.fr</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">author_list</span> <span class="o">+=</span><span class="s1">&#39;Emmanuel Benichou emmanuel.benichou@univ-lyon1.fr</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">author_list</span> <span class="o">+=</span><span class="s1">&#39;Claire Loison claire.loison@univ-lyon1.fr</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">author_list</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">author_list</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="frog_licence">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.frog_licence">[docs]</a>
+<span class="k">def</span> <span class="nf">frog_licence</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span>  <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">FROG Copyright (C) 2024&#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">FROG is an experimental code for the evaluation of (non linear) optical molecular properties using QM/MM calculation based on MD simulations. &#39;</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. The authors accept no responsibility for the performance of the code or for the correctness of the results.</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">The code is curently available at: https://zenodo.org/record/5998193#.YicY-vfjKds </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;See the wiki for more information -- available in Zenodo. </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="strong_remarks">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.strong_remarks">[docs]</a>
+<span class="k">def</span> <span class="nf">strong_remarks</span><span class="p">():</span>
+    <span class="n">remarks</span> <span class="o">=</span> <span class="s1">&#39;-- Please be aware that the whole software assumes that the number of molecule DOES NOT change through time. If so, no guarantees should be expected -- not even error message!</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">remarks</span><span class="o">+=</span> <span class="s1">&#39;-- Please be aware that the values defined in the trajectory file may or may not be used directly. The conversion to pass from the trajectory unit set to Angstrom is defined in GP.MD_convertion_to_angstrom.</span><span class="se">\n</span><span class="s1">&#39;</span> 
+    <span class="n">remarks</span><span class="o">+=</span> <span class="s1">&#39;-- Please be aware that you SHALL NOT restart the FROG routine while defining the Molecular Type in another order then the initial run.</span><span class="se">\n</span><span class="s1">&#39;</span> 
+    <span class="k">return</span><span class="p">(</span><span class="n">remarks</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="user_frendly_1">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_1">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_1</span><span class="p">(</span><span class="n">input_file</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The parameters for the run will be read from the file: &#39;</span> <span class="o">+</span> <span class="n">input_file</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> 
+    <span class="n">msg</span> <span class="o">+=</span><span class="s1">&#39;Frog is going to read the parameter file and initialize the run. Then it will perform the first part of the run, the second and the third.</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_2">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_2">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_2</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;I can read the MD trajectory: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_traj</span> <span class="o">+</span> <span class="s1">&#39; using the topology file: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_topology</span> <span class="o">+</span> <span class="s1">&#39; .</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span><span class="o">+=</span> <span class="s1">&#39;The total number of molecule is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">total_number_molecule</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. The total number of time step is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">total_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. The box size is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">box_size</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; [unit of the MD].</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_3">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_3">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_3</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Since no GP.nbr_time_step has been set, the software will treat 1 frame.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>   </div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_4">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_4">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_4</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will treat 1 frame.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_5">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_5">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_5</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Since no GP.trotter_step has been set, the software will treat every frame up to the number asked -- no frame will be skiped between two treated frames.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_6">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_6">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_6</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will treat &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; frames. This is the maximum number when skiping &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">trotter_step</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; frames between two treated frames. The total number of frames available in the MD trajectory is &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">total_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_7">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_7">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_7</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will treat &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; frames and skip &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">trotter_step</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; frames between 2 treated frames. The total number of frames available in the MD trajectory is &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">total_time_step</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_8">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_8">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_8</span><span class="p">(</span><span class="n">moleculetype</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The molecule type name &#39;</span> <span class="o">+</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; contains &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">population</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; molecules: from the &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; molecule to the &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; molecule. This set represent &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_selection_traj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_selection_traj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; atoms.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_9">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_9">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_9</span><span class="p">(</span><span class="n">moleculetype</span><span class="p">,</span> <span class="n">molecule_type_module</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The molecule type &#39;</span> <span class="o">+</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39; will be treated using the file: &#39;</span> <span class="o">+</span> <span class="n">molecule_type_module</span><span class="o">.</span><span class="vm">__file__</span> <span class="o">+</span> <span class="s1">&#39;. Bellow the structure expected for every molecule.&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">smparameter</span><span class="o">.</span><span class="n">nbr_atom</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">atom</span> <span class="o">!=</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">smparameter</span><span class="o">.</span><span class="n">max_distance_atom</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Atom number: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, Atom type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">smparameter</span><span class="o">.</span><span class="n">L_type_atom</span><span class="p">[</span><span class="n">atom</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;, Maximal distance authorized from the atom number &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">smparameter</span><span class="o">.</span><span class="n">max_distance_atom</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; is &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">smparameter</span><span class="o">.</span><span class="n">max_distance_atom</span><span class="p">[</span><span class="n">atom</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; [unit of the MD].&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Atom number: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, Atom type: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">smparameter</span><span class="o">.</span><span class="n">L_type_atom</span><span class="p">[</span><span class="n">atom</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;. This atom is the reference atom of this molecule.&#39;</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_10">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_10">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_10</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The geometry of each molecules of this molecule type have been successfully checked for the first frame.</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+    
+<div class="viewcode-block" id="user_frendly_11">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_11">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_11</span><span class="p">(</span><span class="n">toprint</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Initializing the diagram with the input:&#39;</span><span class="p">,</span> <span class="n">toprint</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_12">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_12">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_12</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The analysis will be performed for the whole simulation box and the averaged spatial value will be returned.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_13">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_13">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_13</span><span class="p">(</span><span class="n">direction_toprint</span><span class="p">,</span> <span class="n">L_input_diagram</span> <span class="p">,</span> <span class="n">slice_size</span><span class="p">,</span> <span class="n">nbr_bin_space</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The values will be regrouped in slice of the boxes along the &#39;</span> <span class="o">+</span> <span class="n">direction_toprint</span> <span class="o">+</span> <span class="s1">&#39;-axis (&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">L_input_diagram</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; input given). The number of bins used to discretized the box in this direction is &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nbr_bin_space</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; leading to a typical size of the slice will be: &#39;</span> <span class="o">+</span> <span class="n">slice_size</span> <span class="o">+</span> <span class="s1">&#39; [unit of the MD].&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+<div class="viewcode-block" id="user_frendly_14_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_14_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_14_a</span><span class="p">(</span><span class="n">smparameter</span><span class="p">,</span> <span class="n">sdparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The molecular orientation has &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">smparameter</span><span class="o">.</span><span class="n">d_molecular_orientation</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; components for every molecule. Please see how it was defined in the library molecule type file for more inforamtion. Since the independent probability is required, the diagram will have the dimension:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">bin_size</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_14_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_14_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_14_b</span><span class="p">(</span><span class="n">smparameter</span><span class="p">,</span> <span class="n">sdparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The molecular orientation has &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">smparameter</span><span class="o">.</span><span class="n">d_molecular_orientation</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; components for every molecule. Please see how it was defined in the library molecule type file for more inforamtion. Since the join probability is required, the diagram will have the dimension:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">bin_size</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_15">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_15">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_15</span><span class="p">(</span><span class="n">sdparameter</span><span class="p">,</span> <span class="n">smparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Either the function &quot;compute_hbonds&quot; is not defined in the library module file of the molecule type &#39;</span> <span class="o">+</span> <span class="n">smparameter</span><span class="o">.</span><span class="n">name_mt</span> <span class="o">+</span> <span class="s1">&#39; or this function does not know how to deal with the partner molecule type &#39;</span> <span class="o">+</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">partner</span> <span class="o">+</span> <span class="s1">&#39;. Trying to see if the function &quot;compute_hbonds&quot; is defined in the partner molecule type &#39;</span> <span class="o">+</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">partner</span> <span class="o">+</span> <span class="s1">&#39; and if yes if it knows how to deal with hbond with the molecule type &#39;</span> <span class="o">+</span> <span class="n">smparameter</span><span class="o">.</span><span class="n">name_mt</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_16">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_16">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_16</span><span class="p">(</span><span class="n">sdparameter</span><span class="p">,</span> <span class="n">info_mol</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Hbonds will be computed using the function defined in the &#39;</span> <span class="o">+</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">partner</span> <span class="o">+</span> <span class="s1">&#39; molecule type library module file. The maximal distance used to find the partner molecule and check the hbonds is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">info_mol</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_17">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_17">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_17</span><span class="p">(</span><span class="n">smparameter</span><span class="p">,</span> <span class="n">info_mol</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Hbonds will be computed using the function defined in the &#39;</span> <span class="o">+</span>  <span class="n">smparameter</span><span class="o">.</span><span class="n">name_mt</span> <span class="o">+</span> <span class="s1">&#39; molecule type library module file. The maximal distance used to find the partner molecule and check the hbonds is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">info_mol</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_18">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_18">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_18</span><span class="p">(</span><span class="n">sdparameter</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The maximal number of own and given hbonds for this molecule type is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">bin_size</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; and &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">bin_size</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;. The other input parameters are: &#39;</span><span class="p">,</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">fct_parameters</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_19">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_19">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_19</span><span class="p">(</span><span class="n">sdparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;rdf will be computed between this molecule type and the &#39;</span> <span class="o">+</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">partner</span> <span class="o">+</span> <span class="s1">&#39; molecule type. The maximal distance set is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">max_distance</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, the number of bins used to discretized the rdf is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">bin_size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_20">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_20">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_20</span><span class="p">(</span><span class="n">sdparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;In order to discretized the tensor, the same number of bin will be used: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">bin_size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; for every tensor components. The minimal component value accepted is &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">min_max</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; [atomic unit] and the maximal is &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">min_max</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; [atomic unit].&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_21">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_21">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_21</span><span class="p">(</span><span class="n">sdparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The &#39;</span> <span class="o">+</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">analysis_type</span> <span class="o">+</span> <span class="s1">&#39; analysis will be performed for this molecule type, the resulting diagram name is: &#39;</span> <span class="o">+</span>  <span class="n">sdparameter</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_22">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_22">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_22</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Start initializing the diagrams for this molecule type.</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_23">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_23">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_23</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;End initializing the Diagrams for this molecule type.</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_24_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_24_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_24_a</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Start reading the optical parameters:</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="user_frendly_24_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_24_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_24_b</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">End reading the optical parameters</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_25">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_25">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_25</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The polarizability of this molecule type will NOT be investigate in this run -- if needed for PE run, the polarizability value will be searched in the library.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_26">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_26">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_26</span><span class="p">(</span><span class="n">L_alpha_ref</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The initial polarizability of this molecule type is set to be: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">L_alpha_ref</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_27">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_27">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_27</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The polarizability of this molecule type will be computed by QM run. See later for the understood QM parameters.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_28">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_28">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_28</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The SHG reponse of this molecule type will NOT be investigate in this run.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_29">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_29">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_29</span><span class="p">(</span><span class="n">optparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The initial molecular hyperpolarizability tensor of this molecule type is set to be:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">optparameter</span><span class="o">.</span><span class="n">L_beta_ref</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_30">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_30">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_30</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The SHG reponse of this molecule type will be computed by QM run. See later for the understood QM parameters.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    </div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_31">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_31">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_31</span><span class="p">(</span><span class="n">where_to_run_QM</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Given input to determined where QM run is perform for this molecule type (third input of the L_optic_properties list):&#39;</span><span class="p">,</span> <span class="n">where_to_run_QM</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_32">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_32">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_32</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The QM run will be performed for all the molecule of this molecule type.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_33">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_33">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_33</span><span class="p">(</span><span class="n">direction_toprint</span><span class="p">,</span> <span class="n">nbr_bin_space</span><span class="p">,</span> <span class="n">where_to_run_QM</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The QM run will be performed only for molecule of this molecule type with a certain altitude along the axis &#39;</span> <span class="o">+</span> <span class="n">direction_toprint</span> <span class="o">+</span> <span class="s1">&#39;. This MD box axis will be decomposed in &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nbr_bin_space</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; bins for all the frames. If a molecule altitude is within the bin number: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">where_to_run_QM</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;, then the QM run will be performed. Note that the bins numerotation start at 0.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_34_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_34_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_34_a</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The QM calculation will be performed considering the molecule is in vacuum (no electrostaic envionment).&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="user_frendly_34_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_34_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_34_b</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The QM calculation will be performed considering the molecule is within an electrostaic environment (PE scheme of Dalton).&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="user_frendly_34_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_34_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_34_c</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The QM calculation will be performed considering the molecule is within an electrostaic environment (PE scheme of Dalton) with aditional homogenous electrostatic field from distance neighbors: &quot;PE long&quot; case.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="user_frendly_34_d">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_34_d">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_34_d</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The QM calculation will be performed considering the molecule is within an electrostaic environment (PE scheme of Dalton). Moreover, several molecules can be part of the QM box.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_35">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_35">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_35</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The PE level for this molecule is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">pe_level</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. The maximal distance used to built the PE neighbourhood is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">max_pe_distance_neigh</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Note that this distance will be understood in the same unit as the one of the MD trajectory.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_36">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_36">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_36</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The neighbourghood of this target molecule will be printed on a .xyz file since the value &quot;write_xyz_environment&quot; have been set to True. Set it to False if you do not want it. (default value: False)&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_37">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_37">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_37</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The neighbourghood of this target molecule will NOT be printed on a .xyz file since the value &quot;write_xyz_environment&quot; have been set to False. Set it to True if you want it. (default value: False)&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_38">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_38">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_38</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The maximal distance used to built the neighbourhood for the QM box is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">max_qm_box_distance_neigh</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Note that this distance will be understood in the same unit as the one of the MD trajectory.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_39">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_39">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_39</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;In case several molecule are part of the QM box and their basis set are not identical, the FROG have to chose one. To do so, the basis set defined by the molecule in the QM box which appear first in the qmparameter.preference_functional list is chosen. Please note that this list is unique for all the QM simulation. Here is the list of the basis set to chose preferentially: &#39;</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">preference_functional</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+     
+<div class="viewcode-block" id="user_frendly_40">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_40">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_40</span><span class="p">(</span><span class="n">qmparamter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The theory level used for this molecule type will be the DFT using the functional: &#39;</span> <span class="o">+</span> <span class="n">qmparamter</span><span class="o">.</span><span class="n">functional</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    </div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_41">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_41">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_41</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;No external static electric field will be added during the QM calculation for all the molecule type.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_42_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_42_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_42_a</span><span class="p">(</span><span class="n">qmparamter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;A global external electric field in the laboratory frame will be added during the QM calculation for all this molecule type. It value is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmparamter</span><span class="o">.</span><span class="n">static_electric_field</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="user_frendly_42_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_42_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_42_b</span><span class="p">(</span><span class="n">qmparamter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;A global external electric field in the molecular frame will be added during the QM calculation for all this molecule type. It value is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmparamter</span><span class="o">.</span><span class="n">static_electric_field</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_43">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_43">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_43</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The basis used for all the atoms of this molecule type will be: &#39;</span> <span class="o">+</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">global_basis_value</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_44">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_44">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_44</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;A non-zero total charge is required for this molecule: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">total_charge</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_45">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_45">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_45</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Polarizability will be computed for this molecule type at the frequency: &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">polarizability_response</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; [ATOMIC UNIT] (0.05686 = 800 nm, 0 = \infty nm).&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_46">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_46">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_46</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The molecule polarizability will not be computed in the QM run.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_47">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_47">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_47</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Second harmonic generation molecular reponse will be computed for this molecule type at the frequency: &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">shg_response</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; [ATOMIC UNIT] (0.05686 = 800 nm, 0 = \infty nm)&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_48">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_48">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_48</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Second harmonic generation molecular reponse will not be computed.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_49">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_49">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_49</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The maximum SCF iteration authorized is set at: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">max_iter_scf</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; (default value is 500, you can modify it using: qmparameter.max_iter_scf attribute).&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>   </div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_50_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_50_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_50_a</span><span class="p">(</span><span class="n">name_save</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;WARNING: Please be aware that the pickle format is used to save these data, therefore, an &quot;.p&quot; suffix is used instead of the one defined by the user. Initial name: &#39;</span> <span class="o">+</span> <span class="n">name_save</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>  </div>
+
+    
+<div class="viewcode-block" id="user_frendly_50_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_50_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_50_b</span><span class="p">(</span><span class="n">name_pickle</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;WARNING: Please be aware that the pickle format is expected to read these data, therefore, an &quot;.p&quot; suffix is used instead of the one defined by the user. Initial name:&#39;</span> <span class="o">+</span> <span class="n">name_pickle</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>      </div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_51_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_51_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_51_a</span><span class="p">(</span><span class="n">dir_type</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Checking the &#39;</span> <span class="o">+</span> <span class="n">dir_type</span> <span class="o">+</span> <span class="s1">&#39; value:&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_52_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_52_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_52_a</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;A general path have been set: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">general_path</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="user_frendly_52_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_52_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_52_b</span><span class="p">(</span><span class="n">path_working_dir</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span><span class="s1">&#39;No general path have been set , the one used by default is the directory where the software have been launched: &#39;</span> <span class="o">+</span> <span class="n">path_working_dir</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_53_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_53_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_53_a</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The results will be save according to the general_path defined: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">+</span> <span class="s1">&#39; . FROG tries to create a file in this folder to check.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+    
+<div class="viewcode-block" id="user_frendly_53_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_53_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_53_c</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Test OK: FROG will write the results at this location.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_54_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_54_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_54_a</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The objects containing the molecular informations will be save at: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_mol_times</span> <span class="o">+</span> <span class="s1">&#39; by default. I may creat first some directories -- actually it should be only the &#39;&#39;Molecule_times&#39;&#39; directory at: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">+</span> <span class="s1">&#39;.FROG tries to create a file in this folder to check.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_54_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_54_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_54_b</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The object containing the molecular informations will be save at: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_mol_times</span> <span class="o">+</span> <span class="s1">&#39;.FROG tries to create a file in this folder to check.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    </div>
+
+
+<div class="viewcode-block" id="user_frendly_54_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_54_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_54_c</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span>  <span class="s1">&#39;Test OK: FROG will write the objects containing the molecular informations. These objects may be heavy and are not humain readable. These are temporary files used to restart the calculation and may be deleted at the end of the calculation. Obtaining these files is not very time consuming compare to the QM part.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>        </div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_55_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_55_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_55_a</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The QM run will be performed in the directory according to the general_path defined: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">+</span> <span class="s1">&#39; . The typical structure will be: general_path/QM_Simulations/&#39;</span> <span class="o">+</span> <span class="n">dalton_manager_module</span><span class="o">.</span><span class="n">print_info_QM_file_localization</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;daltons_input_files. FROG tries to create a file in this folder to check.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_55_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_55_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_55_b</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The QM run will be performed in the directory according to the dir_torun_QM given: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_torun_QM</span> <span class="o">+</span> <span class="s1">&#39; . The typical structure will be: dir_torun_QM/&#39;</span> <span class="o">+</span> <span class="n">dalton_manager_module</span><span class="o">.</span><span class="n">print_info_QM_file_localization</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;daltons_input_files. FROG tries to create a file in this folder to check.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_55_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_55_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_55_c</span><span class="p">(</span><span class="n">dir_QM_exemple_name</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Test OK: FROG will perform the QM runs at these locations.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    </div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_56_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_56_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_56_a</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;No GP.dir_submission_file have been set. By default, the submission files for the QM runs will be created at: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span> <span class="o">+</span> <span class="s1">&#39; . FROG tries to create a file in this folder to check.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_56_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_56_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_56_b</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span>  <span class="s1">&#39;The submission files for the QM runs will be created at the given GP.dir_submission_file: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span> <span class="o">+</span> <span class="s1">&#39; . FROG tries to create a file in this folder to check.&#39;</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_56_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_56_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_56_c</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span>  <span class="s1">&#39;Test OK: FROG will use this directory for all the submission scripts.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_57">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_57">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_57</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;FROG can read the template file GP.file_template_script_run_QM: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">file_template_script_run_QM</span> <span class="o">+</span> <span class="s1">&#39;, I will use this file to built submition script for every QM simulation.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_58_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_58_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_58_a</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Since no GP.max_submission_QM has been set, the default maximal number of QM run submitted is 15000. You may want to rerun the software when all the QM simulation are finished and resubmitted if needed other simulation.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_58_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_58_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_58_b</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The maximal number of QM run submitted is (GP.max_submission_QM): &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">max_submission_QM</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    </div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_59">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_59">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_59</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;In order to launch the job to the cluster, the commande use will be: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">command_launch_job</span> <span class="o">+</span> <span class="s1">&#39; (GP.command_launch_job value).&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_60_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_60_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_60_a</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Since no GP.redo_QM has been set, if a (valid) Dalton out is found for a molecule, the QM run will not be re-performed. By default GP.redo_QM=&quot;do_not_redo&quot;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    </div>
+
+
+<div class="viewcode-block" id="user_frendly_60_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_60_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_60_b</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;GP.redo_QM has been set to redo: all the QM calculation will be re-performed: GP.redo_QM=&quot;redo&quot;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>  </div>
+
+
+<div class="viewcode-block" id="user_frendly_60_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_60_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_60_c</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;GP.redo_QM has been set to do_not_redo: if a (valid) Dalton out is found for a molecule, the QM run will not be re-performed: GP.redo_QM=&quot;do_not_redo&quot;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>  </div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_61_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_61_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_61_a</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;QM run will be performed. Therefore, some parameters have to be set.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_61_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_61_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_61_b</span><span class="p">():</span>    
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;No QM run will be performed.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_62_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_62_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_62_a</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will run without skipping the first part -- default behaviour.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_62_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_62_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_62_b</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will run without trying to skip the first part since GP.pass_first_part = False.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_62_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_62_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_62_c</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span>  <span class="s1">&#39;If possible, the first part of the run will be skiped: the QM input file will NOT be (re)written or the MD properties (re)compute. The software will try to start from the files contains in the directory GP.dir_mol_times: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_mol_times</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_63_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_63_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_63_a</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will run by default on 1 core. To modify this use GP.nbr_parra.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_63_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_63_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_63_b</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will run on &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; cores. This value have been set to be equal to the number of frame to treat. Each cores will treat 1 frame.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_63_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_63_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_63_c</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will run on &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; cores. Each cores will treat &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; frames.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_63_d">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_63_d">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_63_d</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will run on &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; cores. The first &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; cores will treat &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; frames, and the rest will treat &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step_core</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; frames.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_64">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_64">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_64</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; different molecule types have been declared: &#39;</span>
+    <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_type_molecule</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="n">L_moleculetype</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_65">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_65">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_65</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">QM run will be performed. I will try to write the Dalton input files for the molecule type concerned.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_66_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_66_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_66_a</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will try to restart from the directory: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_mol_times</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="user_frendly_66_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_66_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_66_b</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">time_step</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;I have not found in the directory: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">dir_mol_times</span> <span class="o">+</span> <span class="s1">&#39; the L_moleculetype for the time step &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_step</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Therefore I will redo the first part.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="user_frendly_66_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_66_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_66_c</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;The software will skip the first part.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    </div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_67_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_67_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_67_a</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;QM run not finished yet: please launch the QM run and relaunch the software.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_67_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_67_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_67_b</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;QM run finished, continuing to the final part.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="user_frendly_67_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_67_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_67_c</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;No QM run to perform, skipping the Second part of the run.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    </div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_68_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_68_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_68_a</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> Checking the GP.env_authorised_pbc_condition variable. Understood input: &#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">env_authorised_pbc_condition</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="user_frendly_68_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_68_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_68_b</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Since the GP.env_authorised_pbc_condition variable has not been initialized, the default value: [0, 1, 2] will be used.&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_69">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_69">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_69</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39; WARNING ! at the time beging job array feature is only implemented when GP.nbr_repetition_QM_perMT is defined !</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39; WARNING ! You have not defined GP.nbr_repetition_QM_perMT , so the array instruction will be IGNORED</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39; WARNING : To overcome this, you can define GP.nbr_repetition_QM_perMT = [,.,.,] in your inputfile (one int per MT) </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39; WARNING : if you do not use repetitions in the QM_todo files, </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39; WARNING : the number of jobs is very rapidely increasing.</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39; WARNING : The chance that it is above the maximum of the arraysize is high.</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39; WARNING : THIS CASE IS NOT IMPLEMENTED YET </span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>     </div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+     
+<div class="viewcode-block" id="user_frendly_70">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_70">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_70</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span><span class="n">name_array_script_job</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The script to launch all the jobs as array is: &#39;</span> <span class="o">+</span> <span class="n">name_array_script_job</span> <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;It will send all the job to the cluster using as template the file: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">file_template_script_run_QM</span> <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;In order to launch the array of job, the command: &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">command_launch_job</span> <span class="o">+</span> <span class="s1">&#39; , should be used.&#39;</span><span class="p">)</span></div>
+
+   
+    
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="user_frendly_71_a">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_71_a">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_71_a</span><span class="p">(</span><span class="n">submissionfilename</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : for now the array feature is only defined when GP.command_launch_job is &quot;sbatch&quot; &#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR : The file </span><span class="si">{</span><span class="n">submissionfilename</span><span class="si">}</span><span class="s1"> WILL NOT be  created  &#39;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="user_frendly_71_b">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_71_b">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_71_b</span><span class="p">(</span><span class="n">submissionfilename</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : BOTH GP.submit_job_array  and GP.submit_array_maxjobs have to be defined. There are NO DEFAULT VALUES &#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR : Define BOTH GP.submit_job_array  and GP.submit_array_maxjobs your input file to use the array feature&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR : The file </span><span class="si">{</span><span class="n">submissionfilename</span><span class="si">}</span><span class="s1"> WILL NOT be created  &#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="user_frendly_71_c">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_71_c">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_71_c</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span><span class="n">total_job_number</span><span class="p">,</span><span class="n">submissionfilename</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR : the number of jobs (</span><span class="si">{</span><span class="n">total_job_number</span><span class="si">}</span><span class="s1">) is higher than the maximum number of jobs (GP.submit_array_maxjobs = </span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">submit_array_maxjobs</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR : the array feature is not implemented for this case &#39;</span><span class="p">)</span>   
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ERROR : The file </span><span class="si">{</span><span class="n">submissionfilename</span><span class="si">}</span><span class="s1"> WILL NOT be created  &#39;</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_72">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_72">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_72</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_73">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_73">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_73</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_74">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_74">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_74</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_75">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_75">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_75</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_76">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_76">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_76</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_77">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_77">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_77</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_78">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_78">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_78</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_79">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_79">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_79</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> </div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+     
+<div class="viewcode-block" id="user_frendly_80">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_80">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_80</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>    </div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_81">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_81">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_81</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+  
+<div class="viewcode-block" id="user_frendly_82">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_82">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_82</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_83">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_83">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_83</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_84">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_84">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_84</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_85">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_85">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_85</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_86">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_86">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_86</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_87">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_87">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_87</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_88">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_88">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_88</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################    </span>
+   
+<div class="viewcode-block" id="user_frendly_89">
+<a class="viewcode-back" href="../../Frog.html#Frog.messages.user_frendly_89">[docs]</a>
+<span class="k">def</span> <span class="nf">user_frendly_89</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> </div>
+
+    
+    
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

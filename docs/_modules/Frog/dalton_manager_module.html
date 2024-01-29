@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog.dalton_manager_module &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Frog.dalton_manager_module</h1><div class="highlight"><pre>
+<span></span><span class="c1">##############################################################################</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    FROG: FROm molecular dynamics to second harmonic Generation             #</span>
+<span class="c1">#    Copyright (C) 2024                                                      #</span>
+<span class="c1">#    Author list                                                             #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    Guillaume Le Breton                                                     #</span>
+<span class="c1">#    Oriane Bonhomme                                                         #</span>
+<span class="c1">#    Emmanuel Benichou                                                       #</span>
+<span class="c1">#    Claire Loison                                                           #</span>
+<span class="c1">#                                                                            # </span>
+<span class="c1">#    This program is free software: you can redistribute it and/or modify    #</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by    #</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or       #</span>
+<span class="c1">#    (at your option) any later version.                                     #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is distributed in the hope that it will be useful,         #</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #</span>
+<span class="c1">#    GNU General Public License for more details.                            #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License       # </span>
+<span class="c1">#    along with this program.  If not, see &lt;https://www.gnu.org/licenses/    #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">##############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span> 
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">import</span> <span class="nn">Frog.toolbox</span> <span class="k">as</span> <span class="nn">toolbox</span>
+<span class="kn">import</span> <span class="nn">Frog.messages</span> <span class="k">as</span> <span class="nn">messages</span>
+<span class="kn">import</span> <span class="nn">Frog.error_messages</span> <span class="k">as</span> <span class="nn">error_messages</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="generate_inp_dal">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.generate_inp_dal">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_inp_dal</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">molecular_electric_field</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Generate the .dal input file depending on the parameters given </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">filename</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">filename</span><span class="p">)]</span> <span class="o">!=</span> <span class="s1">&#39;.dal&#39;</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.dal&#39;</span>
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">the_file</span><span class="p">:</span>
+        <span class="c1"># general input</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;**DALTON</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.RUN WAVE FUNCTIONS</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_properties</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.RUN PROPERTIES</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_response</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.RUN RESPONSE</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_pe</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">dalton_version</span> <span class="o">&lt;</span> <span class="mi">2020</span> <span class="p">:</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.PEQM</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*PEQM</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.PELIB</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*PELIB</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">pe_level</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.DIRECT</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">effective_field_polarization</span><span class="p">:</span>
+                    <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.EEF</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># INTEGRAL</span>
+        <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_integral</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;**INTEGRALS</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_int_dipole</span><span class="p">:</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.DIPLEN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_int_quadrupole</span><span class="p">:</span>
+                 <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.SECMOM</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># WAVE FUNCTION</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;**WAVE FUNCTIONS</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">theory_lv</span> <span class="o">==</span> <span class="s1">&#39;DFT&#39;</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.DFT</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">functional</span> <span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*SCF IN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.MAX DIIS</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">max_iter_scf</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_electric_field</span><span class="p">:</span>
+            <span class="n">total_electric_field</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">molecular_electric_field</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                    <span class="n">total_electric_field</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_electric_field</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">molecular_electric_field</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">static_electric_field</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                    <span class="n">total_electric_field</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_electric_field</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">static_electric_field</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*HAMILTONIAN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">L_direction</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;XDIPLEN&#39;</span><span class="p">,</span> <span class="s1">&#39;YDIPLEN&#39;</span><span class="p">,</span> <span class="s1">&#39;ZDIPLEN&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.FIELD</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.10f</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_electric_field</span><span class="p">[</span><span class="n">direction</span><span class="p">])</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">L_direction</span><span class="p">[</span><span class="n">direction</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># Response</span>
+        <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_response</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;**RESPONSE</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_shg</span><span class="p">:</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*QUADRA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">beta_order</span> <span class="o">==</span> <span class="s1">&#39;dipole&#39;</span><span class="p">:</span>
+                    <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.DIPLEN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">beta_order</span> <span class="o">==</span> <span class="s1">&#39;quadrupole&#39;</span><span class="p">:</span>
+                    <span class="n">write_beta_quadrupole_dalton_shortcut</span><span class="p">(</span><span class="n">the_file</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;ERROR CODE: this should not happen!&#39;</span><span class="p">)</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.SHG</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.FREQUE</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">shg_response</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">towrite</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">for</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">shg_response</span><span class="p">:</span>
+                    <span class="n">towrite</span> <span class="o">=</span> <span class="n">towrite</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> 
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">RUN_polarization</span><span class="p">:</span>
+                    <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*LINEAR</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.DIPLEN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.FREQUENCIES</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">polarizability_response</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">towrite</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="k">for</span> <span class="n">frequency</span> <span class="ow">in</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">polarizability_response</span><span class="p">:</span>
+                        <span class="n">towrite</span> <span class="o">=</span> <span class="n">towrite</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> 
+                    <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;**END OF DALTON</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+        
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################  </span>
+            
+<div class="viewcode-block" id="generate_inp_mol">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.generate_inp_mol">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_inp_mol</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">qmdescription</span><span class="p">,</span> <span class="n">message_1</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">message_2</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Generate the .mol dalton input file for the given molecule or graps of molecule. Note that this is given in the laboratory frame. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">filename</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">filename</span><span class="p">)]</span> <span class="o">!=</span> <span class="s1">&#39;.mol&#39;</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.mol&#39;</span>
+        
+    <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">type_basis</span> <span class="o">==</span> <span class="s1">&#39;Global basis&#39;</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">the_file</span><span class="p">:</span> 
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;BASIS</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">global_basis_value</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message_1</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span> 
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message_1</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Nothing&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message_2</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span> 
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message_2</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Nothing&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">total_charge</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">):</span> <span class="c1"># if ionic molecule/total charge not zero</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Atomtypes=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">nbr_type_atom</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39; Angstrom Nosymmetry</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Atomtypes=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">nbr_type_atom</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39; Angstrom Nosymmetry Charge=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">total_charge</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">atomtype</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">qmdescription</span><span class="o">.</span><span class="n">nbr_type_atom</span><span class="p">(),</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Charge=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">L_atom_type</span><span class="p">[</span><span class="n">atomtype</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; Atoms=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">L_atom_type</span><span class="p">[</span><span class="n">atomtype</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">atom_t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">qmdescription</span><span class="o">.</span><span class="n">L_atom_type</span><span class="p">[</span><span class="n">atomtype</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">L_atom_type</span><span class="p">[</span><span class="n">atomtype</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">atom_t</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">L_coordinate</span><span class="p">[</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">L_atom_type</span><span class="p">[</span><span class="n">atomtype</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">atom_t</span><span class="p">][</span><span class="mi">1</span><span class="p">]][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">L_coordinate</span><span class="p">[</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">L_atom_type</span><span class="p">[</span><span class="n">atomtype</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">atom_t</span><span class="p">][</span><span class="mi">1</span><span class="p">]][</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">L_coordinate</span><span class="p">[</span><span class="n">qmdescription</span><span class="o">.</span><span class="n">L_atom_type</span><span class="p">[</span><span class="n">atomtype</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">atom_t</span><span class="p">][</span><span class="mi">1</span><span class="p">]][</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>         
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: No other way to defined basis have been defined yet. Possible value: &lt; Global basis &gt;. We can also defined basis for each atoms (TODO).&#39;</span><span class="p">)</span> </div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="generate_inp_pot">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.generate_inp_pot">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_inp_pot</span><span class="p">(</span><span class="n">electro_neigh</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">xyz_environemnt</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create the .pot input file for a given molecule electrostatic environment. Note that this is given in the lboratory frame. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">filename</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">filename</span><span class="p">)]</span> <span class="o">!=</span> <span class="s1">&#39;.pot&#39;</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.pot&#39;</span>
+        
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="c1">#meaning that the electrostatic environement is empty:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">the_file</span><span class="p">:</span> <span class="c1"># write an empty file</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;@COORDINATES</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;AA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;@MULTIPOLES</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ORDER 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span> 
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">the_file</span><span class="p">:</span>
+        <span class="c1"># Site coordinate </span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;@COORDINATES</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_type</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;AA</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_type</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>    
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_type</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_site</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_site</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>  <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_site</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Multipole charge    </span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;@MULTIPOLES</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ORDER 0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>  
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_0</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> 
+            
+        <span class="k">if</span> <span class="n">electro_neigh</span><span class="o">.</span><span class="n">multipole_order</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ORDER 1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_1</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>              
+            <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_1</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">towrite</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_1</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_1</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">towrite</span> <span class="o">=</span> <span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_1</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">temp</span><span class="p">])</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            
+        <span class="k">if</span> <span class="n">electro_neigh</span><span class="o">.</span><span class="n">multipole_order</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ORDER 2</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_2</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>              
+            <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_2</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span> 
+                <span class="n">towrite</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_2</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_2</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">towrite</span> <span class="o">=</span> <span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_2</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">temp</span><span class="p">])</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Polarizability:  </span>
+        <span class="k">if</span> <span class="n">electro_neigh</span><span class="o">.</span><span class="n">polarization_order</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;@POLARIZABILITIES</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;ORDER 1 1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_order_1_1</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>              
+            <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_order_1_1</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">towrite</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_order_1_1</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_order_1_1</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">towrite</span> <span class="o">=</span> <span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_order_1_1</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">temp</span><span class="p">])</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_exclude</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">nbr_to_exclude_max</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">nbr_localization_type_concerned_by_exclusion</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_exclude</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nbr_localization_type_concerned_by_exclusion</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">nbr_to_exclude_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">nbr_to_exclude_max</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_exclude</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;EXCLISTS</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">nbr_localization_type_concerned_by_exclusion</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nbr_to_exclude_max</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nbr_localization_type_concerned_by_exclusion</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">towrite</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_exclude</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">nbr_site_to_exclude_temp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_exclude</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nbr_site_to_exclude_temp</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">towrite</span> <span class="o">=</span> <span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_polarization_exclude</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">temp</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">nbr_site_to_exclude_temp</span> <span class="o">&lt;</span> <span class="n">nbr_to_exclude_max</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nbr_site_to_exclude_temp</span><span class="p">,</span> <span class="n">nbr_to_exclude_max</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="n">towrite</span> <span class="o">=</span> <span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="s1">&#39;0&#39;</span> 
+                    <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">towrite</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                
+    <span class="c1"># Option to check the site position              </span>
+    <span class="k">if</span> <span class="n">xyz_environemnt</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.xyz&#39;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">the_file</span><span class="p">:</span>
+            <span class="c1"># the_file.write(str(len(electro_neigh.L_localization_type)) + &#39;\n&#39;) Done in the universe manager file</span>
+            <span class="c1">#the_file.write(&#39;Typical site used\n&#39;)</span>
+            <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_type</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>    
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_type</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_site</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_site</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>  <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_site</span><span class="p">[</span><span class="n">trotter</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+                
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+    
+<div class="viewcode-block" id="build_QM_file_localization">
+<a class="viewcode-back" href="../../OpticalAnalysis/qm_management.html#Frog.dalton_manager_module.build_QM_file_localization">[docs]</a>
+<span class="k">def</span> <span class="nf">build_QM_file_localization</span><span class="p">(</span><span class="n">path_QM_dir</span><span class="p">,</span> <span class="n">moleculetype_name</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">molecule_number</span><span class="p">,</span> <span class="n">creat_dir</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Define how the directory name is created/attributed for the QM run knowing target molecule attributes -- for instance the time step or the molecule type name. Also creat the directory if needed</span>
+<span class="sd">    </span>
+<span class="sd">    Today, the localisation for the QM calculation of the &#39;i&#39; molecule at the time step &#39;T&#39; of the molecule type &#39;Mol&#39; would be: GP.dir_torun_QM/Mol/Time_T/Molecule_i.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">dir_name</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">path_QM_dir</span><span class="p">,</span> <span class="n">moleculetype_name</span><span class="p">)</span>
+    <span class="n">dir_name</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">dir_name</span><span class="p">,</span> <span class="s1">&#39;Time_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+    <span class="c1"># dir_name = toolbox.concatenate_path(dir_name, &#39;Bin_number_&#39; + str(bin_number)) # old assignation. This method is depreciated because the path depends on the bin used... The tree built is less usable for other runs! For instance if you want to switch from slice selection to layer selection. </span>
+    <span class="n">dir_name</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">dir_name</span><span class="p">,</span> <span class="s1">&#39;Molecule_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">molecule_number</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">creat_dir</span><span class="p">:</span>
+        <span class="n">toolbox</span><span class="o">.</span><span class="n">creat_directory</span><span class="p">(</span><span class="n">dir_name</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">dir_name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="print_info_QM_file_localization">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.print_info_QM_file_localization">[docs]</a>
+<span class="k">def</span> <span class="nf">print_info_QM_file_localization</span><span class="p">():</span>
+    <span class="c1"># return(&#39;MoleculeType/TimeStep/BinNumber/MoleculeNumber/&#39;) # old assignation</span>
+    <span class="k">return</span><span class="p">(</span><span class="s1">&#39;MoleculeType/TimeStep/MoleculeNumber/&#39;</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="check_if_run_already_performed">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.check_if_run_already_performed">[docs]</a>
+<span class="k">def</span> <span class="nf">check_if_run_already_performed</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">moleculetype_name</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">molecule_number</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Check if the QM calculation of this molecule is already performed. </span>
+<span class="sd">    </span>
+<span class="sd">    If is_the_calculation_done = True, the calculation has been done.  </span>
+<span class="sd">    QM_file_localization_name is the directory where the QM calculation should be done. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">QM_file_localization_name</span> <span class="o">=</span> <span class="n">build_QM_file_localization</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_torun_QM</span><span class="p">,</span> <span class="n">moleculetype_name</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">molecule_number</span><span class="p">)</span>
+    <span class="n">is_the_calculation_done</span> <span class="o">=</span> <span class="n">check_if_run_done</span><span class="p">(</span><span class="n">QM_file_localization_name</span><span class="p">)</span> <span class="c1"># True or False</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">is_the_calculation_done</span><span class="p">,</span> <span class="n">QM_file_localization_name</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+ 
+<div class="viewcode-block" id="move_previous_results">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.move_previous_results">[docs]</a>
+<span class="k">def</span> <span class="nf">move_previous_results</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">moleculetype_name</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">molecule_number</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    If GP.redo_QM == &#39;redo&#39;, this function is called to move the already existing dalton results. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">QM_dir_mol</span> <span class="o">=</span> <span class="n">build_QM_file_localization</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_torun_QM</span><span class="p">,</span> <span class="n">moleculetype_name</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">molecule_number</span><span class="p">)</span>
+    <span class="n">name_result_expected</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">QM_dir_mol</span><span class="p">,</span> <span class="s1">&#39;dalton_molecule_potential.out&#39;</span><span class="p">)</span>
+    <span class="n">IS_there_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">name_result_expected</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">IS_there_file</span><span class="p">:</span> <span class="c1"># The file exist, now we want to move it so it does not interfer anymore with the incoming calculations.</span>
+        <span class="n">trotter_move</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">name_result_expected</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">trotter_move</span><span class="p">)):</span>
+            <span class="n">trotter_move</span> <span class="o">+=</span> <span class="mi">1</span>
+       
+        <span class="k">if</span> <span class="n">trotter_move</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trotter_move</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s1">&#39;mv &#39;</span> <span class="o">+</span> <span class="n">name_result_expected</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">trotter_move</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">name_result_expected</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">trotter_move</span><span class="p">))</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s1">&#39;mv &#39;</span> <span class="o">+</span> <span class="n">name_result_expected</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">name_result_expected</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="check_if_run_done">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.check_if_run_done">[docs]</a>
+<span class="k">def</span> <span class="nf">check_if_run_done</span><span class="p">(</span><span class="n">name_dir</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Check whether the QM calculation has been perform &#39;&#39;successfully&#39;. Here we use the fact that the CPU and Wall time is suposed to be given at the end of the Dalton run. Maybe there are easier way to achieve that. </span>
+<span class="sd">    Note that this function does not check if the polarizability/hyperpolarizability has been computed! </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">is_the_calculation_done</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">name_result_expected</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">name_dir</span><span class="p">,</span> <span class="s1">&#39;dalton_molecule_potential.out&#39;</span><span class="p">)</span>
+    <span class="n">IS_there_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">name_result_expected</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">IS_there_file</span><span class="p">:</span> <span class="c1"># The file exist, now we wanto to check that the simulation ended properly</span>
+        <span class="n">L_grep</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s2">&quot;cd &quot;</span> <span class="o">+</span> <span class="n">name_dir</span> <span class="o">+</span> <span class="s2">&quot; &amp;&amp; grep &#39;End of Static Property Section (ABACUS)&#39; dalton_molecule_potential.out&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_grep</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">pass</span> <span class="c1"># The dalton output file exist but seem to be dammaged/the calculation have not ended.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">L_grep</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s2">&quot;cd &quot;</span> <span class="o">+</span> <span class="n">name_dir</span> <span class="o">+</span> <span class="s2">&quot; &amp;&amp; grep &#39;Total wall time used in DALTON&#39; dalton_molecule_potential.out&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_grep</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">L_grep</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s2">&quot;cd &quot;</span> <span class="o">+</span> <span class="n">name_dir</span> <span class="o">+</span> <span class="s2">&quot; &amp;&amp; grep &#39;Total CPU  time used in DALTON&#39; dalton_molecule_potential.out&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_grep</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">is_the_calculation_done</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># The dalton output file exist and seems ok.</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">is_the_calculation_done</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="submit_qm_calculation">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.submit_qm_calculation">[docs]</a>
+<span class="k">def</span> <span class="nf">submit_qm_calculation</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">name_file_submit</span><span class="p">,</span> <span class="n">dir_QM</span><span class="p">,</span> <span class="n">template_ready_to_copy</span><span class="p">,</span> <span class="n">trotter</span><span class="p">,</span> <span class="n">new_psmn</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Create the submission scripts used to run Dalton on the cluster. This function may be modified for you particular cluster needs! </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dir_QM</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;CODE ERROR: this case should not happen!&#39;</span><span class="p">)</span>
+        
+    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">template_ready_to_copy</span><span class="p">,</span> <span class="n">name_file_submit</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_file_submit</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">script_temp</span><span class="p">:</span>
+        
+        <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;export DALTON_TMPDIR=&#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">)</span>
+        <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;export OPM_NUM_THREAD=1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mkdir -p &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">)</span> <span class="c1"># creat the scratch directory if it is not created</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dir_QM</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="c1"># only one job is performed at the same time for every submission -- e.g. one core for one QM calculation.</span>
+            <span class="c1">#commande_UNIX = &#39;dalton -w / -o &#39; + toolbox.concatenate_path(dir_QM[0], &#39;dalton_molecule_potential.out&#39;) + &#39; &#39; + toolbox.concatenate_path(dir_QM[0], &#39;dalton.dal&#39;) + &#39; &#39; + toolbox.concatenate_path(dir_QM[0], &#39;molecule.mol&#39;) + &#39; &#39; + toolbox.concatenate_path(dir_QM[0], &#39;potential.pot&#39;)  + &quot; &gt; &quot; + toolbox.concatenate_path(dir_QM[0],&quot;output_dalton.txt&quot;)</span>
+            <span class="k">if</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_mpi_dalton</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
+                <span class="n">np_option</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;-np </span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_mpi_dalton</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span> <span class="p">:</span> 
+                <span class="n">np_option</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            
+            <span class="n">commande_UNIX</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;dalton  -w </span><span class="si">{</span><span class="n">dir_QM</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">/ </span><span class="si">{</span><span class="n">np_option</span><span class="si">}</span><span class="s1">  </span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">dalton_run_option</span><span class="si">}</span><span class="s1"> -o dalton_molecule_potential.out -dal dalton.dal -mol molecule.mol -pot potential.pot &gt; </span><span class="si">{</span><span class="n">dir_QM</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">/output_dalton.txt&#39;</span>
+            <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">commande_UNIX</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#name_pickle_temp = &#39;QM_jobs_to_perform_&#39; + str(trotter) + &#39;.p&#39;</span>
+            <span class="c1">#name_pickle_temp = toolbox.concatenate_path(dir_QM[0], name_pickle_temp)</span>
+            <span class="c1">#L_QM_todo_pickle = {&#39;L_QM_todo&#39; : dir_QM ,  &#39;scratch_dir&#39; : GP.scratch_dir}</span>
+            <span class="c1">#toolbox.save_pickle(name_pickle_temp, L_QM_todo_pickle) # these data would be used by the job later on to find what QM run it has to perform (L_QM_todo) and what scratch directory to use (scratch_dir). </span>
+            <span class="c1">#commande_UNIX = &#39;$MPIRUN -v -x LD_LIBRARY_PATH -hostfile ${HOSTFILE} -np 1 $mypython3 parralele_dalton_run_manager.py &#39; + name_pickle_temp # + &#39; &gt; software_output_${JOB_ID}&#39;</span>
+            <span class="n">name_todo_job</span> <span class="o">=</span>  <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span><span class="p">,</span> <span class="s1">&#39;QM_todo_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">trotter</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">GP</span><span class="o">.</span><span class="n">nbr_mpi_dalton</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
+                <span class="n">np_option</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;-np </span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_mpi_dalton</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span> <span class="p">:</span> 
+                <span class="n">np_option</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_todo_job</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">todo_writing</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dir_QM</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="c1">#commande_UNIX = &#39;dalton -w / -o &#39; + toolbox.concatenate_path(dir_QM[k], &#39;dalton_molecule_potential.out&#39;) + &#39; &#39; + toolbox.concatenate_path(dir_QM[k], &#39;dalton.dal&#39;) + &#39; &#39; + toolbox.concatenate_path(dir_QM[k], &#39;molecule.mol&#39;) + &#39; &#39; + toolbox.concatenate_path(dir_QM[k], &#39;potential.pot&#39;) + &quot; &gt; &quot; + toolbox.concatenate_path(dir_QM[k],&quot;output_dalton.txt&quot;)</span>
+                    <span class="n">commande_UNIX</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;dalton -w </span><span class="si">{</span><span class="n">dir_QM</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s1">/ </span><span class="si">{</span><span class="n">np_option</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">dalton_run_option</span><span class="si">}</span><span class="s1"> -o dalton_molecule_potential.out -dal dalton.dal -mol molecule.mol -pot potential.pot &gt; </span><span class="si">{</span><span class="n">dir_QM</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s1">/output_dalton.txt&#39;</span>
+                    <span class="n">todo_writing</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">commande_UNIX</span><span class="p">)</span>
+                    <span class="n">todo_writing</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            
+            <span class="n">commande_UNIX</span> <span class="o">=</span> <span class="s2">&quot;parallel -j &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &lt; &quot;</span> <span class="o">+</span> <span class="n">name_todo_job</span>
+            <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">commande_UNIX</span><span class="p">)</span>
+        
+        <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;rm -rf &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">)</span>  <span class="c1"># delete the scratch directory.   </span>
+        <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">script_temp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+  
+<div class="viewcode-block" id="create_submissionfile_array">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.create_submissionfile_array">[docs]</a>
+<span class="k">def</span> <span class="nf">create_submissionfile_array</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">total_job_number</span><span class="p">,</span> <span class="n">new_psmn</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    TODO </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">submissionfilename</span> <span class="o">=</span> <span class="s1">&#39;submit_array_job.sh&#39;</span>
+
+    <span class="k">if</span> <span class="n">total_job_number</span> <span class="o">&lt;=</span>  <span class="n">GP</span><span class="o">.</span><span class="n">max_submission_QM</span> <span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">GP</span><span class="o">.</span><span class="n">submit_job_array</span> <span class="ow">and</span> <span class="n">GP</span><span class="o">.</span><span class="n">submit_array_maxjobs</span> <span class="ow">and</span> <span class="n">new_psmn</span> <span class="p">:</span>
+
+            <span class="k">if</span> <span class="s2">&quot;sbatch&quot;</span> <span class="ow">in</span> <span class="n">GP</span><span class="o">.</span><span class="n">command_launch_job</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+
+                <span class="n">name_array_script_job</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span><span class="p">,</span><span class="n">submissionfilename</span> <span class="p">)</span>
+                <span class="n">messages</span><span class="o">.</span><span class="n">user_frendly_70</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span><span class="n">name_array_script_job</span><span class="p">)</span>
+
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_array_script_job</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">arrayfile</span><span class="p">:</span>   
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">file_template_script_run_QM</span><span class="p">)</span> <span class="k">as</span> <span class="n">templatefile</span> <span class="p">:</span>
+                        <span class="n">sbatch_lines</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">templatefile</span> <span class="p">:</span>
+                            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#SBATCH&#39;</span><span class="p">)</span> <span class="p">:</span>
+                                <span class="n">sbatch_lines</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">if</span> <span class="n">sbatch_lines</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span>
+                                <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">submit_job_array</span><span class="si">}</span><span class="s1">0-</span><span class="si">{</span><span class="n">total_job_number</span><span class="si">}</span><span class="s1">%</span><span class="si">{</span><span class="n">GP</span><span class="o">.</span><span class="n">submit_array_maxjobs</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                            <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;export DALTON_TMPDIR=&#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">)</span>
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;export OPM_NUM_THREAD=1</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mkdir -p &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">)</span> <span class="c1"># creat the scratch directory if it is not created</span>
+                    
+                    <span class="n">name_todo_job</span> <span class="o">=</span>  <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">dir_submission_file</span><span class="p">,</span> <span class="s1">&#39;QM_todo_$SLURM_ARRAY_TASK_ID&#39;</span><span class="p">)</span>
+                    <span class="n">commande_UNIX</span> <span class="o">=</span> <span class="s2">&quot;parallel -j &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &lt; &quot;</span> <span class="o">+</span> <span class="n">name_todo_job</span>
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">commande_UNIX</span><span class="p">)</span>
+                    
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;rm -rf &#39;</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">scratch_dir</span><span class="p">)</span>  <span class="c1"># delete the scratch directory. </span>
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                    <span class="n">arrayfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="n">error_messages</span><span class="o">.</span><span class="n">e_134_a</span><span class="p">(</span><span class="n">submissionfilename</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">error_messages</span><span class="o">.</span><span class="n">e_134_b</span><span class="p">(</span><span class="n">submissionfilename</span><span class="p">)</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">error_messages</span><span class="o">.</span><span class="n">e_134_c</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span><span class="n">total_job_number</span><span class="p">,</span><span class="n">submissionfilename</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+    
+<div class="viewcode-block" id="load_iota">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.load_iota">[docs]</a>
+<span class="k">def</span> <span class="nf">load_iota</span><span class="p">(</span><span class="n">QM_dir_mol</span><span class="p">,</span> <span class="n">frequency</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Read the polarizabiliy value at the given frequency from the dalton output file named QM_dir_mol. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.0000</span><span class="p">:</span>
+        <span class="n">L_frequency</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;0.00000&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">L_frequency</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">all_possible_frequency_caligraphy</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+        
+    <span class="n">name_result</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">QM_dir_mol</span><span class="p">,</span> <span class="s1">&#39;dalton_molecule_potential.out&#39;</span><span class="p">)</span>
+    <span class="n">temp_file_name</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">QM_dir_mol</span><span class="p">,</span> <span class="s1">&#39;read_beta_from_file.txt&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># check if the iota is calculated from a 1st order response:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;grep &#39;@ -&lt;&lt; XDIPLEN  ; XDIPLEN  &gt;&gt; = &#39; &quot;</span> <span class="o">+</span> <span class="n">name_result</span> <span class="o">+</span> <span class="s2">&quot; &gt; &quot;</span> <span class="o">+</span> <span class="n">temp_file_name</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">L_iota_raw</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_iota_raw</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">L_iota</span> <span class="o">=</span> <span class="n">load_iota_from_1st_order_calculation</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">,</span> <span class="n">L_frequency</span><span class="p">)</span>
+    
+    <span class="c1"># check if the iota is calculated from a 2nd order response:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;grep &#39;@ QRLRVE:&#39; &quot;</span> <span class="o">+</span> <span class="n">name_result</span> <span class="o">+</span> <span class="s2">&quot; &gt; &quot;</span> <span class="o">+</span> <span class="n">temp_file_name</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">L_iota_raw</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_iota_raw</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">L_iota</span> <span class="o">=</span> <span class="n">load_iota_from_2nd_order_calculation</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">,</span> <span class="n">L_frequency</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: The file: &#39;</span> <span class="o">+</span> <span class="n">name_result</span> <span class="o">+</span> <span class="s1">&#39; does not contain first order results. Please check it&#39;</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_iota</span><span class="p">)</span></div>
+
+    
+<span class="c1">################################################################################################################################    </span>
+    
+<div class="viewcode-block" id="load_iota_from_1st_order_calculation">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.load_iota_from_1st_order_calculation">[docs]</a>
+<span class="k">def</span> <span class="nf">load_iota_from_1st_order_calculation</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">,</span> <span class="n">L_frequency</span><span class="p">):</span>    
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: Not implemented&#39;</span><span class="p">)</span>
+    
+    <span class="n">L_iota</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">L_iota_raw</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    
+    
+    <span class="k">return</span><span class="p">(</span><span class="n">L_iota</span><span class="p">)</span></div>
+
+        
+<span class="c1">################################################################################################################################    </span>
+    
+<div class="viewcode-block" id="load_iota_from_2nd_order_calculation">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.load_iota_from_2nd_order_calculation">[docs]</a>
+<span class="k">def</span> <span class="nf">load_iota_from_2nd_order_calculation</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">,</span> <span class="n">L_frequency</span><span class="p">):</span>   
+   
+    <span class="n">L_iota</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">L_iota_raw</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span> <span class="c1"># the line containing the frequency</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_iota_raw</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">L_iota_raw_i</span> <span class="o">=</span> <span class="n">L_iota_raw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s1">&#39;SINGLET SOLUTION FOR SYMMETRY&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">L_iota_raw_i</span><span class="p">:</span>
+                
+                <span class="k">for</span> <span class="n">frequency_str</span> <span class="ow">in</span> <span class="n">L_frequency</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">frequency_str</span> <span class="o">+</span> <span class="s1">&#39;):&#39;</span> <span class="ow">in</span> <span class="n">L_iota_raw_i</span><span class="p">:</span> <span class="c1"># this is the good frequency  </span>
+                        <span class="n">value_tensor_component</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">L_iota_raw_i</span><span class="p">[</span><span class="mi">51</span><span class="p">:])</span>
+                        <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">find_1st_order_tensor_component</span><span class="p">(</span><span class="n">L_iota_raw_i</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># i or j = -1 stands for dipole-quadrupole polarizability</span>
+                            <span class="n">L_iota</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_tensor_component</span>
+                        
+    <span class="k">return</span><span class="p">(</span><span class="n">L_iota</span><span class="p">)</span></div>
+
+
+<span class="c1">################################################################################################################################</span>
+
+<div class="viewcode-block" id="find_1st_order_tensor_component">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.find_1st_order_tensor_component">[docs]</a>
+<span class="k">def</span> <span class="nf">find_1st_order_tensor_component</span><span class="p">(</span><span class="n">L_iota_raw</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Find the component of the first order response tensor in the case of dipole-dipole interaction. </span>
+<span class="sd">    In other words the polarizability. </span>
+<span class="sd">    </span>
+<span class="sd">    In the Dalton output file, there can be also dipole-quadrupole response tensor (for the first hyperpolarizability calculation later on). We are not interested in these quantity, so i or j = -1 in this case</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">component_i</span> <span class="o">=</span> <span class="n">L_iota_raw</span><span class="p">[</span><span class="mi">14</span><span class="p">:</span><span class="mi">21</span><span class="p">]</span>
+    <span class="n">component_j</span> <span class="o">=</span> <span class="n">L_iota_raw</span><span class="p">[</span><span class="mi">25</span><span class="p">:</span><span class="mi">32</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">component_i</span> <span class="o">==</span> <span class="s1">&#39;XDIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">component_i</span> <span class="o">==</span> <span class="s1">&#39;YDIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">component_i</span> <span class="o">==</span> <span class="s1">&#39;ZDIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># raise Exception(&#39;WARNING: probleme during the reading of iota!!!&#39;)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="n">component_j</span> <span class="o">==</span> <span class="s1">&#39;XDIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">component_j</span> <span class="o">==</span> <span class="s1">&#39;YDIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">component_j</span> <span class="o">==</span> <span class="s1">&#39;ZDIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># raise Exception(&#39;WARNING: probleme during the reading of iota!!!&#39;) # old implementation when FROG did not compute the quadrupolar first hyperpolarizability. Nowadays there can be &lt;&lt; XDIPLEN  ; XXSECMOM &gt;&gt; for instance. So no need to worry and just do nothing in this case</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="load_chi">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.load_chi">[docs]</a>
+<span class="k">def</span> <span class="nf">load_chi</span><span class="p">(</span><span class="n">QM_dir_mol</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">beta_type</span><span class="p">,</span> <span class="n">marker</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Load the first hyperpolarizability from the Dalton output. </span>
+<span class="sd">    </span>
+<span class="sd">    The reading depends on the type of beta defiend by , beta_type. If it is &#39;dipole-dipole&#39;, Dalton provide easely the answer. Otherwise for the &#39;dipole-quadrupole&#39; and &#39;quadrupole-dipole&#39; there is bit more work.</span>
+<span class="sd">    </span>
+<span class="sd">    IMPORTANT: no change of sign/convention is made here!!!! This function only read the information from Dalton.</span>
+<span class="sd">    IMPORTANT: depending on the frequency and the type of beta, the Kleinman symetry may be inforced here. Note that the dipole-quadrupole and quadrupole-beta behaves differently from the usual dipole-dipole hyperpolarizability. For more informatioin please read the documentation about the convention/definition of the hyperpolarizability in Frog!</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.0000</span><span class="p">:</span>
+        <span class="n">frequency</span> <span class="o">=</span> <span class="s1">&#39;0.000000&#39;</span>
+    <span class="n">name_result</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">QM_dir_mol</span><span class="p">,</span> <span class="s1">&#39;dalton_molecule_potential.out&#39;</span><span class="p">)</span>
+    <span class="n">temp_file_name</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">concatenate_path</span><span class="p">(</span><span class="n">QM_dir_mol</span><span class="p">,</span> <span class="s1">&#39;read_beta_from_file.txt&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">beta_type</span> <span class="o">==</span> <span class="s1">&#39;dipole-dipole&#39;</span><span class="p">:</span>
+        <span class="n">L_chi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;grep -r &#39;@ B-freq = &quot;</span> <span class="o">+</span> <span class="n">frequency</span> <span class="o">+</span> <span class="s2">&quot;&#39; &quot;</span> <span class="o">+</span> <span class="n">name_result</span> <span class="o">+</span> <span class="s2">&quot; &gt; &quot;</span> <span class="o">+</span> <span class="n">temp_file_name</span><span class="p">)</span>    
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">L_chi_raw</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_chi_raw</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">L_chi_raw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">L_chi_raw</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">chi</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">find_2nd_order_tensor</span><span class="p">(</span><span class="n">L_chi_raw</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">L_chi</span> <span class="o">=</span> <span class="n">fill_2nd_order_tensor</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">beta_type</span> <span class="o">==</span> <span class="s1">&#39;dipole-quadrupole&#39;</span><span class="p">:</span>
+        <span class="n">L_chi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;grep -A 5 -r &#39;@ Quadratic response function value in a.u. for&#39; &quot;</span> <span class="o">+</span> <span class="n">name_result</span> <span class="o">+</span> <span class="s2">&quot; &gt; &quot;</span> <span class="o">+</span> <span class="n">temp_file_name</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">L_info</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_info</span><span class="p">)</span>
+        <span class="n">trotter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">L_info_one_component</span> <span class="o">=</span> <span class="p">[</span><span class="n">L_info</span><span class="p">[</span><span class="n">trotter</span><span class="p">]]</span>
+        <span class="k">while</span> <span class="n">trotter</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">stop</span><span class="p">:</span> <span class="c1"># load the component provided directly by dalton</span>
+            <span class="k">if</span> <span class="n">L_info</span><span class="p">[</span><span class="n">trotter</span><span class="o">+</span><span class="mi">1</span><span class="p">][:</span><span class="mi">11</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;@ Quadratic&#39;</span><span class="p">:</span>
+                <span class="n">L_info_one_component</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L_info</span><span class="p">[</span><span class="n">trotter</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">trotter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">L_chi</span> <span class="o">=</span> <span class="n">find_beta_dipole_quadru</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">,</span> <span class="n">frequency</span><span class="p">)</span>
+                <span class="n">trotter</span> <span class="o">+=</span><span class="mi">1</span> 
+                <span class="n">L_info_one_component</span> <span class="o">=</span> <span class="p">[</span><span class="n">L_info</span><span class="p">[</span><span class="n">trotter</span><span class="p">]]</span>
+    <span class="k">elif</span> <span class="n">beta_type</span> <span class="o">==</span> <span class="s1">&#39;quadrupole-dipole&#39;</span><span class="p">:</span>
+        <span class="n">L_chi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;grep -A 5 -r &#39;@ Quadratic response function value in a.u. for&#39; &quot;</span> <span class="o">+</span> <span class="n">name_result</span> <span class="o">+</span> <span class="s2">&quot; &gt; &quot;</span> <span class="o">+</span> <span class="n">temp_file_name</span><span class="p">)</span>    
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">temp_file_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">L_info</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_info</span><span class="p">)</span>
+        <span class="n">trotter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">L_info_one_component</span> <span class="o">=</span> <span class="p">[</span><span class="n">L_info</span><span class="p">[</span><span class="n">trotter</span><span class="p">]]</span>
+        <span class="k">while</span> <span class="n">trotter</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">stop</span><span class="p">:</span> <span class="c1"># load the component provided directly by dalton</span>
+            <span class="k">if</span> <span class="n">L_info</span><span class="p">[</span><span class="n">trotter</span><span class="o">+</span><span class="mi">1</span><span class="p">][:</span><span class="mi">11</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;@ Quadratic&#39;</span><span class="p">:</span>
+                <span class="n">L_info_one_component</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L_info</span><span class="p">[</span><span class="n">trotter</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">trotter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">L_chi</span> <span class="o">=</span> <span class="n">find_beta_quadru_dipole</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">,</span> <span class="n">frequency</span><span class="p">)</span>
+                <span class="n">trotter</span> <span class="o">+=</span><span class="mi">1</span> 
+                <span class="n">L_info_one_component</span> <span class="o">=</span> <span class="p">[</span><span class="n">L_info</span><span class="p">[</span><span class="n">trotter</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="n">frequency</span> <span class="o">==</span> <span class="s1">&#39;0.000000&#39;</span><span class="p">:</span> <span class="c1"># we have to switch i,j &lt;-&gt; k, l</span>
+            <span class="n">L_chi_real</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                            <span class="c1"># L_chi_real[i][j][k][l] = L_chi[k][l][i][j]</span>
+                            <span class="n">L_chi_real</span> <span class="o">=</span> <span class="n">symetryse_beta_dipole_quadrupole</span><span class="p">(</span><span class="n">L_chi_real</span><span class="p">,</span>  <span class="n">L_chi</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+            <span class="n">L_chi</span> <span class="o">=</span> <span class="n">L_chi_real</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;CODE ERROR: this case should not happens!&#39;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;rm &quot;</span> <span class="o">+</span> <span class="n">temp_file_name</span><span class="p">)</span> 
+    <span class="c1">#print(&#39;the function dalton_manager_reader.read_beta_from_file is trying to read the beta from the file:&#39;, name_result, &#39;at  the frequency:&#39;, frequency, &#39;read chi:&#39; , L_chi)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="find_2nd_order_tensor">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.find_2nd_order_tensor">[docs]</a>
+<span class="k">def</span> <span class="nf">find_2nd_order_tensor</span><span class="p">(</span><span class="n">char</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Remark: in the dalton output, the name is &#39;&#39;beta&#39;&#39;, evenif it is chi.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">finish</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">trotter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">char</span> <span class="o">=</span> <span class="n">char</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">trotter</span> <span class="o">&lt;</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">char</span><span class="p">)</span><span class="o">-</span><span class="mi">12</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">finish</span><span class="p">:</span> 
+        <span class="n">test</span> <span class="o">=</span> <span class="n">char</span><span class="p">[</span><span class="n">trotter</span><span class="p">:</span><span class="n">trotter</span><span class="o">+</span><span class="mi">12</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">test</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;beta&#39;</span> <span class="ow">and</span> <span class="n">test</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;=&#39;</span><span class="p">:</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">test</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">char</span><span class="p">[</span><span class="n">trotter</span><span class="o">+</span><span class="mi">12</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">char</span><span class="p">)]</span>
+            <span class="n">finish</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trotter</span> <span class="o">+=</span> <span class="mi">1</span> 
+    <span class="k">if</span> <span class="n">finish</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: Not recognized!&#39;</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################    </span>
+
+<div class="viewcode-block" id="fill_2nd_order_tensor">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.fill_2nd_order_tensor">[docs]</a>
+<span class="k">def</span> <span class="nf">fill_2nd_order_tensor</span><span class="p">(</span><span class="n">L_beta</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">L_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">L_index_raw</span> <span class="o">=</span> <span class="p">[</span><span class="n">beta</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">beta</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">beta</span><span class="p">[</span><span class="mi">9</span><span class="p">]]</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">L_index_raw</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;X&#39;</span><span class="p">:</span>
+            <span class="n">L_index</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">L_index_raw</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+            <span class="n">L_index</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">L_index_raw</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span>
+            <span class="n">L_index</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: not recognised&#39;</span><span class="p">)</span>
+    <span class="n">L_index</span> <span class="o">=</span> <span class="n">L_index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="c1">#the result is equal to another value previously put in the beta.     </span>
+        <span class="n">L_index_old</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">L_index_raw_old</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">value</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">value</span><span class="p">[</span><span class="mi">9</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">L_index_raw_old</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;X&#39;</span><span class="p">:</span>
+                <span class="n">L_index_old</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">L_index_raw_old</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+                <span class="n">L_index_old</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">L_index_raw_old</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span>
+                <span class="n">L_index_old</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">L_index_old</span> <span class="o">=</span> <span class="n">L_index_old</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">L_beta</span><span class="p">[</span><span class="n">L_index_old</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">L_index_old</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="n">L_index_old</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>       
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="n">L_beta</span><span class="p">[</span><span class="n">L_index</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">L_index</span><span class="p">[</span><span class="mi">1</span><span class="p">]][</span><span class="n">L_index</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_beta</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="find_beta_dipole_quadru">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.find_beta_dipole_quadru">[docs]</a>
+<span class="k">def</span> <span class="nf">find_beta_dipole_quadru</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">,</span> <span class="n">frequency</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Here we record only: &lt;\mu, \mu, Q&gt;</span>
+<span class="sd">    Note: at zero-frequency:  &lt;Q, \mu, \mu&gt;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">precision_freq</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">the_frequency</span> <span class="o">=</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">33</span><span class="p">:</span><span class="mi">33</span><span class="o">+</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">the_frequency</span><span class="p">[:</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">frequency</span><span class="p">[:</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span> <span class="c1"># not the good frequency</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">frequency</span><span class="p">[:</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0.000000000&#39;</span><span class="p">[:</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span> <span class="c1">#special case with no dispersion. Dalton may provide less quantity because of Kleinman symmetry</span>
+        <span class="n">L_chi</span> <span class="o">=</span> <span class="n">fill_beta_quadru_zero_freq</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">L_chi</span> <span class="o">=</span> <span class="n">fill_beta_dipole_quadru</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="fill_beta_quadru_zero_freq">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.fill_beta_quadru_zero_freq">[docs]</a>
+<span class="k">def</span> <span class="nf">fill_beta_quadru_zero_freq</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">):</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span>
+    <span class="c1"># A</span>
+    <span class="k">if</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">31</span><span class="p">:</span><span class="mi">37</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">30</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">32</span><span class="p">:</span><span class="mi">38</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SECMOM&#39;</span><span class="p">:</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">return_component_quadrupole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">30</span><span class="p">:</span><span class="mi">32</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;ERROR: this error is not possible!!!&#39;</span><span class="p">)</span>
+        
+    <span class="c1"># B </span>
+    <span class="k">if</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">31</span><span class="p">:</span><span class="mi">37</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">30</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">32</span><span class="p">:</span><span class="mi">38</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SECMOM&#39;</span><span class="p">:</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">return_component_quadrupole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">30</span><span class="p">:</span><span class="mi">32</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;ERROR: this error is not possible!!!&#39;</span><span class="p">)</span>
+            
+    <span class="c1"># C </span>
+    <span class="k">if</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">31</span><span class="p">:</span><span class="mi">37</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">30</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">32</span><span class="p">:</span><span class="mi">38</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SECMOM&#39;</span><span class="p">:</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">return_component_quadrupole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">30</span><span class="p">:</span><span class="mi">32</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;ERROR: this error is not possible!!!&#39;</span><span class="p">)</span>    
+        
+    <span class="c1"># check the A, B, C component. </span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">j</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="k">elif</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">k</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">j</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Not possible!!!&#39;</span><span class="p">)</span>
+        
+        
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span> <span class="c1"># not the dipole-dipole-quadrupole beta, for instance quadrupole-dipole-quadrupole</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span>
+            
+    <span class="c1">#print(i, j, m, n)</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">trotter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> 
+    <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">while</span> <span class="n">string</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">string</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">+</span> <span class="n">value</span>
+        <span class="n">trotter</span> <span class="o">=</span> <span class="n">trotter</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="c1">#L_chi[i][j][m][n] = float(value)</span>
+    <span class="n">L_chi</span> <span class="o">=</span> <span class="n">symetryse_beta_dipole_quadrupole</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">frequency_zero</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="fill_beta_dipole_quadru">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.fill_beta_dipole_quadru">[docs]</a>
+<span class="k">def</span> <span class="nf">fill_beta_dipole_quadru</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">):</span>
+    <span class="c1"># A </span>
+    <span class="k">if</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">31</span><span class="p">:</span><span class="mi">37</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">30</span><span class="p">])</span>
+        <span class="c1"># B </span>
+        <span class="k">if</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">31</span><span class="p">:</span><span class="mi">37</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DIPLEN&#39;</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">30</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">32</span><span class="p">:</span><span class="mi">38</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SECMOM&#39;</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">l</span> <span class="o">=</span> <span class="n">return_component_quadrupole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">30</span><span class="p">:</span><span class="mi">32</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;ERROR: this error is not possible!!!&#39;</span><span class="p">)</span>
+            
+        <span class="c1"># C </span>
+        <span class="k">if</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">31</span><span class="p">:</span><span class="mi">37</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DIPLEN&#39;</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">30</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">32</span><span class="p">:</span><span class="mi">38</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SECMOM&#39;</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">l</span> <span class="o">=</span> <span class="n">return_component_quadrupole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">30</span><span class="p">:</span><span class="mi">32</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;ERROR: this error is not possible!!!&#39;</span><span class="p">)</span>    
+        <span class="n">string</span> <span class="o">=</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">trotter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> 
+        <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">while</span> <span class="n">string</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">string</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">+</span> <span class="n">value</span>
+            <span class="n">trotter</span> <span class="o">=</span> <span class="n">trotter</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="c1"># L_chi[i][j][k][l] = float(value)</span>
+        <span class="n">L_chi</span> <span class="o">=</span> <span class="n">symetryse_beta_dipole_quadrupole</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">frequency_zero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span></div>
+
+    
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="find_beta_quadru_dipole">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.find_beta_quadru_dipole">[docs]</a>
+<span class="k">def</span> <span class="nf">find_beta_quadru_dipole</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">,</span> <span class="n">frequency</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Here we record only: &lt;Q, \mu,\mu&gt;</span>
+<span class="sd">    Note: at zero-frequency:  &lt;Q, \mu, \mu&gt;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">precision_freq</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">the_frequency</span> <span class="o">=</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">5</span><span class="p">][</span><span class="mi">33</span><span class="p">:</span><span class="mi">33</span><span class="o">+</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">the_frequency</span><span class="p">[:</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">frequency</span><span class="p">[:</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span> <span class="c1"># not the good frequency</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">frequency</span><span class="p">[:</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0.000000000&#39;</span><span class="p">[:</span><span class="n">precision_freq</span><span class="o">+</span><span class="mi">1</span><span class="p">]:</span> <span class="c1">#special case with no dispersion. Dalton may provide less quantity because of Kleinman symmetry</span>
+        <span class="n">L_chi</span> <span class="o">=</span> <span class="n">fill_beta_quadru_zero_freq</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">L_chi</span> <span class="o">=</span> <span class="n">fill_beta_quadru_dipole</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">)</span>
+    
+    <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="fill_beta_quadru_dipole">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.fill_beta_quadru_dipole">[docs]</a>
+<span class="k">def</span> <span class="nf">fill_beta_quadru_dipole</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">L_info_one_component</span><span class="p">):</span>
+    <span class="n">stop</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># A </span>
+    <span class="k">if</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">32</span><span class="p">:</span><span class="mi">38</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SECMOM&#39;</span><span class="p">:</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">return_component_quadrupole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">30</span><span class="p">:</span><span class="mi">32</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="n">stop</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># B </span>
+    <span class="k">if</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">31</span><span class="p">:</span><span class="mi">37</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">30</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1"># C </span>
+    <span class="k">if</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">31</span><span class="p">:</span><span class="mi">37</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DIPLEN&#39;</span><span class="p">:</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">30</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stop</span><span class="p">:</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="n">L_info_one_component</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">trotter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> 
+        <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">while</span> <span class="n">string</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">string</span><span class="p">[</span><span class="n">trotter</span><span class="p">]</span> <span class="o">+</span> <span class="n">value</span>
+            <span class="n">trotter</span> <span class="o">=</span> <span class="n">trotter</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="c1"># L_chi[i][j][k][l] = float(value)</span>
+        <span class="n">L_chi</span> <span class="o">=</span> <span class="n">symetryse_beta_quadrupole_dipole</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="return_component_dipole">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.return_component_dipole">[docs]</a>
+<span class="k">def</span> <span class="nf">return_component_dipole</span><span class="p">(</span><span class="n">XYZ</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">XYZ</span> <span class="o">==</span> <span class="s1">&#39;X&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">XYZ</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">XYZ</span> <span class="o">==</span> <span class="s1">&#39;Z&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;ERROR: bad dalton output file!&#39;</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">i</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="return_component_quadrupole">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.return_component_quadrupole">[docs]</a>
+<span class="k">def</span> <span class="nf">return_component_quadrupole</span><span class="p">(</span><span class="n">IJ</span><span class="p">):</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">IJ</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">return_component_dipole</span><span class="p">(</span><span class="n">IJ</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="symetryse_beta_dipole_quadrupole">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.symetryse_beta_dipole_quadrupole">[docs]</a>
+<span class="k">def</span> <span class="nf">symetryse_beta_dipole_quadrupole</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">frequency_zero</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">L_quadrupole</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">([</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">])]</span>
+    <span class="k">if</span> <span class="n">frequency_zero</span><span class="p">:</span>
+        <span class="n">L_dipole</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])]</span>
+        <span class="k">for</span> <span class="n">ij</span> <span class="ow">in</span> <span class="n">L_dipole</span><span class="p">:</span>
+            <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">ij</span>
+            <span class="k">for</span> <span class="n">kl</span> <span class="ow">in</span> <span class="n">L_quadrupole</span><span class="p">:</span>
+                <span class="n">k</span><span class="p">,</span> <span class="n">l</span> <span class="o">=</span> <span class="n">kl</span>
+                <span class="n">L_chi</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+         <span class="k">for</span> <span class="n">kl</span> <span class="ow">in</span> <span class="n">L_quadrupole</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">l</span> <span class="o">=</span> <span class="n">kl</span>
+            <span class="n">L_chi</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="symetryse_beta_quadrupole_dipole">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.symetryse_beta_quadrupole_dipole">[docs]</a>
+<span class="k">def</span> <span class="nf">symetryse_beta_quadrupole_dipole</span><span class="p">(</span><span class="n">L_chi</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+    <span class="n">L_quadrupole</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])]</span>
+    <span class="n">L_dipole</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">([</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">])]</span>
+    <span class="k">for</span> <span class="n">ij</span> <span class="ow">in</span> <span class="n">L_quadrupole</span><span class="p">:</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">ij</span>    
+        <span class="k">for</span> <span class="n">kl</span> <span class="ow">in</span> <span class="n">L_dipole</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">l</span> <span class="o">=</span> <span class="n">kl</span>
+            <span class="n">L_chi</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">L_chi</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="write_beta_quadrupole_dalton_shortcut">
+<a class="viewcode-back" href="../../Frog.html#Frog.dalton_manager_module.write_beta_quadrupole_dalton_shortcut">[docs]</a>
+<span class="k">def</span> <span class="nf">write_beta_quadrupole_dalton_shortcut</span><span class="p">(</span><span class="n">the_file</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Function used to make the main part of the code more readable</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">L_dipole</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span><span class="p">]</span>
+    <span class="n">L_quadrupole</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;XX&#39;</span><span class="p">,</span> <span class="s1">&#39;XY&#39;</span><span class="p">,</span> <span class="s1">&#39;XZ&#39;</span><span class="p">,</span> <span class="s1">&#39;YY&#39;</span><span class="p">,</span> <span class="s1">&#39;YZ&#39;</span><span class="p">,</span> <span class="s1">&#39;ZZ&#39;</span><span class="p">]</span>
+    <span class="n">L_ABC</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">ABC</span> <span class="ow">in</span> <span class="n">L_ABC</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">XYZ</span> <span class="ow">in</span> <span class="n">L_dipole</span><span class="p">:</span>
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">ABC</span> <span class="o">+</span> <span class="s1">&#39;PROP</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> 
+            <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">XYZ</span> <span class="o">+</span> <span class="s1">&#39;DIPLEN</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="n">ABC</span> <span class="o">==</span> <span class="s1">&#39;A&#39;</span> <span class="ow">or</span> <span class="n">ABC</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">XY</span> <span class="ow">in</span> <span class="n">L_quadrupole</span><span class="p">:</span>
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">ABC</span> <span class="o">+</span> <span class="s1">&#39;PROP</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> 
+                <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">XY</span> <span class="o">+</span> <span class="s1">&#39;SECMOM</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> </div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

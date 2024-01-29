@@ -1,0 +1,19 @@
+.. _gp_index_page:
+
+==================
+Global Parameter 
+==================
+
+All the GP parameter available are described in one of these pages. You can type HERE to see in which page this parameter is explained.
+
+
+
+.. toctree::
+   :maxdepth: 2
+   
+   ./how_to_creat_GP
+   ./usual_parameters
+   ./directory_management
+   ./QM_management
+   ./none_user_defined
+   ./gp_all

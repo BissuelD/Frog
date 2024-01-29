@@ -1,0 +1,88 @@
+.. _diagram_list_page:
+
+==================
+Diagram available
+==================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+Reminder: The user-input have at least 3 parameters: ::
+
+        [analysis_type, geometrical_discretization, [N]]
+        
+Where 'analysis_type' is one of the analysis presented here ('density' or 'alpha' for instance: no capital letter), 'geometrical_discretization' is the discretization ('Averaged' or 'Plane_xy' for instance, see :ref:`this page<diagram_geometry_selection_page>`) and 'N' refers to the bin number used for the geometrical discretization. In all the documentation, 'N' refers always to the geometrical discretization, and is always the first element of the list defined as the third argument. 
+
+More parameters and bin number can be set after this minimal basis. For instance: ::
+
+    ['beta', 'Plane_xy', [100, 50], [-20, 20]]
+    
+Here `N = 100`. 
+
+.. warning:: If several diagram for the same analysis are required, please note that no extra single molecule attribute are generated (in most of the case). This mean that the calculation of the individual property will be made according to the first diagram of this analysis type. Therefore, if in the input parameter some parameter are declared which impact directly the single molecule parameter value, this parameter should be the same for all the diagram declared. For instance the H-bond where the last user-input impact directly the individual H-bond value!
+
+Density
+-------
+.. _autodoc_diagram_density:
+.. autoclass:: Frog.class_Diagrams.Dia_density
+    :noindex:
+    
+Molecular Orientation
+---------------------
+
+.. _autodoc_diagram_molecular_orientation:
+.. autoclass:: Frog.class_Diagrams.Dia_molecular_orientation
+    :noindex:
+
+Hydrogen bond
+-------------
+
+.. _autodoc_diagram_hbond:
+.. autoclass:: Frog.class_Diagrams.Dia_hbond
+    :noindex:
+
+Radial Distribution Function
+----------------------------
+
+.. _autodoc_diagram_rdf:
+.. autoclass:: Frog.class_Diagrams.Dia_rdf
+    :noindex:
+    
+Electric Field
+----------------------------
+
+.. _autodoc_diagram_electric_field:
+.. autoclass:: Frog.class_Diagrams.Dia_electric_field
+    :noindex:
+
+Alpha
+-----
+
+.. _autodoc_diagram_alpha:
+.. autoclass:: Frog.class_Diagrams.Dia_alpha
+    :noindex:
+    
+Iota
+-----
+
+.. _autodoc_diagram_iota:
+.. autoclass:: Frog.class_Diagrams.Dia_iota
+    :noindex:
+    
+Beta
+-----
+
+.. _autodoc_diagram_beta:
+.. autoclass:: Frog.class_Diagrams.Dia_beta
+    :noindex:
+
+Chi
+-----
+
+.. _autodoc_diagram_chi:
+.. autoclass:: Frog.class_Diagrams.Dia_chi
+    :noindex:
+
+
+    

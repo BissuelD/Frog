@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2.8. How to read results &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.9. Molecular Type Module" href="what_should_contain_molecular_type_file.html" />
+    <link rel="prev" title="2.7. Gamma calculation" href="tuto_gamma_calculation.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="how-to-read-results">
+<span id="read-frog-data-page"></span><h1><span class="section-number">2.8. </span>How to read results<a class="headerlink" href="#how-to-read-results" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#open-the-pickle-results" id="id1">Open the pickle results</a></p></li>
+<li><p><a class="reference internal" href="#plot-the-diagrams" id="id2">Plot the diagrams</a></p>
+<ul>
+<li><p><a class="reference internal" href="#general-procedure" id="id3">General procedure</a></p>
+<ul>
+<li><p><a class="reference internal" href="#how-to-load-any-diagram" id="id4">How to load any diagram?</a></p></li>
+<li><p><a class="reference internal" href="#what-contains-a-diagram-object" id="id5">What contains a diagram object?</a></p></li>
+<li><p><a class="reference internal" href="#mean-value-and-standard-deviation" id="id6">Mean value and standard deviation:</a></p></li>
+<li><p><a class="reference internal" href="#some-remarks-on-the-normalization" id="id7">Some remarks on the normalization:</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#how-to-plot-the-different-analysis" id="id8">How to plot the different analysis?</a></p>
+<ul>
+<li><p><a class="reference internal" href="#density" id="id9">Density</a></p></li>
+<li><p><a class="reference internal" href="#molecular-orientation" id="id10">Molecular orientation</a></p></li>
+<li><p><a class="reference internal" href="#h-bond" id="id11">H-bond</a></p></li>
+<li><p><a class="reference internal" href="#radial-distribution-function" id="id12">Radial Distribution Function</a></p></li>
+<li><p><a class="reference internal" href="#electric-field" id="id13">Electric Field</a></p></li>
+<li><p><a class="reference internal" href="#polarizabilities" id="id14">Polarizabilities</a></p></li>
+<li><p><a class="reference internal" href="#hyperpolarizabilities" id="id15">Hyperpolarizabilities</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#advance-open-any-molecular-value" id="id16">Advance: open any molecular value</a></p></li>
+</ul>
+</nav>
+<p>The aim of this tutorial is to provide informations and example to read,
+plot and analyse the data provided by Frog at the end of the simulation.
+Today, Frog returns pickle file as final output and no other
+possibilities are available.</p>
+<p>This tutorial will use several jupyter notebook file since many options
+are presented. We strongly advice you to try the command line as you
+read this document using these notebook.</p>
+<p>Note: These procedure works in other python environment then jupyter
+notebook. Jupyter notebook is available in most python distribution –
+try <code class="docutils literal notranslate"><span class="pre">$</span> <span class="pre">jupyter</span> <span class="pre">notebook</span></code> in your shell to open it!</p>
+<p>First, you will probably need some standard library, let’s load them:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+</pre></div>
+</div>
+<p>Then, let’s load the Frog module we need: <code class="docutils literal notranslate"><span class="pre">frog_data_analysis</span></code>. We may
+also need other Frog module, therefore we will update the path to the
+current Frog version using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/home/fdupond/Software/Frog&#39;</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;/Source&#39;</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;/Source/Molecules&#39;</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;/Source/Class&#39;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">frog_data_analysis</span>
+</pre></div>
+</div>
+<p>Where <code class="docutils literal notranslate"><span class="pre">path</span></code> should point to the directory where Frog is install. If
+you have already updated your python path permanently, the first 4 lines
+are not required.</p>
+<p>Now, that we have initialize your python environment, let’s first load
+the Frog results and then plot the diagram. In the last part of the
+tutorial, we will see how to load some specific molecular value – for
+advanced user. (je dit ‘’advanced user’’ car cette partie est plus
+delicate!)</p>
+<section id="open-the-pickle-results">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink"><span class="section-number">2.8.1. </span>Open the pickle results</a><a class="headerlink" href="#open-the-pickle-results" title="Link to this heading">¶</a></h2>
+<p>In order to load the results from the pickle file to a more humain
+readable format in python, we will use the function <code class="docutils literal notranslate"><span class="pre">load_result</span></code> of
+the <code class="docutils literal notranslate"><span class="pre">frog_data_analysis</span></code> module. This function will return the General
+Parameter object (GP) and the list of the merged Molecule Type (MT).
+Here is an example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">directory</span> <span class="o">=</span> <span class="s1">&#39;/home/fdupond/Software/Frog/Doc/Tutorial_files/Get_started_tuto&#39;</span>
+<span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span> <span class="o">=</span> <span class="n">frog_data_analysis</span><span class="o">.</span><span class="n">load_result</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">name_result</span><span class="o">=</span><span class="s1">&#39;L_moleculetype_result.p&#39;</span><span class="p">,</span> <span class="n">what_to_print</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;general info&#39;</span><span class="p">,</span> <span class="s1">&#39;diagram info&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Where <code class="docutils literal notranslate"><span class="pre">directory</span></code> is the localization of the results file,
+<code class="docutils literal notranslate"><span class="pre">name_result</span></code> is an optional argument in case the name of the merged
+MT list is not <em>L*moleculetype</em>result.p* and <code class="docutils literal notranslate"><span class="pre">what_to_print</span></code> the
+last optional argument to make this function print some useful
+information about this file. Note that you can call these print function
+using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">frog_data_analysis</span><span class="o">.</span><span class="n">print_general_info</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">)</span>
+<span class="n">frog_data_analysis</span><span class="o">.</span><span class="n">print_diagram_info</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After loading the results.</p>
+<p>At this point, you have loaded the object <code class="docutils literal notranslate"><span class="pre">GP</span></code> which contains broad
+information about the MD files used by the Frog analysis, and
+<code class="docutils literal notranslate"><span class="pre">L_moleculetype_result</span></code> which contains the results of the Frog run.
+The diagrams available contains the information of all the time step
+treated (also called ‘merged’ diagram) and the molecular information of
+the first time step treated – see the last part of this tutorial for
+more information.</p>
+<p>These function are here to remind you the MT type defined and the
+<strong>precise</strong> name of the diagram available for each of them. Frog has
+been designed so that the information you need (most of the time) are
+present in the diagram objects. Let’s see how to use them.</p>
+</section>
+<section id="plot-the-diagrams">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">2.8.2. </span>Plot the diagrams</a><a class="headerlink" href="#plot-the-diagrams" title="Link to this heading">¶</a></h2>
+<section id="general-procedure">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">2.8.2.1. </span>General procedure</a><a class="headerlink" href="#general-procedure" title="Link to this heading">¶</a></h3>
+<section id="how-to-load-any-diagram">
+<h4><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">2.8.2.1.1. </span>How to load any diagram?</a><a class="headerlink" href="#how-to-load-any-diagram" title="Link to this heading">¶</a></h4>
+<p>First, a short reminder about how the diagram has been created and their
+structure.</p>
+<p>In the parameter file, you have first define the General Parameter,
+which is load in the <code class="docutils literal notranslate"><span class="pre">frog_data_analysis.load_result</span></code> function, and
+then the different Molecule Type. For every MT, you have define the
+diagram to perform using the
+<code class="docutils literal notranslate"><span class="pre">moleculetype.read_diagram_input</span></code>function. These diagrams are
+contain in the <code class="docutils literal notranslate"><span class="pre">L_moleculetype_result</span></code> object. We will see in the last
+part how to call them directly, in this section we will use the
+function: <code class="docutils literal notranslate"><span class="pre">frog_data_analysis.return_diagram</span></code>. Here is an example
+using the tutorial ‘get started’, the procedure explained here is
+already implemented in the notebook <em>get*started</em>analysis.ipynb* of
+this directory.</p>
+<p>Let’s remind what MT and what diagram are available for this run using:
+<code class="docutils literal notranslate"><span class="pre">frog_data_analysis.print_diagram_info(GP,</span> <span class="pre">L_moleculetype_result)</span></code></p>
+<p>Returns:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">############## Some information about the diagram available: ##############</span>
+
+<span class="n">Here</span> <span class="ow">is</span> <span class="n">the</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">the</span> <span class="n">available</span> <span class="n">MT</span><span class="p">:</span>  <span class="p">[</span><span class="s1">&#39;Water_TIP4P2005&#39;</span><span class="p">]</span>
+<span class="n">For</span> <span class="n">every</span> <span class="n">MT</span><span class="p">,</span> <span class="n">here</span> <span class="n">are</span> <span class="n">the</span> <span class="n">available</span> <span class="n">diagram</span><span class="p">:</span>
+<span class="n">MT</span><span class="p">:</span>  <span class="n">Water_TIP4P2005</span>
+<span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">diagram</span><span class="p">,</span> <span class="n">population</span>
+<span class="n">density_slice_z</span> <span class="mi">17000</span>
+<span class="n">molecular_orientation_slice_z</span> <span class="mi">17000</span>
+<span class="n">chi</span> <span class="mi">17000</span>
+</pre></div>
+</div>
+<p>There is 1 MT named ‘Water*TIP4P2005’ and 3 diagram available:
+‘density*slice<em>z’, ‘molecular</em>orientation<em>slice</em>z’ and ‘chi’ .
+Let’s load the density analysis of this MT using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MT_name</span> <span class="o">=</span> <span class="s1">&#39;Water_TIP4P2005&#39;</span>
+<span class="n">name_diagram</span> <span class="o">=</span> <span class="s1">&#39;density_slice_z&#39;</span>
+<span class="n">my_diagram</span> <span class="o">=</span> <span class="n">frog_data_analysis</span><span class="o">.</span><span class="n">return_diagram</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">,</span> <span class="n">MT_name</span><span class="p">,</span> <span class="n">name_diagram</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The object <code class="docutils literal notranslate"><span class="pre">my_diagram</span></code> is a diagram of type ‘Dia*density’ – try out
+`type(my*diagram)`. This diagram object return contains all the
+information needed.</p>
+</section>
+<section id="what-contains-a-diagram-object">
+<h4><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">2.8.2.1.2. </span>What contains a diagram object?</a><a class="headerlink" href="#what-contains-a-diagram-object" title="Link to this heading">¶</a></h4>
+<p>Here is a list of the attribute name you can from any diagram object:</p>
+<ul class="simple">
+<li><p>value: The discretized value of the observable required. It is an
+<strong>non-normalized</strong> distribution. We will explain in more details what
+it contains later on and for every type of analysis.</p></li>
+<li><p>valuesquare: usefull?</p></li>
+<li><p>size: The size of the ‘value’ argument. For instance (100, 3, 50)
+means that the ‘value’ array has a 100X3X50 size. This first argument
+always refers to the space discretization.</p></li>
+<li><p>population: an integer with the total number of molecule which have
+contributed to this distribution.</p></li>
+<li><p>unit: the unit object corresponding to the <code class="docutils literal notranslate"><span class="pre">value</span></code> attribute. All
+the diagram are ‘population’, except for the density analysis, since
+it refers to the number of occurrence of the observable within a
+certain range of value. We will explain it in more detail in the
+following unit section.</p></li>
+<li><p>axis_space: The axis representing the space discretization.</p></li>
+<li><p>axis_observable: The axis representing the observable
+discretization.</p></li>
+</ul>
+<section id="axis">
+<h5><span class="section-number">2.8.2.1.2.1. </span>Axis:<a class="headerlink" href="#axis" title="Link to this heading">¶</a></h5>
+<p>For all the space-discretize diagram, the attribute
+<code class="docutils literal notranslate"><span class="pre">my_diagram.axis_space</span></code> contain a ‘frog*axis’ object which correspond
+to the relative axis discretization values. For instance, we wanted to
+have the density along the z-laboratory axis using 100 bin for the
+discretization – done using the argument `[‘density’, ‘Plane*xy’,
+[100]]``in the function``moleculetype.read<em>diagram</em>input<code class="docutils literal notranslate"><span class="pre">of</span> <span class="pre">the</span> <span class="pre">input</span> <span class="pre">file.</span> <span class="pre">Therefore,</span> <span class="pre">the</span></code>my<em>diagram.axis</em>space<code class="docutils literal notranslate"><span class="pre">of</span> <span class="pre">this</span> <span class="pre">diagram</span> <span class="pre">represent</span> <span class="pre">the</span> <span class="pre">z-axis</span> <span class="pre">discretize</span> <span class="pre">in</span> <span class="pre">100</span> <span class="pre">bin.</span> <span class="pre">The</span></code>my<em>diagram.axis</em>space.value`
+is a list going from 0 to the <em>z</em>-box size at the time step 0 with 100
+elements.</p>
+<p>Please note that if the box size changes during the MD simulation, the
+discretization along the laboratory axis will follows this evolution
+(<em>i.e.</em> the bin-length used to construct <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> may
+change). However, for simplicity, the <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_space.value</span></code>
+will be based only on the first frame.</p>
+<p>For all the diagram type, <strong>except</strong> the ‘density’, the attribute
+<code class="docutils literal notranslate"><span class="pre">my_diagram.axis_observable</span></code> contains a ‘frog*axis’ object which
+correspond to the relative observable discretization values. For
+instance, we wanted to have the chi tensor discretized over 50 bins –
+done using the arguement <code class="docutils literal notranslate"><span class="pre">['chi',</span> <span class="pre">'Averaged',</span> <span class="pre">[1,</span> <span class="pre">50],</span> <span class="pre">[-10,</span> <span class="pre">10]]</span></code> in
+the function
+`moleculetype.read*diagram<em>input``of the input file. In this case, the extra argument [-10, 10] holds for the minimal and maximal authorised value for every tensor components (in atomic units). Therefore, The``my</em>diagram.axis_observable`.value
+is a list going from -10 to 10 with 50 elements.</p>
+</section>
+<section id="value">
+<h5><span class="section-number">2.8.2.1.2.2. </span>value:<a class="headerlink" href="#value" title="Link to this heading">¶</a></h5>
+<p>The <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> is the occurrence of the molecular value,
+discretized according to the parameters. For instance, see the file
+<em>get*started</em>analysis.ipynb* of the ‘get started’ tutorial, in the
+case of an input: <code class="docutils literal notranslate"><span class="pre">['density',</span> <span class="pre">'Plane_xy',</span> <span class="pre">[100]]</span></code> , the
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> is a list with the size 100 – given also by
+<code class="docutils literal notranslate"><span class="pre">my_diagram.size</span></code>. The mean position of the water molecule are
+computed for every frame, and the position along the <em>z</em> laboratory axis
+is discretize into 100 bin with respect to the box size in the z
+direction. In this example, the box size along the z direction is 150 A.
+Therefore, a molecular z mean position is 74 A corresponds to the 50th
+bin. Thus, for every molecule with a z mean position of 74 A, Frog will
+add 1 in the 50th bin of <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> – <em>i.e.</em>
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value[49]</span></code> since python list index starts from 0.</p>
+<p>Here us another example more complex using the molecular orientation,
+see the file <em>get*started</em>analysis.ipynb* of the ‘get started’
+tutorial. In this case, the input used to generate the diagram is
+<code class="docutils literal notranslate"><span class="pre">['molecular_orientation',</span> <span class="pre">'Plane_xy',</span> <span class="pre">[100,</span> <span class="pre">100],</span> <span class="pre">'independent']</span></code> in
+the input file. For a given molecule, Frog will perform two
+discretization: one regarding the mean position (like the previous case)
+and one regarding the molecular orientation. Let’s say the mean position
+of the molecule in the z laboratory axis is 89 A and the molecular
+orientation is [-0.89, 0.1, 0.42]. As for the above example, the space
+discretization uses 100 bin. The mean position 89 A correspond to the
+60th bin. In order to discretize the molecular orientation (the
+observable), 100 bin is also used. The molecular orientation range from
+-1 to 1 (projections). Therefore, a molecular orientation of [-0.89,
+0.1, 0.42] correspond to the bin 6, 56 and 72. Since the independent
+distribution is required here, the <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> will be a
+100X3X100 array – given also by <code class="docutils literal notranslate"><span class="pre">my_diagram.size</span></code>. If Frog found a
+molecule with a z laboratory axis mean position of 89 A and a molecular
+orientation of [-0.89, 0.1, 0.42], it will add 1 to the
+elements:<code class="docutils literal notranslate"><span class="pre">my_diagram.value[59][0][5]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value[59][1][55]</span></code> and <code class="docutils literal notranslate"><span class="pre">my_diagram.value[59][2][71]</span></code> .</p>
+<p>Note: if the join distribution was asked, the <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> will
+be a 100X100X100X100 array – given also by <code class="docutils literal notranslate"><span class="pre">my_diagram.size</span></code>. In this
+case, the molecule would lead to only one element update:
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value[59][5][55][71]</span></code>.</p>
+</section>
+</section>
+<section id="mean-value-and-standard-deviation">
+<h4><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">2.8.2.1.3. </span>Mean value and standard deviation:</a><a class="headerlink" href="#mean-value-and-standard-deviation" title="Link to this heading">¶</a></h4>
+<p>For all the analysis type <strong>except</strong> the ‘density’ and the ‘rdf’ (for
+Radial Distribution Function), mean value and standard deviation are
+already available in the diagram object:</p>
+<ul class="simple">
+<li><p>mean: The mean value of the observable. This value can depend on an
+space axis if the diagram is space-discretized.</p></li>
+<li><p>sd: The standard deviation of the observable. This value can depend
+on an space axis if the diagram is space-discretized. Remarque: if
+only one molecule contribute to this value, the standard deviation
+has been set to zero.</p></li>
+<li><p>axis_population: In the case the analysis is space-discretize, this
+list show the number of molecule which have contribute to this
+distribution <strong>for each space-bin</strong>. This list is used to normalized
+the mean and sd value for space-discretized analysis.</p></li>
+</ul>
+<p>For instance, let’s take the space-averaged molecular orientation of the
+‘Mixture MD’ tutorial, see the file <em>mixture*md</em>analysis.ipynb* for
+the analysis jupyter notebook. For the ‘Water*TIP4P2005’ MT, the
+molecular orientation has 3 dimension. Therefore, the dimension of the
+`my*diagram.mean<code class="docutils literal notranslate"><span class="pre">and</span></code>my<em>diagram.sd``is 3. Please note that the unit of the ‘mean’ and ‘sd’ is the same as the one of the``my</em>diagram.axis_observable<code class="docutils literal notranslate"><span class="pre">axis.</span> <span class="pre">Here,</span> <span class="pre">the</span> <span class="pre">mean</span> <span class="pre">and</span> <span class="pre">the</span> <span class="pre">sd</span> <span class="pre">are</span> <span class="pre">**normalized**</span> <span class="pre">with</span> <span class="pre">respect</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">molecule</span> <span class="pre">with</span> <span class="pre">have</span> <span class="pre">contributed</span> <span class="pre">--</span> <span class="pre">*i.e.*</span> <span class="pre">space</span> <span class="pre">and</span> <span class="pre">time</span> <span class="pre">using</span> <span class="pre">the</span></code>population`
+attribute.</p>
+<p>If the molecular orientation of the ‘Water*TIP4P2005’ MT is now also
+space-discretize as in the tutorial ‘get started’, see the
+*get*started<em>analysis.ipynb* file. In this case, the space
+discretization is made over 100 bin. Therefore, the dimension of the
+mean and sd is 100x3 and represent the average of the observable (the
+molecular orientation) in function of the position of the molecule. As
+for the previous case of non-space-discretized analysis, the mean and sd
+are **normalized*</em> with respect to the number of molecule with have
+contributed – <em>i.e.</em> for a given part of space and time using the
+`axis*population<code class="docutils literal notranslate"><span class="pre">.</span> <span class="pre">If</span> <span class="pre">you</span> <span class="pre">want</span> <span class="pre">to</span> <span class="pre">know</span> <span class="pre">how</span> <span class="pre">many</span> <span class="pre">molecule</span> <span class="pre">has</span> <span class="pre">contributed</span> <span class="pre">to</span> <span class="pre">each</span> <span class="pre">space-bin,</span> <span class="pre">you</span> <span class="pre">can</span> <span class="pre">plot</span> <span class="pre">the</span></code>axis_population`
+using for example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_population</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Population in Molecule&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Number of molecule used to compute the mean value wrt the altitude&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This <code class="docutils literal notranslate"><span class="pre">axis_population</span></code> is in fact close to a density in many cases.</p>
+<p>Now let’s plot the mean value of the molecular orientation 1st dimension
+with respect to the altitude using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>If you want to plot the mean value with error bars using the standard
+deviation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">yerr</span><span class="o">=</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">sd</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;orientation mean&#39;</span><span class="p">,</span> <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">mfc</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mew</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Note that here the error bars is equal to the standard deviation.</p>
+<p>As for the previous plot example, we use the function
+<code class="docutils literal notranslate"><span class="pre">print_unit()</span></code>of a unit object. Let’s have a look at the unit object
+briefly.</p>
+<section id="unit">
+<h5><span class="section-number">2.8.2.1.3.1. </span>unit:<a class="headerlink" href="#unit" title="Link to this heading">¶</a></h5>
+<p>Both the observable represented by <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> and the axis
+<code class="docutils literal notranslate"><span class="pre">my_diagram.axis_observable</span></code> and <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_space</span></code> have an
+unit. Here are the unit component already defines in Frog, in
+parenthesis the default value:</p>
+<ul class="simple">
+<li><p>length: [Angstrom], for instance the space-axis.</p></li>
+<li><p>population: [molecule] , for instance the density or the radial
+distribution function analysis.</p></li>
+<li><p>potential: [V], for the electric field analysis.</p></li>
+<li><p>polarizability: [atomic unit], for the alpha and iota analysis.</p></li>
+<li><p>hyperpolarizability: [atomic unit], for the beta and chi analysis.</p></li>
+<li><p>The molecular orientation has a special unit named ‘’projection’’,
+ranged from -1 to 1.</p></li>
+<li><p>The H-bond has a special unit name H-bond. The H-bond are very
+special since they are defined for each molecular pair. Therefore, it
+just represent the ‘own’ and ‘given’ H-bond, the frog unit is
+therefore somehow useless.</p></li>
+</ul>
+<p>All the <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> object have a ‘population’ unit, by default
+in number of molecule, except the density analysis where the
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> is a population.length^{-3}, default unit
+molecule.A^{-3}. This unit is encoded in the <code class="docutils literal notranslate"><span class="pre">my_diagram.unit</span></code> object.</p>
+<p>If the analysis is space discretized, the <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_space</span></code> axis
+as for unit length and default value Angstrom, encoded in
+<code class="docutils literal notranslate"><span class="pre">my_diagram.axis_space.unit</span></code> .</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_observable</span></code> unit depends on the analysis type:</p>
+<ul class="simple">
+<li><p>Density: The <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_observable</span></code>does not exist, this is
+an exception – see bellow.</p></li>
+<li><p>Molecular Orientation: the unit is ‘Projection’, since the value is
+ranged from -1 to 1 and has no real ‘’physical’’ meaning.</p></li>
+<li><p>H-bond: the unit is ‘H-bonds’ and has no real ‘’physical’’ meaning.
+It just represent the number of H-bond own and given.</p></li>
+<li><p>RDF: the unit is a population [Molecule].</p></li>
+<li><p>Electric Field: the unit is potential/length [V/A].</p></li>
+<li><p>Alpha and Iota (polarizabilities): the unit is polarizabilities
+(TODO, mais il me semble que c est un volume physiquement parlant)
+[atomic unit].</p></li>
+<li><p>Beta and Chi (hyperpolarizabilities): the unit is
+hyperpolarizabilities (TODO) [atomic unit].</p></li>
+</ul>
+<p>This unit is stored in <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_observable.unit</span></code></p>
+<p>In order to print the actual unit value of an unit object, use the
+function <code class="docutils literal notranslate"><span class="pre">unit.print_unit()</span></code>.</p>
+<p>You can change any unit using the function
+<code class="docutils literal notranslate"><span class="pre">my_diagram.switch_unit_diagram</span></code> which takes several arguments. For
+instance,let’s take the case of the density analysis of the ‘get
+started’ tutorial, see the <em>get*started</em>analysis.ipynb* file. You
+can plot the density with respect to the space using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Here, the space axis is in Angstrom and the density in Molecule.A^{-3}
+by default – these unit are printed using
+<code class="docutils literal notranslate"><span class="pre">my_diagram.axis_space.unit.print_unit()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">my_diagram.unit.print_unit()</span></code>respectively. If you want to change
+the space axis unit to nm, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_diagram</span><span class="o">.</span><span class="n">switch_unit_diagram</span><span class="p">(</span><span class="s1">&#39;axis_space&#39;</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="s1">&#39;nm&#39;</span><span class="p">,</span> <span class="n">custom_change</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">molar_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the first argument specifies what object the function should change
+the unit. It can be either ‘distribution’, for the <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code>,
+‘axis*observable’, for the `my*diagram.axis<em>observable`, or
+‘axis</em>space’ for the <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_space</span></code>. In the second argument
+specifies what unit component should be changed. The possible value are:
+‘population’, ‘potential’, ‘polarizability’, ‘hyperpolarizability’, or
+‘length’. The third argument specifies the new unit of this unit
+component. For instance, you can change the ‘population’ unit component
+to ‘Molecule’, ‘Mol’, ‘g’ or ‘kg’, and the ‘length’ unit component to
+‘m’, ‘dm’, ‘cm’, ‘mm’, ‘mu’, ‘nm’ or ‘A’. Note that if you want to act
+to the population, you should provide the molar mass of the molecule
+(g/mol) using the optional argument ‘molar_mass’.</p>
+<p>Once the unit of the distribution/axis is change, a coefficient to
+switch the value of these object is provided and automatically apply.
+The unit given are coherent to the value provided. Note that if you
+change the observable axis, it also change the mean and standard
+deviation (if they exist). (TODO: exemple a donner dans un fichier. Pour
+l instant je n en ai pas eu besoin a vrai dire).</p>
+<p>If we want to plot the density in Kg.dm^{-3} (Kg/L), we have to call two
+time the <code class="docutils literal notranslate"><span class="pre">switch_unit_diagram</span></code> function: one for the ‘population’ part
+of the density, and one for the ‘length’. For instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_diagram</span><span class="o">.</span><span class="n">switch_unit_diagram</span><span class="p">(</span><span class="s1">&#39;distribution&#39;</span><span class="p">,</span> <span class="s1">&#39;population&#39;</span><span class="p">,</span> <span class="s1">&#39;kg&#39;</span><span class="p">,</span> <span class="n">custom_change</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">molar_mass</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+<span class="n">my_diagram</span><span class="o">.</span><span class="n">switch_unit_diagram</span><span class="p">(</span><span class="s1">&#39;distribution&#39;</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="s1">&#39;dm&#39;</span><span class="p">,</span> <span class="n">custom_change</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">molar_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, we can plot again the density with respect to the altitude with the
+same line:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>but this time the x-axis (space) is in nm and the y-axis (density) is in
+Kg.dm^{-3}.</p>
+</section>
+</section>
+<section id="some-remarks-on-the-normalization">
+<h4><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">2.8.2.1.4. </span>Some remarks on the normalization:</a><a class="headerlink" href="#some-remarks-on-the-normalization" title="Link to this heading">¶</a></h4>
+<p>You may have notice that in order to plot the density, a normalization
+of the <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> by the number of time step
+<code class="docutils literal notranslate"><span class="pre">GP.nbr_time_step</span></code> is needed. This is due to the fact that the
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> are not normalized with respect to the number of
+time step in any case by default – contrary to the mean values.
+Indeed,, we advice to keep track of the number of molecule used to
+obtained any value. You can use <code class="docutils literal notranslate"><span class="pre">my_diagram.population</span></code> to print the
+number of molecule which have contributed to the diagram. Moreover, you
+can plot the number of molecule used to computed space-discretize mean
+value using the <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_population</span></code>,for instance:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_population</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Population used to compute mean&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Moreover, we recomand to sometime <strong>not normalised</strong> the
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> distribution with the number of time step to have
+the actual number of occurrence. It may help you to check if a behaviour
+is only due to noise or is statistically relevant.</p>
+</section>
+</section>
+<section id="how-to-plot-the-different-analysis">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink"><span class="section-number">2.8.2.2. </span>How to plot the different analysis?</a><a class="headerlink" href="#how-to-plot-the-different-analysis" title="Link to this heading">¶</a></h3>
+<p>Je ne sais pas a quel point j ai besoin de rentrer dans les details ici.
+J espere que ce qui a deja ete explique permet de comprendre la suite.</p>
+<p>For simplicity sake, we will use some notation to refers to the
+different discretization. N refers to the space discretization – the
+size of <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_space.value</span></code>. If the analysis is not
+space-discretized, N=1. M refers to the observable discretization – the
+size of <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_observable.value</span></code>. A last dimension D can be
+needed for some analysis – for instance, the hyperpolarizability have
+27 components, therefore D=27.</p>
+<section id="density">
+<h4><a class="toc-backref" href="#id9" role="doc-backlink"><span class="section-number">2.8.2.2.1. </span>Density</a><a class="headerlink" href="#density" title="Link to this heading">¶</a></h4>
+<p>Very special case: no mean, no sd and no axis<em>observable. If the
+density is not space discretized, to get the mean density you should
+use:
+`my</em>diagram.value/GP.nbr<em>time</em>step<code class="docutils literal notranslate"><span class="pre">which</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">1</span> <span class="pre">element</span> <span class="pre">array.</span> <span class="pre">If</span> <span class="pre">the</span> <span class="pre">density</span> <span class="pre">is</span> <span class="pre">space</span> <span class="pre">discretized,</span> <span class="pre">use</span> <span class="pre">also</span></code>my<em>diagram.value/GP.nbr</em>time_step`
+which is a N element array. Then you can plot it using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>To get the mean density over the all space, you can use for instance:
+<code class="docutils literal notranslate"><span class="pre">np.sum(my_diagram.value/GP.nbr_time_step)/len(my_diagram.value)</span></code>.</p>
+<p>The unit of the density is population.length^{-3} [molecule.A^{-3}].</p>
+</section>
+<section id="molecular-orientation">
+<h4><a class="toc-backref" href="#id10" role="doc-backlink"><span class="section-number">2.8.2.2.2. </span>Molecular orientation</a><a class="headerlink" href="#molecular-orientation" title="Link to this heading">¶</a></h4>
+<p>The dimension depend on the MT. For instance for the Water<em>TIP4P2005
+MT, 3 dimension are needed, for the Methanol</em>OPLSAA, 6 dimensions are
+needed – let’s call this dimension D. The dimension of the mean and the
+sd is equal to NXD. If the independent distribution is required, the
+dimension of the <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> is NXDXM while if the join
+probability is required is goes to NXD^M.</p>
+<p>The unit of the density is ‘Projection’.</p>
+</section>
+<section id="h-bond">
+<h4><a class="toc-backref" href="#id11" role="doc-backlink"><span class="section-number">2.8.2.2.3. </span>H-bond</a><a class="headerlink" href="#h-bond" title="Link to this heading">¶</a></h4>
+<p>Since the H-bond values should be small (less then 10 H-bond per
+molecule for instance), the join distribution of own and given H-bond is
+computed. The user can even defines two different number of
+discretization for the own and given H-bond M and M’. The size of the
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> object is NxMxM’. The mean and sd is a Nx2 array –
+the column is for the own and the second for the given H-bond.</p>
+<p>To plot the own and given distribution, you can use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">][:][</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Own&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">value2</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">][:][</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Given&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;H-bond between water-methanol&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Please note that for the H-bond the <code class="docutils literal notranslate"><span class="pre">my_diagram.axis_observable</span></code>has
+2 value: one for the own and for the given H-bond.</p>
+<p>You can print the mean with the standard deviation using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Mean value:&#39;</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="s1">&#39;sd: &#39;</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">sd</span><span class="p">,</span> <span class="s1">&#39;unit: &#39;</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>The unit of the H-bond is ‘H-bonds’.</p>
+</section>
+<section id="radial-distribution-function">
+<h4><a class="toc-backref" href="#id12" role="doc-backlink"><span class="section-number">2.8.2.2.4. </span>Radial Distribution Function</a><a class="headerlink" href="#radial-distribution-function" title="Link to this heading">¶</a></h4>
+<p>There is no mean nor sd for the RDF. The size of the the
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> object is NxM. It represent the number of partner
+molecule found for a given distance away from the target MT. The result
+for all the time and for all the molecule of this MT are summed in the
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> . To get the averaged value per molecule, normalise
+using <code class="docutils literal notranslate"><span class="pre">my_diagram.population</span></code> as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">population</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Raw RDF for water-water&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The RDF unit is a population (molecule).</p>
+<p>However, to have the usual RDF, this number of molecule found for a
+given distance should be normalized with respect to the homogenous case.
+See the ‘Mixture MD’ tutorial, the <em>mixture*md</em>analysis.ipynb* file.
+First, let’s load the density analysis of this same MT and compute the
+mean density in molecule.A^{-3}:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MT_name</span> <span class="o">=</span> <span class="s1">&#39;Water_TIP4P2005&#39;</span>
+<span class="n">name_diagram</span> <span class="o">=</span> <span class="s1">&#39;density_slice_z&#39;</span>
+<span class="n">my_diagram_density</span> <span class="o">=</span> <span class="n">frog_data_analysis</span><span class="o">.</span><span class="n">return_diagram</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype_result</span><span class="p">,</span> <span class="n">MT_name</span><span class="p">,</span> <span class="n">name_diagram</span><span class="p">)</span>
+
+<span class="c1"># make sure it is the good unit!</span>
+<span class="n">my_diagram_density</span><span class="o">.</span><span class="n">switch_unit_diagram</span><span class="p">(</span><span class="s1">&#39;axis_space&#39;</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">custom_change</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">molar_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">my_diagram_density</span><span class="o">.</span><span class="n">switch_unit_diagram</span><span class="p">(</span><span class="s1">&#39;distribution&#39;</span><span class="p">,</span> <span class="s1">&#39;population&#39;</span><span class="p">,</span> <span class="s1">&#39;Molecule&#39;</span><span class="p">,</span> <span class="n">custom_change</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">molar_mass</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+<span class="n">my_diagram_density</span><span class="o">.</span><span class="n">switch_unit_diagram</span><span class="p">(</span><span class="s1">&#39;distribution&#39;</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">custom_change</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">molar_mass</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">density_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">my_diagram_density</span><span class="o">.</span><span class="n">value</span><span class="o">/</span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">my_diagram_density</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">density_mean</span><span class="p">,</span> <span class="n">my_diagram_density</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>In the homogeneous case, the RDF is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">d_molecules</span> <span class="o">=</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">value</span>
+<span class="n">L_volume_wrt_d</span> <span class="o">=</span> <span class="p">((</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">d_molecules</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">d_molecules</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">d_molecules</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="c1"># 4 \pi R^2 dR</span>
+<span class="n">L_homogenous_rdf</span> <span class="o">=</span> <span class="n">density_mean</span><span class="o">*</span><span class="n">L_volume_wrt_d</span> <span class="c1"># in number of molecule</span>
+</pre></div>
+</div>
+<p>Thus, the normalised RDF is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">L_homogenous_rdf</span><span class="o">/</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">population</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">print_unit</span><span class="p">())</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Normalized RDF for water-water&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="electric-field">
+<h4><a class="toc-backref" href="#id13" role="doc-backlink"><span class="section-number">2.8.2.2.5. </span>Electric Field</a><a class="headerlink" href="#electric-field" title="Link to this heading">¶</a></h4>
+<p>A discuter</p>
+</section>
+<section id="polarizabilities">
+<h4><a class="toc-backref" href="#id14" role="doc-backlink"><span class="section-number">2.8.2.2.6. </span>Polarizabilities</a><a class="headerlink" href="#polarizabilities" title="Link to this heading">¶</a></h4>
+<p>Since the polarizabilities (alpha or iota analysis) are 3x3 tensor, D=9.
+The size of the the <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> object is NxDxM (Nx9xM). To
+call any <em>ij</em> tensor element, use the correspondence: x=0, y=1, z=2 and
+call the (i+3xj) element of the the <code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> . For instance,
+for the yx tensor element, you should use: the 1+3x0 elements of
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value</span></code> , ie
+<code class="docutils literal notranslate"><span class="pre">my_diagram.value[something][1][otherthing]</span></code>. To plot the distribution
+for one tensor component and for a given altitude (bin number <em>z</em>), use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># the yx tensor element:</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># y</span>
+<span class="n">j</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># x</span>
+<span class="n">z</span> <span class="o">=</span> <span class="mi">50</span> <span class="c1"># an altitude</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_observable</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="n">z</span><span class="p">][</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="mi">3</span><span class="p">][:])</span>
+</pre></div>
+</div>
+<p>The mean and sd value have the dimension: Nx3x3. To plot the mean value
+with respect to the altitude, use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># the xz tensor element:</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># x</span>
+<span class="n">j</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># z</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">my_diagram</span><span class="o">.</span><span class="n">axis_space</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">my_diagram</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The unit is ‘polarizability’, by default in atomic unit.</p>
+</section>
+<section id="hyperpolarizabilities">
+<h4><a class="toc-backref" href="#id15" role="doc-backlink"><span class="section-number">2.8.2.2.7. </span>Hyperpolarizabilities</a><a class="headerlink" href="#hyperpolarizabilities" title="Link to this heading">¶</a></h4>
+<p>Same as for the polarizability. D=27 instead of 9 and the mean and sd
+have one extra dimension. (si le paragraph d avant est comprehensible,
+je ferais un equivalent)</p>
+</section>
+</section>
+</section>
+<section id="advance-open-any-molecular-value">
+<h2><a class="toc-backref" href="#id16" role="doc-backlink"><span class="section-number">2.8.3. </span>Advance: open any molecular value</a><a class="headerlink" href="#advance-open-any-molecular-value" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Ouvrir un fichier en particulier</p></li>
+<li><p>Livre une molecule</p></li>
+<li><p>Faire une autocorrelation en temps</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tutorial_index.html">2. Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview.html">2.1. Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="get_started.html">2.2. Get started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_space_discretization.html">2.3. Space Discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_mixture_md.html">2.4. Mixture and structural analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_optical_analysis_overview.html">2.5. Optical Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_quadrupole_long.html">2.6. Quadrupole and Long range QM/MM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html">2.7. Gamma calculation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">2.8. How to read results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html">2.9. Molecular Type Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Tutorials/read_frog_data.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2. Tutorials &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.1. Overview" href="overview.html" />
+    <link rel="prev" title="1.2. Numerical notes and requirements" href="../Installation/numerical_notes_and_requirements.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="tutorials">
+<span id="tutorial-index-page"></span><h1><span class="section-number">2. </span>Tutorials<a class="headerlink" href="#tutorials" title="Link to this heading">¶</a></h1>
+<p>For beginer, we warlmy recommand to try the <a class="reference internal" href="get_started.html#get-started-on-frog-tutorial-page"><span class="std std-ref">get started tutorial</span></a> with the help of the <a class="reference internal" href="overview.html#overview-tutorial-page"><span class="std std-ref">overview page</span></a>.</p>
+<p>The <a class="reference internal" href="tuto_space_discretization.html#tuto-space-discretization-page"><span class="std std-ref">space discretization tutorial</span></a> and the <a class="reference internal" href="tuto_mixture_md.html#tuto-mixture-structural-analysis"><span class="std std-ref">liquid mixture</span></a> one should help you understanding the <em>structural</em> analysis available and how to deal with complexe systems.</p>
+<p>Then, the <a class="reference internal" href="tuto_optical_analysis_overview.html#tuto-optical-analysis-overview-page"><span class="std std-ref">optical analysis overview</span></a> present the main goal of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>: perform QM/MM calculation to obtained the first hyperpolarizability in the liquid phase.
+You can try the <a class="reference internal" href="tuto_quadrupole_long.html#tuto-quadrupole-long-page"><span class="std std-ref">more advanced QM/MM tutorial</span></a> which presents how to refine the PE environment description, see <span id="id1">[<a class="reference internal" href="../index.html#id3" title="Guillaume Le Breton, Oriane Bonhomme, Emmanuel Benichou, and Claire Loison. First hyperpolarizability of water in bulk liquid phase: long-range electrostatic effects included via the second hyperpolarizability. Physical Chemistry Chemical Physics, 24:19463-19472, 2022.">1</a>]</span> or <span id="id2">[<a class="reference internal" href="../index.html#id5" title="Guillaume Le Breton. Génération de second harmonique non-résonnant de liquides : de la réponse moléculaire à la mesure expérimentale. PhD thesis, Université Lyon 1, 2022. Thèse de doctorat dirigée par Bénichou, Emmanuel Loison, Claire et Bonhomme, Oriane Physique &amp; Chimie Lyon 1 2022. URL: http://www.theses.fr/2022LYO10015.">2</a>]</span> Chapter IV, and how to compute the first hyperpolarizability up to the quadrupole order. See <span id="id3">[<a class="reference internal" href="../index.html#id5" title="Guillaume Le Breton. Génération de second harmonique non-résonnant de liquides : de la réponse moléculaire à la mesure expérimentale. PhD thesis, Université Lyon 1, 2022. Thèse de doctorat dirigée par Bénichou, Emmanuel Loison, Claire et Bonhomme, Oriane Physique &amp; Chimie Lyon 1 2022. URL: http://www.theses.fr/2022LYO10015.">2</a>]</span> Chapter VI.</p>
+<p>A short <a class="reference internal" href="tuto_gamma_calculation.html#tuto-gamma-calculation-page"><span class="std std-ref">tutorial about the second hyperpolarizability</span></a> is proposed for advanced users, see <span id="id4">[<a class="reference internal" href="../index.html#id3" title="Guillaume Le Breton, Oriane Bonhomme, Emmanuel Benichou, and Claire Loison. First hyperpolarizability of water in bulk liquid phase: long-range electrostatic effects included via the second hyperpolarizability. Physical Chemistry Chemical Physics, 24:19463-19472, 2022.">1</a>]</span>.</p>
+<p>Finally, we explain how to write by yourself a new MoleculeType, which is the backbone of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, for any molecule not yet available. This tutorial may require some knowledge about the <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> functionment explained throughout this wiki.</p>
+<p>Every tutorial are in the directory <em>Tutorials</em> which you should find in the <a class="reference external" href="https://github.com/glb96/Frog">GitHub repository</a>. Each sub-directory correspond to a tutorial. In every directory you will find input for <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, sometimes QM results, and also a jupyter notebook file (.ipynb) that can be used for the analysis. The trajectories needed for the tutorials are in <em>Tutorials/Traj</em>.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">2.1. Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#goal-and-perquisite">2.1.1. Goal and Perquisite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#frog-purposes">2.1.2. Frog purposes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#key-objects">2.1.3. Key Objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#steps">2.1.4. Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#frog-files-and-directory-structure">2.1.5. Frog Files and Directory Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">2.2. Get started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="get_started.html#goal-and-perquisite">2.2.1. Goal and Perquisite:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="get_started.html#the-parameter-file">2.2.2. The Parameter file:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="get_started.html#run-frog">2.2.3. Run Frog:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tuto_space_discretization.html">2.3. Space Discretization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tuto_space_discretization.html#goal-and-perquisite">2.3.1. Goal and Perquisite:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_space_discretization.html#parameter-file">2.3.2. Parameter file:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_space_discretization.html#analysis">2.3.3. Analysis:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tuto_mixture_md.html">2.4. Mixture and structural analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tuto_mixture_md.html#goal-and-perquisite">2.4.1. Goal and Perquisite:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_mixture_md.html#parameter-file">2.4.2. Parameter file:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_mixture_md.html#run-and-analysis">2.4.3. Run and analysis:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tuto_optical_analysis_overview.html">2.5. Optical Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tuto_optical_analysis_overview.html#goal-and-perquisite">2.5.1. Goal and Perquisite:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_optical_analysis_overview.html#parameter-file">2.5.2. Parameter file:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_optical_analysis_overview.html#procedure">2.5.3. Procedure:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_optical_analysis_overview.html#analysing-the-results">2.5.4. Analysing the results:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tuto_quadrupole_long.html">2.6. Quadrupole and Long range QM/MM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tuto_quadrupole_long.html#goal-and-perquisite">2.6.1. Goal and Perquisite:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_quadrupole_long.html#parameter-file">2.6.2. Parameter file:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_quadrupole_long.html#procedure">2.6.3. Procedure:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tuto_gamma_calculation.html">2.7. Gamma calculation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html#goal-and-perquisite">2.7.1. Goal and Perquisite:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html#overview">2.7.2. Overview:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html#one-parameter-file">2.7.3. One Parameter file:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html#procedure">2.7.4. Procedure:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="read_frog_data.html">2.8. How to read results</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="read_frog_data.html#open-the-pickle-results">2.8.1. Open the pickle results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read_frog_data.html#plot-the-diagrams">2.8.2. Plot the diagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read_frog_data.html#advance-open-any-molecular-value">2.8.3. Advance: open any molecular value</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="what_should_contain_molecular_type_file.html">2.9. Molecular Type Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html#goal-and-perquisite">2.9.1. Goal and Perquisite:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html#procedure">2.9.2. Procedure:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html#general-informations">2.9.3. General informations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html#structural-analysis">2.9.4. Structural analysis:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html#optical-properties">2.9.5. Optical properties:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html#final-remarks">2.9.6. Final remarks</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="docutils container" id="id5">
+<div role="list" class="citation-list">
+<div class="citation" id="id7" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id4">2</a>)</span>
+<p>Guillaume Le Breton, Oriane Bonhomme, Emmanuel Benichou, and Claire Loison. First hyperpolarizability of water in bulk liquid phase: long-range electrostatic effects included via the second hyperpolarizability. <em>Physical Chemistry Chemical Physics</em>, 24:19463–19472, 2022.</p>
+</div>
+<div class="citation" id="id9" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id2">1</a>,<a role="doc-backlink" href="#id3">2</a>)</span>
+<p>Guillaume Le Breton. <em>Génération de second harmonique non-résonnant de liquides : de la réponse moléculaire à la mesure expérimentale</em>. PhD thesis, Université Lyon 1, 2022. Thèse de doctorat dirigée par Bénichou, Emmanuel Loison, Claire et Bonhomme, Oriane Physique &amp; Chimie Lyon 1 2022. URL: <a class="reference external" href="http://www.theses.fr/2022LYO10015">http://www.theses.fr/2022LYO10015</a>.</p>
+</div>
+</div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html">2.1. Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="get_started.html">2.2. Get started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_space_discretization.html">2.3. Space Discretization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_mixture_md.html">2.4. Mixture and structural analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_optical_analysis_overview.html">2.5. Optical Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_quadrupole_long.html">2.6. Quadrupole and Long range QM/MM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tuto_gamma_calculation.html">2.7. Gamma calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="read_frog_data.html">2.8. How to read results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="what_should_contain_molecular_type_file.html">2.9. Molecular Type Module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Tutorials/tutorial_index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

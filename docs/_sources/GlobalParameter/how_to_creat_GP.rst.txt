@@ -1,0 +1,51 @@
+.. _how_to_creat_GP_page:
+
+======================
+How to create GP?
+======================
+
+To create and initialize the Global Parameters, use in the parameter file: ::
+    
+    from Frog.class_GP import  GlobalParameter
+    GP = GlobalParameter()
+
+Now if you want to set a GlobalParameter attribute with name 'A' the value 'B', use: ::
+
+    GP.A = B
+
+For the GlobalParameter, you shall define at least the attribute relative to the MD file: 
+
+    + :ref:`GlobalParameter.MD_file_name_topology<autodoc_gp_MD_file_name_topology>` 
+    
+    + :ref:`GlobalParameter.MD_file_name_traj<autodoc_gp_MD_file_name_traj>` 
+    
+    + :ref:`GlobalParameter.MD_file_type<autodoc_gp_MD_file_type>` 
+    
+    + :ref:`GlobalParameter.nbr_time_step<autodoc_gp_nbr_time_step>` 
+    
+    + :ref:`GlobalParameter.trotter_step<autodoc_gp_trotter_step>` 
+    
+If you have QM calculation, defines: 
+
+    + :ref:`GlobalParameter.file_template_script_run_QM<autodoc_gp_file_template_script_run_QM>` 
+    
+    + :ref:`GlobalParameter.scratch_dir<autodoc_gp_scratch_dir>` 
+    
+    + :ref:`GlobalParameter.max_submission_QM<autodoc_gp_max_submission_QM>` 
+    
+    + :ref:`GlobalParameter.nbr_job_parr_QM<autodoc_gp_nbr_job_parr_QM>` 
+        
+    + :ref:`GlobalParameter.command_launch_job<autodoc_gp_command_launch_job>` 
+
+You may also set the :ref:`GlobalParameter.pass_first_part<autodoc_gp_pass_first_part>` to True.
+
+
+Once all the GP attribute you wanted to defined have been set, you have to call the function: ::
+
+    GP.MD_check_GP()
+
+In order to end the GP definition. This function will check if the parameter make sens and intialize important varaible for the MT definitions.
+
+.. Warning:: After this line, some attribute will still evolve on the GP object but we strongly recommend to **not** define directly other GP's attributes. 
+
+

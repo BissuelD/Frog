@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>3.3. Directory Management &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3.4. QM Management" href="QM_management.html" />
+    <link rel="prev" title="3.2. Usual Parameters" href="usual_parameters.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="directory-management">
+<span id="gp-directory-management-page"></span><h1><span class="section-number">3.3. </span>Directory Management<a class="headerlink" href="#directory-management" title="Link to this heading">¶</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In case you are working with a cluster, be aware that the ‘~’ might not work threw job management. Prefere explicite location instead – /home/yourname instead of ~ !</p>
+</div>
+<dl class="py attribute" id="autodoc-gp-general-path">
+<dt class="sig sig-object py" id="Frog.class_GP.GlobalParameter.general_path">
+<span class="sig-prename descclassname"><span class="pre">GlobalParameter.</span></span><span class="sig-name descname"><span class="pre">general_path</span></span><a class="headerlink" href="#Frog.class_GP.GlobalParameter.general_path" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The general path used to defined all the other path of the directory. By default, it will be set to the working directory.
+You may define the directory with or without the final ‘/’:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/My_systeme/Frog_Analysis&#39;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/My_systeme/Frog_Analysis/&#39;</span>
+</pre></div>
+</div>
+<p>If you want to not use this behaviour – for instance you want to define yourself every directory – you can set GP.general_path to ‘/’. You may also define the other directory attribute with a starting ‘//’. For instance, If you want to set the QM datas at: <span class="incremental">/scratch/myname/Datas/Frog/Water_QM</span></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/My_systeme/Whatever/&#39;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">dir_torun_QM</span> <span class="o">=</span> <span class="s1">&#39;//scratch/myname/Datas/Frog/Water_QM&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The general_path does not affect the location of the GP.MD_file_name_topology and GP.MD_file_name_traj.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-gp-dir-mol-times">
+<dt class="sig sig-object py" id="Frog.class_GP.GlobalParameter.dir_mol_times">
+<span class="sig-prename descclassname"><span class="pre">GlobalParameter.</span></span><span class="sig-name descname"><span class="pre">dir_mol_times</span></span><a class="headerlink" href="#Frog.class_GP.GlobalParameter.dir_mol_times" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The directory used to store the molecular properties for each time step. These data are not humain-readable intented. These datas can become heavy depending on the number of molecule, time step and the number of analysis required.  The path is updated using the GP.general_path attribute. The default value is “Molecule_times”.</p>
+<p class="rubric">Example</p>
+<p>If no GP.dir_mol_times is declared, the results are saved at <span class="incremental">GP.general_path/Molecule_times</span>.</p>
+<p>If <span class="incremental">GP.dir_mol_times = Datas/Molecule_in_time</span>, the results are saved at :  <span class="incremental">GP.general_path/Datas/Molecule_in_time</span></p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-gp-dir-torun-qm">
+<dt class="sig sig-object py" id="Frog.class_GP.GlobalParameter.dir_torun_QM">
+<span class="sig-prename descclassname"><span class="pre">GlobalParameter.</span></span><span class="sig-name descname"><span class="pre">dir_torun_QM</span></span><a class="headerlink" href="#Frog.class_GP.GlobalParameter.dir_torun_QM" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The directory used to store the QM directories: the input script and the results. A large number of directory can be created if many QM simulations are required and thus occupied large amount of space eventhough each file (input file or the result) are small. These data are humain-readable and we strongly recommand to have a look from time to time. The path is updated using the GP.general_path attribute. The default value is “QM_Simulations”.</p>
+<p class="rubric">Example</p>
+<p>If no GP.dir_torun_QM is declared, the results are saved at <span class="incremental">GP.general_path/QM_Simulations</span>.</p>
+<p>If you want to set the QM datas at: “/scratch/myname/Datas/Frog/Water_QM”, you have to set <span class="incremental">GP.dir_torun_QM = “/scratch/myname/Datas/Frog/Water_QM”</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If possible, we recommand to set this directory to a place where the writting/openning of the files are easely efficient.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-gp-dir-submission-file">
+<dt class="sig sig-object py" id="Frog.class_GP.GlobalParameter.dir_submission_file">
+<span class="sig-prename descclassname"><span class="pre">GlobalParameter.</span></span><span class="sig-name descname"><span class="pre">dir_submission_file</span></span><a class="headerlink" href="#Frog.class_GP.GlobalParameter.dir_submission_file" title="Link to this definition">¶</a></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The directory used to store the script needed to launch the QM run on a cluster. A large number of file can be created if many QM simulations are required, but it should not occupy a large amount of space. These script are humain-readable. The path is updated using the GP.general_path attribute. The default value is “Submission_script”.</p>
+<p class="rubric">Example</p>
+<p>If no GP.dir_submission_file is declared, the results are saved at <span class="incremental">GP.general_path/Submission_script</span>.</p>
+<p>If <span class="incremental">GP.dir_submission_file = Dir_sge/</span>, the results are saved at :  <span class="incremental">GP.general_path/Dir_sge</span></p>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="gp_index.html">3. Global Parameter</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_creat_GP.html">3.1. How to create GP?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usual_parameters.html">3.2. Usual Parameters</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">3.3. Directory Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QM_management.html">3.4. QM Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="none_user_defined.html">3.5. None user defined</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gp_all.html">3.6. All the GP parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/GlobalParameter/directory_management.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

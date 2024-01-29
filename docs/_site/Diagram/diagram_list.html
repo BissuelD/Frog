@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>5.2. Diagram available &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="5.3. Diagram analysis" href="diagram_analysis.html" />
+    <link rel="prev" title="5.1. How to create Diagram?" href="how_to_creat_diagram.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="diagram-available">
+<span id="diagram-list-page"></span><h1><span class="section-number">5.2. </span>Diagram available<a class="headerlink" href="#diagram-available" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#density" id="id1">Density</a></p></li>
+<li><p><a class="reference internal" href="#molecular-orientation" id="id2">Molecular Orientation</a></p></li>
+<li><p><a class="reference internal" href="#hydrogen-bond" id="id3">Hydrogen bond</a></p></li>
+<li><p><a class="reference internal" href="#radial-distribution-function" id="id4">Radial Distribution Function</a></p></li>
+<li><p><a class="reference internal" href="#electric-field" id="id5">Electric Field</a></p></li>
+<li><p><a class="reference internal" href="#alpha" id="id6">Alpha</a></p></li>
+<li><p><a class="reference internal" href="#iota" id="id7">Iota</a></p></li>
+<li><p><a class="reference internal" href="#beta" id="id8">Beta</a></p></li>
+<li><p><a class="reference internal" href="#chi" id="id9">Chi</a></p></li>
+</ul>
+</nav>
+<p>Reminder: The user-input have at least 3 parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">analysis_type</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Where ‘analysis_type’ is one of the analysis presented here (‘density’ or ‘alpha’ for instance: no capital letter), ‘geometrical_discretization’ is the discretization (‘Averaged’ or ‘Plane_xy’ for instance, see <a class="reference internal" href="how_to_creat_diagram.html#diagram-geometry-selection-page"><span class="std std-ref">this page</span></a>) and ‘N’ refers to the bin number used for the geometrical discretization. In all the documentation, ‘N’ refers always to the geometrical discretization, and is always the first element of the list defined as the third argument.</p>
+<p>More parameters and bin number can be set after this minimal basis. For instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Here <span class="incremental">N = 100</span>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If several diagram for the same analysis are required, please note that no extra single molecule attribute are generated (in most of the case). This mean that the calculation of the individual property will be made according to the first diagram of this analysis type. Therefore, if in the input parameter some parameter are declared which impact directly the single molecule parameter value, this parameter should be the same for all the diagram declared. For instance the H-bond where the last user-input impact directly the individual H-bond value!</p>
+</div>
+<section id="density">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink"><span class="section-number">5.2.1. </span>Density</a><a class="headerlink" href="#density" title="Link to this heading">¶</a></h2>
+<dl class="py class" id="autodoc-diagram-density">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_Diagrams.</span></span><span class="sig-name descname"><span class="pre">Dia_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_Diagrams.html#Dia_density"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Unit</strong> [Molecule / Angstrom^3]</p>
+<p><strong>Input format</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Compute the density of the system for a given molecule type. Please note that the position of a molecule is defined in its molecular module using the function: compute_mean_position. In case the position of a molecule is ouside the box, it is reput inside for the diagram calculation. Very few extra calculation is required to perform the density analysis since the mean position of every molecule is computed anyway.</p>
+<p>For the density, no extra parameters are needed, i.e., only the three basic arguments are needed to define the density analysis.</p>
+<p><strong>Diagram size</strong>: N</p>
+<p><strong>Diagram mean</strong>: No mean available</p>
+<p><strong>SingleMolecule attribute</strong>: mean_position</p>
+<p><strong>Extra parameter for the SingleDiagramParameter</strong>: Nothing</p>
+<p class="rubric">Example</p>
+<p>User input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="s1">&#39;density&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+<span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">]]]</span>
+</pre></div>
+</div>
+<p>Creates 2 diagrams:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>One with name ‘density’, not space-discretized. Contains the number of molecule divided by the volume of the box.</p></li>
+<li><p>One with the name ‘density_slice_z’, duscretized along the z-axis with 100 bins. The diagram.value contains the list of the number of molecule found per slices divided by the slice volume. Please note that the slice volume may depend on the MD box size.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="molecular-orientation">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink"><span class="section-number">5.2.2. </span>Molecular Orientation</a><a class="headerlink" href="#molecular-orientation" title="Link to this heading">¶</a></h2>
+<dl class="py class" id="autodoc-diagram-molecular-orientation">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_Diagrams.</span></span><span class="sig-name descname"><span class="pre">Dia_molecular_orientation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_Diagrams.html#Dia_molecular_orientation"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Unit</strong> [Projection]</p>
+<p><strong>Input format</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;molecular_orientation&#39;</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">],</span> <span class="n">Proba_style</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Compute the molecular orientation of a molecule type. This ‘’molecular orientation’’ is defined in its molecular module using the function named: compute_molecular_orientation.
+The molecular orientation can have an arbitrary number of values.
+For instance, it can be defined by 3 number (for instance 3 cosinus value).
+The expected value of a molecule orientation is between -1 and 1.</p>
+<p>Depending on the Proba_style used, the size of the diagram is different.
+If Proba_style = ‘join’, the diagram compute the joint occurence for every dimension used to describe the molecular orientation. If L number of dimensions is needed, the diagram size is: NxMxMxM…xM with L times M.
+If Proba_style = ‘independent’, the diagram compute the independence for every dimension used to describe the molecular orientation. If L number of dimensions is needed, the diagram size is: NxLXM</p>
+<p><strong>Diagram size</strong>: NxLxM or NxMxM…xM</p>
+<p><strong>Diagram mean</strong>: NxL any case</p>
+<p><strong>SingleMolecule attribute</strong>: molecular_orientation</p>
+<dl class="simple">
+<dt><strong>Extra parameter for the SingleDiagramParameter</strong>:</dt><dd><ul class="simple">
+<li><p>proba_style</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>User input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="s1">&#39;molecular_orientation&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span> <span class="s1">&#39;join&#39;</span><span class="p">],</span>
+<span class="p">[</span><span class="s1">&#39;molecular_orientation&#39;</span><span class="p">,</span> <span class="s1">&#39;Plane_xz&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">70</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="s1">&#39;independent&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Let’s assume there is 3 number are needed to defined the molecular angle.
+Creats 2 diagrams:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>One with name ‘molecular_orientation_slice_z’. Contains the join probability of finding the molecular orientation. Its size is 60x45x45x45. It mean size is 60x3.</p></li>
+<li><p>One with name ‘molecular_orientation_slice_y’. Contains the independent probability of finding the molecular orientation. Its size is 70x3x10. It mean size is 70x3.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="hydrogen-bond">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">5.2.3. </span>Hydrogen bond</a><a class="headerlink" href="#hydrogen-bond" title="Link to this heading">¶</a></h2>
+<dl class="py class" id="autodoc-diagram-hbond">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_Diagrams.</span></span><span class="sig-name descname"><span class="pre">Dia_hbond</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_Diagrams.html#Dia_hbond"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Unit</strong> [H-bond]</p>
+<p><strong>Input format</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;hbond&#39;</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">],</span> <span class="n">partner</span><span class="p">,</span> <span class="n">fct_parameters</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Compute the ‘’hydrogen bonds’’ of a molecule type with another molecule type – the ‘’partner’’ molecule type.
+This ‘’hbond’’ is defined in its molecular module or in the partner molecular module using the function named: compute_hbonds.
+This function should return whether one molecule or the other ‘’own’’ or ‘’give’’ something – for instance an hydrogen bond.
+This function can be of course used to defined other things then hydrogen bounds.</p>
+<p>The important point is that this function should return only +1 for one of the molecule or 0 for both molecule.
+The diagram tracks the occurence of this molecule to ‘’own’’ or ‘’give’’ somthing with the other molecule type (joint occurence).
+Therefore, in the input the partner molecule type have to be defined.</p>
+<p>I and J are the maximal number of ‘own’ and ‘given’ hbond respectively by this MoleculeType.
+The ‘mean’ is the independent average of the ‘own’ and ‘given’ hbond.</p>
+<p>The last parameter, fct_parameters, depends on the function defined on the molecular module compute_hbonds.
+Please, keep in mind that the function compute_hbonds can be either defined in this molecular module or in the partner molecular module for the specific couple of molecule type.</p>
+<p><strong>Diagram size</strong>: NxIxJ</p>
+<p><strong>Diagram mean</strong>: Nx2</p>
+<p><strong>SingleMolecule attribute</strong>: hbond_ +  partner</p>
+<dl class="simple">
+<dt><strong>Extra parameter for the SingleDiagramParameter</strong>:</dt><dd><ul class="simple">
+<li><p>partner = [string] The moleculartype name of the partner molecule.</p></li>
+<li><p>which_function_to_call = [string] Either ‘Target’ or ‘Partner’ if the compute_hbonds should be used in this molecular module or the partner one.</p></li>
+<li><p>fct_parameters = [list] An array of all the parameter to pass to the function which compute the hbounds. See the molecular module function compute_hbonds to now what is expected.</p></li>
+<li><p>max_distance = [float] Define the radius to defined the neighbourood.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>User input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;hbond&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>  <span class="s1">&#39;WaterTIP4P2005&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">2.7</span><span class="p">,</span> <span class="mi">37</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>The diagram size will be 4X5.
+The ‘partner’ MoleculeType name is WaterTIP4P2005. If there is no WaterTIP4P2005 declared, there will be zero hbond.
+If no ways of computing hbond between this MT and WaterTIP4P2005 are found in the compute_hbonds function of this molecular file module or the one of WaterTIP4P2005, Frog will krash.
+[2.7, 37] are the parameters passed to the molecular module function compute_hbonds.</p>
+</dd></dl>
+
+</section>
+<section id="radial-distribution-function">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">5.2.4. </span>Radial Distribution Function</a><a class="headerlink" href="#radial-distribution-function" title="Link to this heading">¶</a></h2>
+<dl class="py class" id="autodoc-diagram-rdf">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_Diagrams.</span></span><span class="sig-name descname"><span class="pre">Dia_rdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_Diagrams.html#Dia_rdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Unit</strong> [Molecule]</p>
+<p><strong>Input format</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;rdf&#39;</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">],</span> <span class="n">partner</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Compute the radial distribution function (rdf) of a target molecule type – the ‘’partner’’ molecule type – with respect to this molecule type.
+The distance between each molecule is defined between their ‘mean position’ – defined in their respective compute_mean_position function of their molecular module.
+The maximal distance to compute this rdf is set by max_distance, in Angstrom.</p>
+<p>Note that the rdf obtained is not normalized.
+See the get started tutorial for more information.</p>
+<p><strong>Diagram size</strong>: NxM</p>
+<p><strong>Diagram mean</strong>: Not defined</p>
+<p><strong>SingleMolecule attribute</strong>: rdf_ +  partner</p>
+<dl class="simple">
+<dt><strong>Extra parameter for the SingleDiagramParameter</strong>:</dt><dd><ul class="simple">
+<li><p>partner = [string] The moleculartype name of the partner molecule.</p></li>
+<li><p>max_distance = [float] Define the maximal radius for the rdf.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>User input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;rdf&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">25</span><span class="p">],</span>  <span class="s1">&#39;WaterTIP4P2005&#39;</span><span class="p">,</span> <span class="mf">10.2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The diagram size will be 25.
+The ‘partner’ MoleculeType name is WaterTIP4P2005.
+The maximal distance to find this partner is 10.2 Angstrom.</p>
+</dd></dl>
+
+</section>
+<section id="electric-field">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">5.2.5. </span>Electric Field</a><a class="headerlink" href="#electric-field" title="Link to this heading">¶</a></h2>
+<dl class="py class" id="autodoc-diagram-electric-field">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_Diagrams.</span></span><span class="sig-name descname"><span class="pre">Dia_electric_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_Diagrams.html#Dia_electric_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Unit</strong> [V/A]</p>
+<p><strong>Input format</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;electric_field&#39;</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">],</span> <span class="p">[</span><span class="n">e_min</span><span class="p">,</span> <span class="n">e_max</span><span class="p">]</span> <span class="n">calculation_type</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Compute the electrostatic field created by the environment around each molecule of this MT.
+This electrostatic environment takes into account every molecules (include this MT and others).
+Each neighborgs are described using their electrostatic description provided by their MT module.</p>
+<p>The electrostatic field they produce are computed <em>only</em> at the ‘mean position’ of the molecule from this MT.
+The return electrostatic field is the one produce by all the environment (direct sum).
+The spatial derivative is also computed from the individua neighborgs contribution.</p>
+<p>The results is written in Volt per Angstrom for the electrostatic field, and Volt per Angstrom square for the electrostatic field space derivative.</p>
+<p>Depending on the calculation_type used, the size of the diagram may be different.</p>
+<p>If calculation_type = ‘on_fly’, the diagram compute by itself the electrostatic field.
+It builts the neighborghood up to the max_distance parameter, convert it into electrostatic environment, and compute the net electrostatic field.</p>
+<p>If calculation_type = ‘PE’, the diagram do not compute the electrostatic field by itself.
+In this case, an optical property analysis which require an PE environement should be ongoing.
+During the preparation of the QM run (in the ‘first part’ of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> procedure), the total electrostatic field is also stored in this diagram.
+Hence, the parameters used to built the environment DO NOT DEPEND ON THIS DIAGRAM but on the optical parameters.
+More precisely, it depends on the qmparameters used.</p>
+<p>Especially, if the division between explicite (or ‘short’) and implicite (or ‘long-range’) is required, the dimensions of the electric_field diagram is increased to store the short and long part.
+See <a class="reference internal" href="../Tutorials/tuto_quadrupole_long.html#tuto-quadrupole-long-page"><span class="std std-ref">this tutorial</span></a> for more informations.</p>
+<p>The minimal size of the diagram is: 2x?x12.
+The first 2 are for the laboratory or molecular frame.
+The ? is for the direct and long part if needed.
+The last 12 are for the electrostatic field and its spatial derivative.</p>
+<p>The parameters [e_min, e_max] is used to fix the minimal and maximal value to compute the distribution.
+Along with the number of M, it creats bins of length: (e_max-e_min)/M.</p>
+<p><strong>Diagram size</strong>: Nx2x12xM or Nx2x2x12xM</p>
+<p><strong>Diagram mean</strong>: Nx2x12 or Nx2x2x12</p>
+<p><strong>SingleMolecule attribute</strong>: electric_field_ + calculation_type</p>
+<dl class="simple">
+<dt><strong>Extra parameter for the SingleDiagramParameter</strong>:</dt><dd><ul class="simple">
+<li><p>min_max = [list of two float] The maximal and minimal value to discretize each component of the vector.</p></li>
+<li><p>calculation_type = [string] Can be ‘PE’ or ‘on_fly’. If PE is asked, it will be calculated using the PE environment. If ‘on_fly’ it will be computed independently according to the parameter given</p></li>
+<li><p>max_distance = [float] Define the radius to built the neighbourood used to compute the electric field. This argument should not be defined if calculation_type = ‘PE’ and should be defined if calculation_type = ‘on_fly’.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>User input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="s1">&#39;electric_field&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">14</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="s1">&#39;on_fly&#39;</span><span class="p">,</span> <span class="mf">10.5</span><span class="p">],</span>
+<span class="p">[</span><span class="s1">&#39;electric_field&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">17</span><span class="p">]],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="s1">&#39;PE&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>It creats 2 diagrams.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>electric_field_on_fly: size of 2x12x14. The electrostatic environment around each molecule of this MT is built up to 10.5 Angstrom.</p></li>
+<li><p>electric_field_PE: size 2x12x17 is the electrostatic environment used for this MT is classic, 2x2x12x17 if there is a short-long separation.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</section>
+<section id="alpha">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">5.2.6. </span>Alpha</a><a class="headerlink" href="#alpha" title="Link to this heading">¶</a></h2>
+<dl class="py class" id="autodoc-diagram-alpha">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_Diagrams.</span></span><span class="sig-name descname"><span class="pre">Dia_alpha</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_Diagrams.html#Dia_alpha"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Unit</strong> [atomic unit]</p>
+<p><strong>Input format</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">],</span> <span class="p">[</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Compute the polarizability of the molecule type in the <strong>molecular frame</strong>. The argument to define how the value are optained are defined in the optical parameters, <a class="reference internal" href="../OpticalAnalysis/overview_opt_analysis.html#overview-opt-analysis-page"><span class="std std-ref">see this page</span></a> or <a class="reference internal" href="../Tutorials/tuto_optical_analysis_overview.html#tuto-optical-analysis-overview-page"><span class="std std-ref">this tutorial</span></a>.</p>
+<p>Note that if no QM calculation are performed, <em>i.e.</em> fixed alpha for all the molecule, this diagram has no sens and is ignored: every molecule share the exact same value!</p>
+<p>All the optical properties are in atomic unit and also the alpha components.
+The min/max value given are used to performed distribution and are applied for every tensor components.
+Note that these extrema value do not impact the mean and standard deviation calculation.</p>
+<p><strong>Diagram size</strong>: Nx9xM</p>
+<p><strong>Diagram mean</strong>: Nx9</p>
+<p><strong>SingleMolecule attribute</strong>: alpha_ +  frequency</p>
+<dl class="simple">
+<dt><strong>Extra parameter for the SingleDiagramParameter</strong>:</dt><dd><ul class="simple">
+<li><p>min_max = [list of two float] The maximal and minimal value to discretize each component of the tensors.</p></li>
+<li><p>frequency = [float or string] The frequency at which the tensor is computed. If no frequency is set (or a reference value), the frequency value is replace by ‘REF’. The frequency is fixed by the optical parameters definition.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>User input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>will return an 9 X 30 diagrams. The ‘9’ is because their are 9 components for this tensor.</p>
+</dd></dl>
+
+</section>
+<section id="iota">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">5.2.7. </span>Iota</a><a class="headerlink" href="#iota" title="Link to this heading">¶</a></h2>
+<dl class="py class" id="autodoc-diagram-iota">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_Diagrams.</span></span><span class="sig-name descname"><span class="pre">Dia_iota</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_Diagrams.html#Dia_iota"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Unit</strong> [atomic unit]</p>
+<p><strong>Input format</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;iota&#39;</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">]</span><span class="n">article</span><span class="p">,</span> <span class="p">[</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Compute the polarizability of the molecule type in the <strong>laboratory frame</strong>. The argument to define how the value are optained are defined in the optical parameters, <a class="reference internal" href="../OpticalAnalysis/overview_opt_analysis.html#overview-opt-analysis-page"><span class="std std-ref">see this page</span></a> or <a class="reference internal" href="../Tutorials/tuto_optical_analysis_overview.html#tuto-optical-analysis-overview-page"><span class="std std-ref">this tutorial</span></a>.</p>
+<p>All the optical properties are in atomic unit and also the iota components.
+The min/max value given are used to performed distribution and are applied for every tensor components.
+Note that these extrema value do not impact the mean and standard deviation calculation.</p>
+<p><strong>Diagram size</strong>: Nx9xM</p>
+<p><strong>Diagram mean</strong>: Nx9</p>
+<p><strong>SingleMolecule attribute</strong>: iota_ +  frequency</p>
+<dl class="simple">
+<dt><strong>Extra parameter for the SingleDiagramParameter</strong>:</dt><dd><ul class="simple">
+<li><p>min_max = [list of two float] The maximal and minimal value to discretize each component of the tensors.</p></li>
+<li><p>frequency = [float or string] The frequency at which the tensor is computed. If no frequency is set (or a reference value), the frequency value is replace by ‘REF’. The frequency is fixed by the optical parameters definition.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>User input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;iota&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>will return an 9 X 30 diagrams. The ‘9’ is because their are 9 components for this tensor.</p>
+</dd></dl>
+
+</section>
+<section id="beta">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink"><span class="section-number">5.2.8. </span>Beta</a><a class="headerlink" href="#beta" title="Link to this heading">¶</a></h2>
+<dl class="py class" id="autodoc-diagram-beta">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_Diagrams.</span></span><span class="sig-name descname"><span class="pre">Dia_beta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_Diagrams.html#Dia_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Unit</strong> [atomic unit]</p>
+<p><strong>Input format</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">],</span> <span class="p">[</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Compute the first hyperpolarizability of the molecule type in the <strong>molecular frame</strong>. The argument to define how the value are optained are defined in the optical parameters, <a class="reference internal" href="../OpticalAnalysis/overview_opt_analysis.html#overview-opt-analysis-page"><span class="std std-ref">see this page</span></a> or <a class="reference internal" href="../Tutorials/tuto_optical_analysis_overview.html#tuto-optical-analysis-overview-page"><span class="std std-ref">this tutorial</span></a>.</p>
+<p>Note that if no QM calculation are performed, <em>i.e.</em> fixed beta for all the molecule, this diagram has no sens and is ignored: every molecule share the exact same value!</p>
+<p>All the optical properties are in atomic unit and also the alpha components.
+The min/max value given are used to performed distribution and are applied for every tensor components.
+Note that these extrema value do not impact the mean and standard deviation calculation.</p>
+<p><strong>Diagram size</strong>: Nx27xM</p>
+<p><strong>Diagram mean</strong>: Nx27</p>
+<p><strong>SingleMolecule attribute</strong>: beta_ +  frequency</p>
+<dl class="simple">
+<dt><strong>Extra parameter for the SingleDiagramParameter</strong>:</dt><dd><ul class="simple">
+<li><p>min_max = [list of two float] The maximal and minimal value to discretize each component of the tensors.</p></li>
+<li><p>frequency = [float or string] The frequency at which the tensor is computed. If no frequency is set (or a reference value), the frequency value is replace by ‘REF’. The frequency is fixed by the optical parameters definition.</p></li>
+<li><p>beta_type = [str] The type of first hyperpolarizability. Either ‘dipole-dipole’, ‘dipole-quadrupole’ or ‘quadrupole-dipole’. It affects the size of the diagram (and the attached SingleMolecule property) and how is read the tensor from the DALTON output file. See <a class="reference internal" href="../Tutorials/tuto_quadrupole_long.html#tuto-quadrupole-long-page"><span class="std std-ref">this tutorial</span></a> for more informations.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>User input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>will return an 27 X 30 diagrams, in the usual dipolar approximation. The ‘27’ is because their are 27 components for this tensor.
+At the quadrupole level, some diagram (dipole-quadrupole and quadrupole-dipole) will have 3x3x3x3=81 components instead of 27.</p>
+</dd></dl>
+
+</section>
+<section id="chi">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink"><span class="section-number">5.2.9. </span>Chi</a><a class="headerlink" href="#chi" title="Link to this heading">¶</a></h2>
+<dl class="py class" id="autodoc-diagram-chi">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_Diagrams.</span></span><span class="sig-name descname"><span class="pre">Dia_chi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sdparameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_Diagrams.html#Dia_chi"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Unit</strong> [atomic unit]</p>
+<p><strong>Input format</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;chi&#39;</span><span class="p">,</span> <span class="n">geometrical_discretization</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">],</span> <span class="p">[</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Compute the first hyperpolarizability of the molecule type in the <strong>laboratory frame</strong>. The argument to define how the value are optained are defined in the optical parameters, <a class="reference internal" href="../OpticalAnalysis/overview_opt_analysis.html#overview-opt-analysis-page"><span class="std std-ref">see this page</span></a> or <a class="reference internal" href="../Tutorials/tuto_optical_analysis_overview.html#tuto-optical-analysis-overview-page"><span class="std std-ref">this tutorial</span></a>.</p>
+<p>All the optical properties are in atomic unit and also the alpha components.
+The min/max value given are used to performed distribution and are applied for every tensor components.
+Note that these extrema value do not impact the mean and standard deviation calculation.</p>
+<p><strong>Diagram size</strong>: Nx27xM</p>
+<p><strong>Diagram mean</strong>: Nx27</p>
+<p><strong>SingleMolecule attribute</strong>: chi_ +  frequency</p>
+<dl class="simple">
+<dt><strong>Extra parameter for the SingleDiagramParameter</strong>:</dt><dd><ul class="simple">
+<li><p>min_max = [list of two float] The maximal and minimal value to discretize each component of the tensors.</p></li>
+<li><p>frequency = [float or string] The frequency at which the tensor is computed. If no frequency is set (or a reference value), the frequency value is replace by ‘REF’. The frequency is fixed by the optical parameters definition.</p></li>
+<li><p>beta_type = [str] The type of first hyperpolarizability. Either ‘dipole-dipole’, ‘dipole-quadrupole’ or ‘quadrupole-dipole’. It affects the size of the diagram (and the attached SingleMolecule property) and how is read the tensor from the DALTON output file. See <a class="reference internal" href="../Tutorials/tuto_quadrupole_long.html#tuto-quadrupole-long-page"><span class="std std-ref">this tutorial</span></a> for more informations.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>User input:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;chi&#39;</span><span class="p">,</span> <span class="s1">&#39;Averaged&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>will return an 27 X 30 diagrams, in the usual dipolar approximation. The ‘27’ is because their are 27 components for this tensor.
+At the quadrupole level, some diagram (dipole-quadrupole and quadrupole-dipole) will have 3x3x3x3=81 components instead of 27.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="diagram_index.html">5. Diagram</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_creat_diagram.html">5.1. How to create Diagram?</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">5.2. Diagram available</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagram_analysis.html">5.3. Diagram analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="diagram_structure.html">5.4. Diagram Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Diagram/diagram_list.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

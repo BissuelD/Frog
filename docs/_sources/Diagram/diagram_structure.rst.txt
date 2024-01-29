@@ -1,0 +1,212 @@
+.. _diagram_structure_page:
+
+========================
+Diagram Structure
+========================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+
+Reminder about data structure
+-----------------------------
+
+Please see the MT structure page to be aware of how the analysis are stored in ||frog|. 
+
+In short, an MT contains all the information regarding a set of molecule at a given MD frame. There are as many MT object as time step and molecule type declared. 
+
+It contains all the parameters needed to performed the analysis, which does not depend on the time step, in the :ref:`Molecule Type Parameter object<autodoc_mt_mtparameter>`.
+
+It contains a :ref:`list of all the molecule<autodoc_mt_L_molecule>`: every molecule is described using a singlemolecule object. In this :ref:`Single Molecule object<single_molecule_object_page>`, all the individual property which should be computed are stored: the mean position, the number of H-bond, the hyperpolarizability... In :ref:`the analysis available page<diagram_list_page>`, is presented what singlemolecule attribute is generated for each analysis required. For instance, asking for a 'beta' analysis will create for each singlemolecule object an attribute 'beta' where the individual beta value will be stored for each time step. 
+
+Finaly, the MT object contains the diagram corresponding to the analysis done for this molecule set. There are at least as many diagram as analysis performed. 
+
+
+The diagram structure
+---------------------
+
+Every analysis declared refers to a class, which inherite from the Diagram class. This diagram class defines the attributes presented bellow as well as basic function. Every analysis defines how to deal with the user-input, how to compute the individual quantity, how to add an individual quantity to the distribution... These informations relative to the analysis are presented in :ref:`this page<diagram_list_page>`.
+
+
+Every diagram are attached to a Single Diagram Parameter object, contained in the :ref:`myMT.mtparameter.dparamter.L_diagram<autodoc_diagramparameter_L_diagram>` list. This object contains the parameter needed for the analysis and the discretization. This idea is that the sdparameter contains most of the time-invariant parameters for the diagram, while the diagram itself contains the time-dependant values -- *i.e.* the results for every time step. 
+
+.. note:: The diagram are directly stored in the MT object. Therefore, to call a diagram, you may want to look at the sdparamter first. To call the diagram relative to the sdparameter, use: `getattr(myMT, sdparameter.name)`
+
+Here is what contains every diagram, due to the Diagram class inheritance:
+
+.. _autodoc_diagram_name:
+.. autoattribute:: Frog.class_Diagrams.Diagram.name
+    :noindex:
+
+|
+
+.. _autodoc_diagram_size:
+.. autoattribute:: Frog.class_Diagrams.Diagram.size
+   :noindex:
+
+|
+
+.. _autodoc_diagram_population:
+.. autoattribute:: Frog.class_Diagrams.Diagram.population
+    :noindex:
+
+|
+
+.. _autodoc_diagram_value:
+.. autoattribute:: Frog.class_Diagrams.Diagram.value
+    :noindex:
+
+|
+
+.. _autodoc_diagram_valuesquare:
+.. autoattribute:: Frog.class_Diagrams.Diagram.valuesquare
+    :noindex:
+
+|
+
+.. _autodoc_diagram_mean:
+.. autoattribute:: Frog.class_Diagrams.Diagram.mean
+    :noindex:
+
+|
+
+.. _autodoc_diagram_sd:
+.. autoattribute:: Frog.class_Diagrams.Diagram.sd
+    :noindex:
+
+|
+
+.. _autodoc_diagram_axis_population:
+.. autoattribute:: Frog.class_Diagrams.Diagram.axis_population
+    :noindex:
+
+|
+
+.. _autodoc_diagram_unit:
+.. autoattribute:: Frog.class_Diagrams.Diagram.unit
+    :noindex:
+
+|
+
+.. _autodoc_diagram_axis_observable:
+.. autoattribute:: Frog.class_Diagrams.Diagram.axis_observable
+    :noindex:
+
+|
+
+.. _autodoc_diagram_axis_space:
+.. autoattribute:: Frog.class_Diagrams.Diagram.axis_space
+    :noindex:
+
+
+
+
+Diagram Parameter
+---------------------
+.. _diagram_parameter_page:
+
+
+The :ref:`dparameter<autodoc_mtparameter_dparameter>` attribute is a Diagram Parameter object. It is contained in the mtparameter (which is a :ref:`Molecule Type Parameter object<autodoc_mt_mtparameter>`) attribute of the Molecule Type Object. In Short: `myMT.mtparameter.dparameter`. 
+
+It is built when the diagram input are set by the user using the function `myMT.read_diagram_input`, see :ref:`this page<how_to_creat_diagram_page>` for pratical examples. It contains information about the analysis and diagram required for this MT. 
+
+.. note:: If 'optical' analysis are required, the parameters relative to these analysis are completed by the one provided in the Optcial Parameter object: :ref:`myMT.mtparameter.optparameter<autodoc_mtparameter_optparameter>`.
+
+Here are the available attribute of this object. Please note that you have no use to call or add them manually for a standard use of |frog|. This part is intented for advance user. 
+
+.. _autodoc_diagramparameter_L_possible_diagram:
+.. autoattribute:: Frog.class_DiagramParameter.DiagramParameter.L_possible_diagram
+    :noindex:
+
+|
+
+.. _autodoc_diagramparameter_L_diagram:
+.. autoattribute:: Frog.class_DiagramParameter.DiagramParameter.L_diagram
+    :noindex:
+
+|
+
+.. _autodoc_diagramparameter_IS_rot_mat:
+.. autoattribute:: Frog.class_DiagramParameter.DiagramParameter.IS_rot_mat
+    :noindex:
+
+|
+
+.. _autodoc_diagramparameter_IS_density:
+.. autoattribute:: Frog.class_DiagramParameter.DiagramParameter.IS_density
+    :noindex:
+
+|
+
+.. _autodoc_diagramparameter_special_selection:
+.. autoattribute:: Frog.class_DiagramParameter.DiagramParameter.special_selection
+    :noindex:
+
+|
+
+.. _autodoc_diagramparameter_L_allowed_molecule:
+.. autoattribute:: Frog.class_DiagramParameter.DiagramParameter.L_allowed_molecule
+    :noindex:
+
+
+
+Single Diagram Parameter
+-------------------------
+.. _single_diagram_parameter_page:
+
+All the single parameter object are contained in the :ref:`myMT.mtparameter.dparameter.L_diagram <autodoc_diagramparameter_L_diagram>` list. See above for the dparameter object. 
+
+They are built when the diagram input are set by the user using the function `myMT.read_diagram_input`, see :ref:`this page<how_to_creat_diagram_page>` for pratical examples. Each sdparameter objects are attached to a diagram. The attributes of these sdparameter depend on the analysis required. In the :ref:`list of the available analysis<diagram_list_page>` is details which sdparameter attributed are added for each analysis.  
+
+.. note:: If 'optical' analysis are required, the parameters relative to these analysis are completed by the one provided in the Optcial Parameter object: :ref:`myMT.mtparameter.optparameter<autodoc_mtparameter_optparameter>`.
+
+Here are the available attribute of this object. Please note that you have no use to call or add them manually for a standard use of |frog|. This part is intented for advance user. 
+
+
+.. _autodoc_singlediagramparameter_name:
+.. autoattribute:: Frog.class_DiagramParameter.SingleDiagramParameter.name
+    :noindex:
+
+|
+
+.. _autodoc_singlediagramparameter_analysis_type:
+.. autoattribute:: Frog.class_DiagramParameter.SingleDiagramParameter.analysis_type
+    :noindex:
+
+|
+
+.. _autodoc_singlediagramparameter_discretization_type:
+.. autoattribute:: Frog.class_DiagramParameter.SingleDiagramParameter.discretization_type
+    :noindex:
+
+.. Note:: See :ref:`this page<diagram_geometry_selection_page>` for more informations about the geometrical discretization of diagram.
+
+|
+
+.. _autodoc_singlediagramparameter_bin_size:
+.. autoattribute:: Frog.class_DiagramParameter.SingleDiagramParameter.bin_size
+    :noindex:
+
+|
+
+.. _autodoc_singlediagramparameter_mean_size:
+.. autoattribute:: Frog.class_DiagramParameter.SingleDiagramParameter.mean_size
+    :noindex:
+
+|
+
+.. _autodoc_singlediagramparameter_L_reassignation_selection:
+.. autoattribute:: Frog.class_DiagramParameter.SingleDiagramParameter.L_reassignation_selection
+    :noindex:
+
+|
+
+.. _autodoc_singlediagramparameter_real_space_discretization_bin_number:
+.. autoattribute:: Frog.class_DiagramParameter.SingleDiagramParameter.real_space_discretization_bin_number
+    :noindex:
+
+
+
+
+

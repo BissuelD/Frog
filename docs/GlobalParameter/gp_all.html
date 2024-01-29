@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>3.6. All the GP parameters &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="4. Molecule Type" href="../MoleculeType/mt_index.html" />
+    <link rel="prev" title="3.5. None user defined" href="none_user_defined.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="all-the-gp-parameters">
+<span id="gp-all-page"></span><h1><span class="section-number">3.6. </span>All the GP parameters<a class="headerlink" href="#all-the-gp-parameters" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Frog.class_GP.</span></span><span class="sig-name descname"><span class="pre">GlobalParameter</span></span><a class="reference internal" href="../_modules/Frog/class_GP.html#GlobalParameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The GlobalParameter object is suposed to holds very basic information for the run. This object will be copied/passed to every threat if parrallel run is performed.</p>
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IS_layer_selection</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Set to True if there are any need of a layer geometry selection. It can be for a diagram or for QM selection. By default set to False.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This attribute is set by Frog and should not be define by the user.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">MD_check_GP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_GP.html#GlobalParameter.MD_check_GP"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>MD part of the global parameter object (GP). The MD trajectory is openned and some general properties are stores in the GP objects.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MD_convertion_to_angstrom</span></span></dt>
+<dd><p><strong>Type</strong> [float]</p>
+<p>The convertion to apply to get the distance of the MD trajectory in Angstrom. If not provieded, Frog assume that the unit of the MD is already Angstrom.</p>
+<p class="rubric">Example</p>
+<p>If you want to rescale your MD trajectory by 0.529177, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">MD_convertion_to_angstrom</span> <span class="o">=</span> <span class="mf">0.529177</span>
+</pre></div>
+</div>
+<p>Position used by frog = (Position MD) x (GP.MD_convertion_to_angstrom)</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Use float not integer – 1.0 instead of 1 for instance.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is no real need to use Angstrom unit. You just have to be coherent with the values defined everywhere in Frog and in the Molecular library file. Be aware that the Anstrom unit are expected in the current procedure with Dalton.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MD_cut_trajectory</span></span></dt>
+<dd><p><strong>Type</strong> [boolean]</p>
+<p>If set to True, the trajectory will be cut in several file in order to have one time step per file. This option is made in order to reduce the RAM memory needed. The piece of trajectory are saved in the GP.dir_mol_times directory. By default True.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">MD_cut_trajectory</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you deal with a very small trajectory, it may not worth it to cut it: set GP.MD_cut_trajectory. Otherwise, it seems a good safe-guard to avoid impacting the initial trajectory. Indeed, the initial trajectory will be read at the very begining of the Frog run to perform the cut, and then will not be open again.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MD_file_name_topology</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The name of the molecular dynamic topology file, used to defined which atom are part of the same molecules. Apart from that, the molecule names, groups, masses or other informations is not taken into account. FROG is not designed to handle changes in the topology files in time. More informations about the supported topology files are available <a class="reference internal" href="../Installation/numerical_notes_and_requirements.html#compatible-md-software"><span class="std std-ref">here</span></a>. Even if the file is located in the working directory, we strongly recommend to use general path:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_topology</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/mytopology.data&#39;</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Mandatory parameter</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MD_file_name_traj</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The name of the molecular dynamic trajectory file. This file should respect the topology defined in <a class="reference internal" href="usual_parameters.html#Frog.class_GP.GlobalParameter.MD_file_name_topology" title="Frog.class_GP.GlobalParameter.MD_file_name_topology"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalParameter.MD_file_name_topology</span></code></a> . More informations about the supported trajectory files are available <a class="reference internal" href="../Installation/numerical_notes_and_requirements.html#compatible-md-software"><span class="std std-ref">here</span></a>. Even if the file is located in the working directory, we strongly recommend to use general path:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_traj</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/mytrajectory.dcd&#39;</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Mandatory parameter</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MD_file_type</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The type of topology and trajectory used as input, in <a class="reference internal" href="usual_parameters.html#Frog.class_GP.GlobalParameter.MD_file_name_topology" title="Frog.class_GP.GlobalParameter.MD_file_name_topology"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalParameter.MD_file_name_topology</span></code></a> and <a class="reference internal" href="usual_parameters.html#Frog.class_GP.GlobalParameter.MD_file_name_traj" title="Frog.class_GP.GlobalParameter.MD_file_name_traj"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalParameter.MD_file_name_traj</span></code></a> respectively. The type used have to be compatible with the <a class="reference external" href="https://www.mdanalysis.org/">MDAnalysis</a>. python module. More informations about the supported MD output are available <a class="reference internal" href="../Installation/numerical_notes_and_requirements.html#compatible-md-software"><span class="std std-ref">here</span></a>.</p>
+<p class="rubric">Example</p>
+<p>For an LAMMPS output, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_topology</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/mytopology.data&#39;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_traj</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/mytrajectory.dcd&#39;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">MD_file_type</span> <span class="o">=</span> <span class="s1">&#39;LAMMPS&#39;</span>
+</pre></div>
+</div>
+<p>You can try to open your topology/trajectory if you have trouble to deal with these parameters in Frog. To open the MD trajectory with MDAnalysis, Frog use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">u</span> <span class="o">=</span> <span class="n">MDAnalysis</span><span class="o">.</span><span class="n">Universe</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_topology</span><span class="p">,</span> <span class="n">GP</span><span class="o">.</span><span class="n">MD_file_name_traj</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="n">GP</span><span class="o">.</span><span class="n">MD_file_type</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Do not hesitate to try out combinaison of topology-trajectory which would have not been yet presented in the <a class="reference internal" href="../Installation/numerical_notes_and_requirements.html#compatible-md-software"><span class="std std-ref">doc</span></a> and to send us feedback for any working combinaison.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Mandatory parameter</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">box_size</span></span></dt>
+<dd><p><strong>Type</strong> [float, float, float]</p>
+<p>The first time step MD box size. Used to print some information to the user.</p>
+<p>Should not be defined by the user – would be overwritten in any case.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In Frog, the MD box size is update for every frame. This variable is used just for printing user-friendly information.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">check_GP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_GP.html#GlobalParameter.check_GP"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>This function tests if the parameter set in the input file are coherent. It explicitly print the value understood by the software. It also checks that files can be written/openned in several directories.</p>
+<p>First it checks how the path are set by creating a file and/or a directory at the given location. This is done to avoid unpleasant surprises after hours of calculation…
+Depending on the general options/parameters asked, some attribute/value have to be given or not.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">check_all_MT_initialized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L_moleculetype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_GP.html#GlobalParameter.check_all_MT_initialized"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Check that the MT has been properly initialized: at least all the function defining the key objects have been called in the input file!</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">command_launch_job</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>The command to launch a sumission script in your cluster waiting queue. For instance ‘sbatch’ or ‘qsub’.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">cut_trajectory</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_GP.html#GlobalParameter.cut_trajectory"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dalton_run_option</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>option to add to the dalton command. Default = “” (no option). Please define this attribute only once and write all the option you need at once.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">dalton_run_option</span> <span class="o">=</span> <span class="s2">&quot;-noarch&quot;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">dalton_run_option</span> <span class="o">=</span> <span class="s2">&quot;-D&quot;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">dalton_run_option</span> <span class="o">=</span> <span class="s2">&quot;-t&quot;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">dalton_run_option</span> <span class="o">=</span> <span class="s2">&quot;-noarch -D -t&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dir_mol_times</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The directory used to store the molecular properties for each time step. These data are not humain-readable intented. These datas can become heavy depending on the number of molecule, time step and the number of analysis required.  The path is updated using the GP.general_path attribute. The default value is “Molecule_times”.</p>
+<p class="rubric">Example</p>
+<p>If no GP.dir_mol_times is declared, the results are saved at <span class="incremental">GP.general_path/Molecule_times</span>.</p>
+<p>If <span class="incremental">GP.dir_mol_times = Datas/Molecule_in_time</span>, the results are saved at :  <span class="incremental">GP.general_path/Datas/Molecule_in_time</span></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dir_submission_file</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The directory used to store the script needed to launch the QM run on a cluster. A large number of file can be created if many QM simulations are required, but it should not occupy a large amount of space. These script are humain-readable. The path is updated using the GP.general_path attribute. The default value is “Submission_script”.</p>
+<p class="rubric">Example</p>
+<p>If no GP.dir_submission_file is declared, the results are saved at <span class="incremental">GP.general_path/Submission_script</span>.</p>
+<p>If <span class="incremental">GP.dir_submission_file = Dir_sge/</span>, the results are saved at :  <span class="incremental">GP.general_path/Dir_sge</span></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dir_torun_QM</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The directory used to store the QM directories: the input script and the results. A large number of directory can be created if many QM simulations are required and thus occupied large amount of space eventhough each file (input file or the result) are small. These data are humain-readable and we strongly recommand to have a look from time to time. The path is updated using the GP.general_path attribute. The default value is “QM_Simulations”.</p>
+<p class="rubric">Example</p>
+<p>If no GP.dir_torun_QM is declared, the results are saved at <span class="incremental">GP.general_path/QM_Simulations</span>.</p>
+<p>If you want to set the QM datas at: “/scratch/myname/Datas/Frog/Water_QM”, you have to set <span class="incremental">GP.dir_torun_QM = “/scratch/myname/Datas/Frog/Water_QM”</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If possible, we recommand to set this directory to a place where the writting/openning of the files are easely efficient.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">env_authorised_pbc_condition</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>Defines which direction can be used to built environment is needed. By default all 3 direction are supposed to be PBC.</p>
+<p class="rubric">Example</p>
+<p>GP.env_authorised_pbc_condition = [0, 1]</p>
+<p>In this case, only the X and Y direction are understood as PBC.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>FROG has been tested for 3D and 2D PBC. If you are using no PBC condition, you may want to be carefull…</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">file_template_script_run_QM</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>The file used to create every submission script. The line relative to the QM run are added at the end of the script. Please note that the file name is update with GP.general_path. The created submission files are written in the GP.dir_submission_file directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">find_molecule_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molecule_number</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_GP.html#GlobalParameter.find_molecule_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Return the molecule type name for the molecule_number given. Return an Exception if it is was not implemented.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">general_path</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>The general path used to defined all the other path of the directory. By default, it will be set to the working directory.
+You may define the directory with or without the final ‘/’:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/My_systeme/Frog_Analysis&#39;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/My_systeme/Frog_Analysis/&#39;</span>
+</pre></div>
+</div>
+<p>If you want to not use this behaviour – for instance you want to define yourself every directory – you can set GP.general_path to ‘/’. You may also define the other directory attribute with a starting ‘//’. For instance, If you want to set the QM datas at: <span class="incremental">/scratch/myname/Datas/Frog/Water_QM</span></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">general_path</span> <span class="o">=</span> <span class="s1">&#39;/home/user/MD/My_systeme/Whatever/&#39;</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">dir_torun_QM</span> <span class="o">=</span> <span class="s1">&#39;//scratch/myname/Datas/Frog/Water_QM&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The general_path does not affect the location of the GP.MD_file_name_topology and GP.MD_file_name_traj.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">initializating_software_friendly_GP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L_moleculetype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_GP.html#GlobalParameter.initializating_software_friendly_GP"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>This function update the GP according to the given attributes/options.</p>
+<p>MD analysis &amp; Diagrams
+Preparing the molecules set
+Preparing the QM parts: Daltons inputs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer_nbr_max</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>If there are several layer geometric selection (for diagram or QM selction), layer_nbr_max contains the maximal number of layer required. The aim is to do the layer attribution only once with this maximal layer number. If some diagrams use less possible layer (for instance 2 instead of 5), then the molecule in deeper layer are assigned to 0 (for instance the molecule at the layer 3 is assigned to 0).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This attribute is set by Frog and should not be define by the user.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">layer_radii_MT_definition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L_moleculetype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/Frog/class_GP.html#GlobalParameter.layer_radii_MT_definition"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Create a new topology file where the radii used by pytim to define the layer are set according to the MT values. The new topology file is savec as: GP.dir_mol_times/frog_topology.pqr</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer_which_radii_MT</span></span></dt>
+<dd><p><strong>Type</strong> [str or dict]</p>
+<p>Defines how to set the VDW radii used by pytim to attributes layer to the molecule. Precisely, the radii is the optional argument ‘radii_dict’ of the function pytim.ITIM, see <a class="reference external" href="https://marcello-sega.github.io/pytim/guessing_radii.html">https://marcello-sega.github.io/pytim/guessing_radii.html</a></p>
+<p>Possible values:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘MD’: No values are set manually. Therefore, pytim try to use the Gromos 43A1 force field to attribute radii.</p></li>
+<li><p>‘MT’: default value, uses the values defines in the MT, using the function info_molecule_for_layer of the molecular library file. Note that if this option is used, the GP.MD_cut_trajectory is set to True. Indeed, Frog needs to modify the topology file in order to make this option work.</p></li>
+<li><p>your_dict: you can pass directly a dictionary, which will be used as pytim.ITIM(u, radii_dict = your_dict). The name of the directory does not matter: it just has to be a directory so that this option is detected by Frog.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_submission_QM</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>The number of jobs which can be prepared by the software to perform the QM simulations. This option has been made in order to avoid trouble when submitting a lot of job to a cluster – for instance sending 100 000 jobs to a cluster…</p>
+<p>Using this option, you might not be able to perform all the QM simulation at the same time. If it is so, you should wait that the QM calculation already sent end, then re-run the programme in order to treat the rest of the QM simulation and resumit to the cluster the rest of the QM simulation.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">max_submission_QM</span> <span class="o">=</span> <span class="mi">100</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbr_job_parr_QM</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>The number of QM simulation which run at the same time on a server.</p>
+<p>For exemple, set to 1 to have one QM simulation runing for every jobs submitted to the cluster – for monocore CPUs.</p>
+<p>Set 8 to have 8 QM simulations running for every jobs submitted to the cluster – designed to run on multicore CPUs. Note that no memory sharing is needed to perform several QM simulation on a single server (no OpenMPi mandatory) since every QM simulation can be performed independently.</p>
+<p>The maximum number of QM simulation witch can be launched simultaneously is: nbr_job_parr_QM*max_submission_QM.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please be aware that the memory needed for every QM simulation can be large: check the RAM available and where you write the temporary Dalton files. For instance, if 100 QM simulation are running on the same time on the cluster, a lot of reading/writting file will be occuring (temporary Dalton files) and may slow down the cluster. /tmp or a scratch directory should be used for these temporary file, see the scratch_dir variable.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The template used to define how to send job to the cluster (GP.file_template_script_run_QM) must match with this nbr_job_parr_QM. If the template ask only for 4 cores while nbr_job_parr_QM = 8 you may have some trouble. See the Tutorials.</p>
+</div>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_job_parr_QM</span> <span class="o">=</span> <span class="mi">16</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbr_mpi_dalton</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>The number of MPI processes for each dalton calculation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please be aware that the memory needed for every QM simulation can be large: check the RAM available and where you write the temporary Dalton files.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The template used to define how to send job to the cluster (GP.file_template_script_run_QM) must match with nbr_mpi_dalton.
+If the template ask only for 4 MPI processes while nbr_mpi_dalton = 8 you may have some trouble.
+The number of MPI processes  asked for the job to the job manager should be (nbr_mpi_dalton * nbr_job_parr_QM)</p>
+<p>For SLURM , if one demande one node using 8 mpi processes, the number of mpi tasks per node is given by
+#SBATCH –ntasks-per-node=8
+The number of nodes is demanded by
+#SBATCH –nodes=1</p>
+<p>Alternatively, the total number of tasks can be asked with
+#SBATCH –ntasks=8
+This second possibility WAS NOT TESTED YET!</p>
+</div>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_mpi_dalton</span> <span class="o">=</span> <span class="mi">4</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbr_parra</span></span></dt>
+<dd><p><strong>Type</strong> [integer]</p>
+<p>Maximal number of core on which the first and third part of the run will be parralelized. This is number is NOT related to the parralelization of the QM runs. OpenMP is required to performed this parralelization. The default value is 1.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span> <span class="o">=</span> <span class="mi">80</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span> <span class="o">=</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>The total number of frame treat is 80, and 2 cores will be used. Each core will treat 40 frames.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span> <span class="o">=</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>The total number of frame treat is 5, and 2 cores will be used. One core will treat 3 frames, the other 2.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If GP.nbr_parra &gt; GP.nbr_time_step, the GP.nbr_parra is set to GP.nbr_time_step.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Be aware that the RAM may become important, so do not overload your (personal) computer and try small GP.nbr_parra to start with.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you use parallelization, it is recommanded to cut the MD trajectory to not overload the RAM and for savety (of the MD trajectory file: otherwise it would be read by several core at the same time.). Set  <a class="reference internal" href="usual_parameters.html#autodoc-gp-md-cut-trajectory"><span class="std std-ref">GP.MD_cut_trajectory</span></a> to True (default value).</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbr_repetition_QM_perMT</span></span></dt>
+<dd><p><strong>Type</strong> list of [int] of length GP.nbr_type_molecule, ie one int for each MT</p>
+<p>The number of repetitions for the bunches of (nbr_job_parr_QM)  QM simulations  run at the same time on the server.
+Using the parallel command that will run nbr_job_parr_QM at the same time.</p>
+<p>For exemple, set to 1 to have one bunch of nbr_job_parr_QM QM simulation runing
+for every jobs submitted to the cluster .</p>
+<p>Set 10 to have (10 * nbr_job_parr_QM) in each QM_todo file for the QM simulations running for every
+jobs submitted to the cluster .</p>
+<p>The maximum number of QM simulation witch can be launched simultaneously is NOT affected by nbr_repetition_QM_perMT !
+It remains nbr_job_parr_QM*max_submission_QM.
+But the TIME NEEDED for 1 job to be finished will be multiplied by nbr_repetition_QM_perMT.</p>
+<p>This is particularly usefull if the QM calculation times for the available MTs are quite different. Using this attribute, you can send jobs on the cluster which will last about the same time by asking for more QM calculations per jobs for the small MT and fewer for the large one.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_repetition_QM_perMT</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">one</span> <span class="n">want</span> <span class="mi">10</span> <span class="n">repetitions</span> <span class="k">for</span> <span class="n">the</span> <span class="n">MT</span> <span class="n">numbered</span> <span class="mi">0</span><span class="p">,</span><span class="ow">and</span> <span class="mi">1</span> <span class="n">repatition</span> <span class="k">for</span> <span class="n">MT</span> <span class="n">numbered</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbr_time_step</span></span></dt>
+<dd><p><strong>Type</strong> [integer]</p>
+<p>Define the total number of frame to treat.
+If set to 0, treat the maximal frame number possible depending on the total number of frame available in the MD trajectory and the value of <a class="reference internal" href="usual_parameters.html#Frog.class_GP.GlobalParameter.trotter_step" title="Frog.class_GP.GlobalParameter.trotter_step"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalParameter.trotter_step</span></code></a> . The default value is 1.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span> <span class="o">=</span> <span class="mi">80</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">trotter_step</span> <span class="o">=</span> <span class="mi">4</span>
+</pre></div>
+</div>
+<p>Will treat the MD snapshot each 4 available frame up to 80, ie the frame number 1, 5, 9, …</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_time_step</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">GP</span><span class="o">.</span><span class="n">trotter_step</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>If the MD trajectory contains 100 frames, FROG will treat 10 snapshot separated by 10 frames, ie the frame 1, 11, .. 101</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbr_time_step_core</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>A list of integer (size of the list = GP.nbr_parra). Every component define the number of time step to perform for every cores during a parralelized run – during the first and third part.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nbr_type_molecule</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>The number of Molecule Type defined by the user – found in the list L_moleculetype.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pass_first_part</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Defined if the first part should be perform or not. This appribute has been created to deal with QM calculation.</p>
+<p>Default value False: Frog perform the first part and overwrite the previous results.</p>
+<p>If set to True, the first part of the run will be skiped if possible all the moleculetype file are found in the dir_mol_times directory for every time step required.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Frog do not check if the input file is the same for the previous calculation used for the restart, and the one provided (which have launch this calculation). The MT object are the same as the one defined in the previous calculation, while the GP is the one of the new parameters. This has been done in order to make possible to change the attribute relative to the QM management – in the GP parameters.</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">preference_functional</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>Defines which functional should be used in the case where several molecule or different MT are merged into one QM calculation. .</p>
+<p class="rubric">Example</p>
+<p>GP.preference_functional = [‘FunctionalA’, ‘FunctionalB’]</p>
+<p>In this case, if one molecule has for functional the ‘FunctionalA’, and the other has ‘FunctionalB’ for its QMParameter, the final functional used for the graps of the 2 molecule will be ‘FunctionalA’.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">redo_QM</span></span></dt>
+<dd><p><strong>Type</strong> [string]</p>
+<p>If set to ‘redo’, the QM calculation inputs are written in the first part for every molecule which need a QM calculation. The QM calculation should be then done in the second part to be read in the third part. This is the default.</p>
+<p>If set to ‘do_not_redo’, Frog will try to check if the QM calculation for a molecule have been already performed. For a molecule which QM calculation have to be performed, it tries to open the expected Dalton result file. It check if the result is readable – meaning the QM calculation endded. If it is, the QM input for this configuration are not written, and the QM calculation is considerated are already performed. The results read in the third part are the one written in this file.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Frog does not check if the QM parameter for the target molecule (like the functional used) or the neighborhood is the same in the already available file and the input parameter. If you have a doubt, you should use  redo_QM = ‘redo’.</p>
+</div>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">redo_QM</span> <span class="o">=</span> <span class="s1">&#39;redo&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scratch_dir</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>Define the directory where the temporary Dalton file will be written. Note that this directory is NOT the one where the result of the QM simulation is stored. By default, if the QM simulation ended without an error, these temporary file will be deleted.</p>
+<p>However, if many QM calculation are running at the same time, a large amount of (disk) memory can be used. Therefore, we recommand to use a /tmp or a /scratch to perform these calculation.</p>
+<p>Today, the chosen implementation is to write in the submission script the line: &lt; ‘export DALTON_TMPDIR=’ + scratch_dir &gt;.</p>
+<p>Therefore, we recommand to use: scratch_dir = ‘$SCRATCH_DIR’, and to define the variable “SCRATCH_DIR” in the GP.file_template_script_run_QM. This way, you can define very precisly where the temporary file should be written within your (cluister) submission file. You can for instance define an automatic selection within the submission file to chose which scratch directory to use in function of the cluster/node it is run on.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">submit_array_maxjobs</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>TODO!</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">submit_job_array</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>The command to launch a sumission script in your cluster waiting queue. For instance ‘sbatch’ or ‘qsub’.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_number_molecule</span></span></dt>
+<dd><p><strong>Type</strong> [integer]</p>
+<p>The total number of molecule read in the topology file.</p>
+<p>Should not be defined by the user – would be overwritten in any case.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The number of molecule and atom SHALL remain the same throughout all the MD trajectory. There is no safeguard to prevent Frog to make mistake if it is not the case!!!</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_time_step</span></span></dt>
+<dd><p><strong>Type</strong> [integer]</p>
+<p>The total number of time step read in the topology file. To define it, use GP.nbr_time_step and GP.trotter_step</p>
+<p>Should not be defined by the user – would be overwritten in any case.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trotter_step</span></span></dt>
+<dd><p><strong>Type</strong> [integer]</p>
+<p>How many consecutive frame are not treated (1 means every frame are treated, 2, only one over 2, ect..). The default is 1. See <a class="reference internal" href="usual_parameters.html#Frog.class_GP.GlobalParameter.nbr_time_step" title="Frog.class_GP.GlobalParameter.nbr_time_step"><code class="xref py py-class docutils literal notranslate"><span class="pre">GlobalParameter.nbr_time_step</span></code></a> for more information.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="gp_index.html">3. Global Parameter</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_creat_GP.html">3.1. How to create GP?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usual_parameters.html">3.2. Usual Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="directory_management.html">3.3. Directory Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QM_management.html">3.4. QM Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="none_user_defined.html">3.5. None user defined</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">3.6. All the GP parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/GlobalParameter/gp_all.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

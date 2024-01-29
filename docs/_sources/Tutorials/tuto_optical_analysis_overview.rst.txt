@@ -1,0 +1,329 @@
+.. _tuto_optical_analysis_overview_page:
+
+==================
+Optical Analysis
+==================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+
+Goal and Perquisite: 
+====================
+
+In this first tutorial about the QM/MM calculation, we will see how to prepare the parameter file to compute the SHG property of a molecule within an explicite electrostatic environement. 
+To start simple, we will present the usual polarizable Emvironement at the zeroth-order scheme emmebdding as proposed in the |dalton| software. 
+The system is net bulk water at room temperature. 
+
+For simplicity sake, the results of the QM calculations are provided within the tutorial so that you do not have to performed them on a cluster. However, you may if you want to check your implementation. 
+
+Finally, we will present how to load and see the datas obtained using a Jupyter Notebook Python environment.
+
+You should be familiar to the standard command presented in the :ref:`get started tutorial<get_started_on_frog_tutorial_page>` and the one presented in the :ref:`space discretization tutorial started tutorial<tuto_space_discretization_page>`. 
+
+.. note:: We also recommand to read this :ref:`overview<overview_opt_analysis_page>`.
+
+The file needed to run this tutorial are located at: *Frog/Doc/Tutorial_files/Traj/Tutorial_files/Traj/Tuto_get_strated* for the MD trajectory and *Frog/Doc/Tutorial_files/Optical_analysis_overview/* for all the other documents.
+
+Parameter file: 
+================
+
+The definition of which property to compute at the QM level and how to do it are defined in the MoleculeType. 
+Running among every MTs and time step, |frog| construct a pool of QM calculation to perform. 
+First of all, let's define how to deal with these QM calculation using the Global parameter object. 
+
+GP definition: 
+------------------
+
+New attribute foir the Global Parameters must be defined for a |frog| run when QM calculations are performed.
+First, if the QM calculations may or may not be perforemed again ('redo'): ::
+    
+    GP.redo_QM = 'do_not_redo' # or 'redo' 
+
+Indeed, you may want to use your own way (for instance other parameters/basis/theory level not yet available in |frog|) to perform the QM calculations. 
+Hence, you can have already the QM result at the begining of the |frog| run, and you still want to use |frog| for its data management and/or space discretization procedure. 
+Or, you can have already perform a previous |frog| run with QM calculations but for a small number of molecules/time step. 
+In this case, you want to keep the same QM parameters, but increase the statistics. 
+
+In both cases, you should set `GP.redo_QM = 'do_not_redo'`: if |frog| find for a molecule a QM result available (see later on), it will not try to perform a QM run for this molecule. 
+
+If `GP.redo_QM = 'redo'`, |frog| will creat a new set of |dalton| input and **change the available QM results file name** if any to avoid confusion. See :ref:`this page <autodoc_gp_redo_QM>` for more information about GP.redo_QM.
+
+In general, we recommend to work on another directory if you want to test new QM parameters -- compare to use `GP.redo_QM = 'redo'` and thus make the previous QM results more difficult to use again.
+
+
+2 new directories are created: :: 
+
+    GP.dir_torun_QM = 'QM_dir'  # default is GP.general_path/QM_Simulations
+    GP.dir_submission_file = 'Submit_dir' # default is GP.general_path/Submission_script
+
+This first one hold the |dalton| input files and results. 
+For the presentation of the organisation within this directory, see :ref:`this page<autodoc_dalton_manager_module.build_QM_file_localization>`.
+
+.. note:: :ref:`GP.dir_torun_QM<autodoc_gp_dir_torun_QM>` is not supposed to be the directory where |dalton| stores its temporary files -- given by :ref:`GP.scratch_dir<autodoc_gp_scratch_dir>`. In GP.dir_torun_QM only few files will be created and should be the first and final input of |dalton|. 
+
+:ref:`GP.dir_submission_file<autodoc_gp_dir_submission_file>` defines where to store the submission script used to start the QM calculation (in parrallel) on a cluster. 
+You may or may not redefine these directory names or localisation. 
+
+
+Then is defined which 'template' for the submission to your cluster job management should be used and how to launch the command: ::
+
+    GP.file_template_script_run_QM = 'template_run_dalton_parr.sh' # any .sh file in the same directory as the parameter.py file.
+    GP.command_launch_job = 'qsub' # for instance: qsub for SGE, sbatch for SLURM. 
+
+The :ref:`GP.command_launch_job<autodoc_gp_command_launch_job>` sonely depend on your cluster job manager type (for instance SGE or SLURM). 
+The :ref:`GP.file_template_script_run_QM<autodoc_gp_file_template_script_run_QM>` should point to an existing file. 
+
+.. Warning:: **You** shall take care of this file because it would be heavely dependent on the cluster you are using and the type of calculation. For more information, see :ref:`this page <qm_management_template_script_subpage>`. We warmly recommend to try out by yourself (on a small number of QM calculations) several type of ways to submit these jobs on your cluster. We hope that |frog| provide enough flexibility to find the 'best' way for **your** type of calculation (many small molecule, few large ones? On a mono-servor? Using MPI?). 
+
+
+Attached to these QM calculation management attribute are : ::
+    
+    GP.max_submission_QM = 5000
+    GP.nbr_job_parr_QM = 32 # default is 1
+    
+:ref:`GP.max_submission_QM<autodoc_gp_max_submission_QM>` defines a maximum for the number of 'job' that can be submit to the cluster at once. 
+This avoid to overload the cluster (or to test if the parameters are correct using `GP.max_submission_QM = 1`. 
+:ref:`GP.nbr_job_parr_QM<autodoc_gp_nbr_job_parr_QM>` defines how many QM calculations are planned for a single 'job'. Typically, a fraction of the core available for each job. See :ref:`this page <qm_management_general_procedure_subpage>` for more informations. 
+
+The last parameter to take care of is the :ref:`GP.scratch_dir<autodoc_gp_scratch_dir>`: :: 
+    
+    GP.scratch_dir= '$SCRATCH_DIR' # default is ./
+    
+This parameter is deeply connected to the GP.file_template_script_run_QM file. 
+It defines where the temporary file of |dalton| are localised. 
+
+.. Warning:: Please take some time to read :ref:`this page<qm_management_scratch_dir_subpage>` for the use of GP.scratch_dir. Depending on how you are using |frog| you can really request to fill your cluster with |dalton| large temporary files and thus crash it down. As for the GP.file_template_script_run_QM, try out several ways! 
+
+The GP.pass_first_part is discussed further. 
+
+
+MT definition: 
+------------------
+
+    + Diagram definition 
+
+You can perform QM calculation on several MTs within a single |frog| run -- or perform QM calculation for a single MT while several are defined. 
+In this tutorial, only one MT is defined (water). 
+For several MTs, repeat the MTs definition as presented in :ref:`this tutorial<tuto_mixture_structural_analysis>` but with a read_optic_properties_input similar to the one presented here. 
+
+For this tutorial, we will focus on the available **optical properties**: the polarizability and the first hyperpolarizability. 
+We would like to compute the first hyperpolarizability at the QM/MM level, and only set the polarizability using a fix value in the laboratory frame. 
+For more information about the available optical properties and there scientific meaning, see :ref:`this page<optical_parameter_page>`
+The electrostatic emmbbeding is performed by the Polarizable Environement (PE) scheme of the |dalton| software. 
+Hence, we may want to keep track of the electrostatic field felt by every molecule (the one generated by the neighborgs). 
+Thus, we will declare several diagram: :: 
+
+    L_diagram_analysis_to_perform = [
+        ['electric_field', 'Averaged', [1, 200], [-10, 10], 'on_fly', 10],
+        ['electric_field', 'Averaged', [1, 200], [-10, 10], 'PE'],
+        ['alpha', 'Averaged', [1, 200], [-25, 25]],
+        ['iota', 'Averaged', [1, 200], [-25, 25]],
+        ['beta', 'Averaged', [1, 200], [-35, 35]],
+        ['chi', 'Averaged', [1, 200], [-35, 35]]
+                                  ]
+    moleculetype.read_diagram_input(GP, L_diagram_analysis_to_perform)
+
+The diagram type 'electric_field' will hold the electrostatic field felt by a molecule. 
+2 ways to compute this electrostatic field are used: 'on_fly' and 'PE'. We will discussed the difference later on.
+The diagram type 'alpha' is the polarizability in the molecular frame while 'iota' is in the laboratory one. 
+The diagram type 'beta' is the first hyperpolarizability in the molecular frame, 'chi' in the laboratory one. 
+
+
+As for all diagram, several space discretization can be defined (here 'Averaged' for simplicity sake) as the number of bins for this space discretization (here 1 because of the 'Averaged' type). 
+However, the absolute range of these observable are not know by |frog| and should be provided. 
+The electrostatic field unit is Volt per Angstrom while the polarizability and first hyperpolarizabilty are given in atomic unit. 
+In this example, the range to performed the diagram are [-10, 10] for the electric field, [-25, 25] for the polarizability and [-35, 35] for the first hyperpolarizability. 
+
+.. note:: these limits do not impact the mean and standard deviation calculation, only the diagram.value distribution. 
+
+In this example, 200 bins are used to discretize the observable of each diagram. 
+
+
+
+    + Optical Parameters definition 
+
+The optical parameters are defined using: ::
+    
+    moleculetype.read_optic_properties_input(GP, alpha_calculation_style='Fixed for all', L_alpha_ref=L_alpha_ref, beta_calculation_style='QM', L_beta_ref=False, where_to_run_QM=where_to_run_QM, qmparameter=qmparameter, selection_tool=False)
+    
+Here we can notice that the polarizability is not QM dependent (alpha_calculation_style='Fixed for all') and that the first hyperpolarizability is (beta_calculation_style='QM'). 
+Hence, for the polarizability one should provide a value, used for every molecule, in the molecular frame: :: 
+    
+    L_alpha_ref = np.array([[9.8, 0, 0], [0, 9.8, 0], [0, 0, 9.8]]) # should be a 3x3 matrix or False
+    
+On the contrary, L_beta_ref should be set to False (or not set at all because it is the default value).
+
+To perform the QM calculation, the key object is the qmparameter defined using: ::
+    
+    qmparameter = QMParameter()
+    
+All the attribute of the QMParameter object are defined :ref:`in the page <qm_parameter_object_page>`. 
+
+Every molecule can undergo only one QM calculation during a |frog| run. 
+Hence, only one qmparameter can be defined for an MT -- for instance the ground state parameters are the same for all the optical property of this MT.
+
+First, let's define the QM/MM environment: ::
+
+    qmparameter.calculation_style = 'PE' #'PE long'
+    qmparameter.pe_level = 0
+    qmparameter.max_pe_distance_neigh = 10
+    
+:ref:`qmparameter.calculation_style <autodoc_qmparameter_calculation_style>` defines the general scheme, here the classical PE.
+Attached with it the order of the PE environement: :ref:`qmparameter.pe_level<autodoc_qmparameter_pe_level>`: -1 is for vacuum, 0 for static description of the neighborhood and 1 up to polarizable environement.  
+
+.. note:: The neighborgs electrostatic description (point charge, permanent dipole or quadrupole or dipolar polarizability) are defined within the MT itself. See :ref:`this page<electrostatic_description_object_page>` and :ref:`this one<molecular_library_file_electrostatic_description_function_page>` for more informations. 
+
+The environement in the PE0 scheme is included up to a distance of 10 angstrom as defined in :ref:`qmparameter.max_pe_distance_neigh<autodoc_qmparameter_max_pe_distance_neigh>`.
+See :ref:`this page<electrostatic_embedding_page>` for more information about the electrostatic emmbedding scheme in |frog|.
+
+To keep track of the influence of the environement size, the electric field diagram type can be used. 
+Above we have defined 2 kinds using 'on_fly' and 'PE' options. 
+The one obtained by the 'on_fly' option is computed outside the QM calculation procedure: it can be used without any QM calculation and/or QMParameter definition. 
+To do that, the environment up to 10 angstrom is built and the electrostatic description of these neighborgs is used to compute the electrostatic field felt by the molecule.
+For the 'PE' option, the electrostatic field generated by the PE environement built during the QM/MM procedure is store. 
+Hence, defining the same radius for the 'on_fly' (here 10 angstrom) and :ref:`qmparameter.max_pe_distance_neigh<autodoc_qmparameter_max_pe_distance_neigh>` for the 'PE' scheme lead to the same results. 
+A deeper analysis of these electrostatic field is presented in the jupyter notebook analysis file. 
+
+.. note:: When using the diagram electric_field with the option 'PE', you **have to** skip the first part if any QM calculation is already performed. Otherwise the creation of the environement is not done (because there is already a QM results available) and this the electrostatic calculation. This will lead to krash later on. 
+
+You can also use :ref:`qmparameter.write_xyz_environment<autodoc_qmparameter_write_xyz_environment>` to have a look of the environement over every molecule. Setting this attribute to True will generate for every molecule for every time step its electrostatic environement readable using :vmd:`VMD<>`. 
+
+Then, we should define how to compute the ground state property: ::
+    
+    qmparameter.theory_lv = 'DFT'
+    qmparameter.functional = 'Camb3lyp'
+    qmparameter.type_basis = 'Global basis'
+    qmparameter.global_basis_value = 'd-aug-cc-pVTZ'
+
+Here we use the DFT formalism with the CAM-B3YLYP functional. The basis set used is Dunning's ones: d-aug-cc-pVTZ. More information can be found :ref:`here <qm_parameter_object_page>`.
+We also recommand to read the relative part in the |dalton| manual. 
+
+.. note:: The available option/scheme in |frog| depends on previous uses. Only a few framework/options available in |dalton| are currently implemtented in |frog|. However, it should not be difficult to upgrade |frog| code to include the scheme/option you want to use. 
+
+
+Once the ground state calculted, the Response scheme is used to compute the polarizability and/or the first hyperpolarizability. 
+Thus, the frequency of the perturbation should be defined using :ref:`qmparameter.shg_response<autodoc_qmparameter_shg_response>` in **atomic unit**: ::
+
+    qmparameter.shg_response = [0.0, 0.05686]
+    
+Here we required to compute the first hyperpolarizability for an excitating wave-length of 0 and 0.05686 a.u. (*i.e.* at the inifite limit wave-length and at 800 nm).
+Since we are not computing the polarizeability at the QM level, we shall not defined the equivalent attribute -- :ref:`qmparameter.polarizability_response<autodoc_qmparameter_polarizability_response>`.
+
+Finally, 2 parameters can be used to defined which molecule should undergo a QM calculation: :ref:`OpticalParameter.where_to_run_QM<autodoc_opticalparameter_where_to_run_QM>` and :ref:`OpticalParameter.selection_tool<autodoc_opticalparameter_selection_tool>`. 
+
+In this example, we are dealing with a bulk simulation with 1700 molecules in the box. 
+Using : ::
+    
+    GP.nbr_time_step = 1 
+    where_to_run_QM = ['All']
+    selection_tool = False
+
+will compute for *all* the molecule of this MT at 1 time step there property at the QM level.
+
+Using : ::
+    
+    GP.nbr_time_step = 10 
+    where_to_run_QM = ['All']
+    selection_tool = ['traking_molecules', [1, 4, 10]]
+
+will compute for the molecule 1, 4 and 10 there property at the QM level for 10 time steps. 
+
+At interfaces, you can use: :: 
+
+    where_to_run_QM = ['Plane_xy', 100, [50, 62, 63, 64, 65]]
+    
+to compute the QM property only of molecule within the 50, 62, 63, 64 and 65th bin. You can also defined the molecule using layers. 
+
+.. note:: You can combine both requirement of where_to_run_QM and selection_tool. 
+
+See :ref:`this page<optical_property_which_molecule_should_be_qm_treated_subpage>` for more details
+
+
+Procedure: 
+===========
+
+Now that we have defined the new attributes of the parameters files, let's have a look on the |frog| run.
+
+First Part
+-----------
+
+As always, launch the run using: ::
+
+    Frog parameter_optical_analysis_overview.py
+    
+In the shell. You will have new prints during the reading of the parameters file which should confirm the new optical parameters defined. 
+
+The first part may be much longer than the previous tutorial: |frog| is building for every molecule its environement and write |dalton| input file. Typically this should spend several minutes. 
+You can find the input file in the GP.dir_torun_QM directory (by default QM_Simulations).
+
+At the very beggining of this directory, you can find some *example* files: .dal, .mol, .pot and .xyz. 
+These file can help you understanding how a MT are considerated if they are the one that is QM-treated (the .mol file) or if they are a neighborg (.pot and .xyz file). 
+For more information about the meaning of these file see the |dalton| manual at the PE section. 
+
+At the end of the first part, |frog| count how many QM calculation it should perform for all MTs and time step. 
+It write this information in a file called *job_to_perform.p* in the GP.dir_submission_file directory. 
+
+Second Part
+------------
+
+At the begginig of the second part, |frog| checks how many of these QM calculations has already be made. 
+Then, it will create submission file, which we called 'jobs' in this wiki, where GP.nbr_job_parr_QM QM calculations will be made. 
+A final file called *submit_job.sh* in the GP.dir_submission_file directory is created. 
+Running this file using bash will send every jobs to the cluster. 
+
+.. note:: We recommand you to have a look at these files to understand how they work.
+
+If there is any QM calculation left to do (which is the case for the first |frog| run), the software stops and print: :: 
+
+    QM run not finished yet: please launch the QM run and relaunch the software.
+
+At this point you have 2 choices: 
+
+    + Perform the QM/MM calculations:
+    
+In this case you should have access to a cluster and rewrite the GP.file_template_script_run_QM file and/or the GP.command_launch_job and/or GP.scratch_dir. To test you really should start using `GP.max_submission_QM = 1` and `GP.nbr_job_parr_QM = 1` (or 2 if you want to compte several QM calculations in one job). 
+
+To perform the QM calculation, see :ref:`this page<qm_management_general_procedure_subpage>`. 
+
+    + Use the available results for tutorial sake:
+
+In the directory *Optical_analysis_overview* you have already the results called *QM_result_for_testing.tar.gz*. 
+This directory is exactly the same as the GP.dir_torun_QM directory, but there the actual QM results have been computed. 
+For every molecule, you will find a file called *dalton_molecule_potential.out* which is the output of the |dalton| run for this molecule at the QM/MM level. 
+To achieve that, you should copying the *QM_result_for_testing.tar.gz* as *GP.dir_torun_QM directory*: |frog| will find the results and go to the next step.
+
+Once every QM calculations finished (or available in the right directory), |frog| continue to the last part. 
+
+.. note:: To speed up the loop over the second part, use `GP.pass_first_part = True`. |frog| will not redo the first part, and thus the numerical part devoted to |frog| should be almost nul. Using this attribute, you can also change some of the GP parameters used for the QM management, see :ref:`this page<gp_qm_management_numerical_parameter_subpage>` for the trusted list. 
+
+Third Part
+------------
+
+In this part, |frog| reads the QM results from the |dalton| output files. 
+Then, the distribution, averaged and standard deviation are computed for all the molecules. 
+
+.. note:: If some of the molecule are not QM treated, using :ref:`OpticalParameter.where_to_run_QM<autodoc_opticalparameter_where_to_run_QM>` and/or :ref:`OpticalParameter.selection_tool<autodoc_opticalparameter_selection_tool>`, this is not a problem. For these molecules, not results are available and they will not be considerated in the distribution, averaged or standard deviation. If you are using complicated selection, you can keep track of the population using diagram.population and/or diagram.axis_population. 
+
+
+Analysing the results: 
+=======================
+
+As for the case without QM calculation, the results are available in average in the *L_moleculetype_result.p* file or in the time step one (GP.dir_mol_times/L_moleculetype_T.p where T stand for every time steps). 
+You can also find the raw individual results in the *dalton_molecule_potential.out* file of every molecule. 
+
+A jupyter notebook *analysis_optical_overview.ipynb* file is proposed to load and read the results. 
+
+
+
+
+
+
+
+
+
+
+
+
+

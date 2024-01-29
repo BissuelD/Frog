@@ -1,0 +1,16 @@
+# Tests made over bulk mixture of methanol and water. 
+# Environement type: vacuum, PE, PE+QM box
+test_vacuum: vacuum calculation for both water and methanol 
+test_pe0: PE0 without long range switch 
+test_pe0_LR: PE0 with long range switch 
+test_pe1_1: PE1 without molecule that can be polarized 
+test_pe1_2: PE1 with molecule that can be polarized (water)
+test_qmbox: PE0+QM box
+
+# PBC: play with PBC authorization and check by opening the .xyz file yourself. PE0 environment without long range is used
+test_all_PBC: very large PBC environment, all included: should be a sphere
+test_xz_PBC: only xz: should be flat at some point along +y and -y (like a cheese loaf)
+test_y_PBC: only y: should be flat at some point along +x/z and -x/z
+# there is no test for no PBC authorized. 
+
+#END 

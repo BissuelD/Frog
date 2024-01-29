@@ -1,0 +1,28 @@
+.. _optical_analysis_index_page:
+
+==================
+Optical Analysis
+==================
+
+In the :ref:`overview page<overview_opt_analysis_page>` is presented a general overview of the scientific quantities refer as 'optical'. A quick description of the code input and functionement is also given. 
+
+The :ref:`optical parameter page<optical_parameter_page>` presents the different input available and there uses to deal with optical analysis. 
+
+In the :ref:`electrostatic emmedding page<electrostatic_embedding_page>` is presented in details how the electrostatic environement is taken into account in |frog|. 
+
+The :ref:`QM box page<qm_box_page>` presents in details how the inside of the QM box is built. 
+
+The :ref:`QM management page<qm_management_page>` presents in details how the submission script are generated and how to deal with thousands of QM calculations. This page contains informations about the |frog| uses but also some general advices. As well as the :ref:`advice for QM page<advices_for_qm_page>` which is a sort of Q&A sections. 
+
+
+
+.. toctree::
+    :maxdepth: 2  
+    
+    ./overview_opt_analysis
+    ./optical_parameter
+    ./electrostatic_embedding
+    ./qm_box
+    ./qm_management
+    ./advices_for_qm
+    

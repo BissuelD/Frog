@@ -1,0 +1,19 @@
+# test1
+General test with very simple parameters
+
+# test2
+Same as test1 but with different time step / frame number 
+
+# test3 
+Same as test2 in parrallel 
+
+# Run test4 and test4_next one after the other without cleaning the directory.
+# test4
+Try GP.MD_cut_trajectory False and defined GP.MD_convertion_to_angstrom 
+# test4_next
+Same as test4 but bypassing the first part. 
+
+# test5
+Define different directory names 
+
+#END

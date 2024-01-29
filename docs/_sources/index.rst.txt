@@ -1,0 +1,96 @@
+=====
+FROG
+=====
+
+:Release: |release|
+:Date: |today|
+
+|frog| is a software originally designed to compute the second harmonic generation response of liquids from Molecular Dynamics (MD) at the quantum level. To achieve this, it uses the PE scheme of the |dalton| software which provides optical response of molecules within an electrostatic embedding. 
+
+Here are the main |frog| functionalities:
+
+    + Perform usual **structural** analysis such as density, molecular orientation, Radial Distribution Function or H-bond.
+    
+    + Compute automatically the **optical** response (polarizability, first and second hyperpolarizability) of molecules at the quantum level in an embedded environment.
+    
+Its main advantages are:
+
+    + Can open many types of MD, works for pure liquid or mixture.
+    
+    + Can deal with 2D liquid interfaces, but also work in bulk.
+    
+    + The user can quite easily define the parameters for a molecule description or analysis. 
+
+    + Has a whole part designed to help you to treat thousands of QM calculations in a cluster.
+    
+And for honesty sake, its drawback:
+
+    + Not that easy to use at first.
+    
+    + Can be slow.
+    
+
+
+Today, |frog| is still in intense development, as this wiki. You will find practical information to use |frog| in the :ref:`tutorials<tutorial_index_page>`. The other parts of the wiki give more explanations. Some of the parts are really dedicated for developers and to deeper understand the objects defined in |frog|. The common user may not read all! Rather, we strongly recommend reading also the documentation of the |dalton| software, and especially the part related to the PE environment.
+
+.. note:: For beginers: :ref:`install it<installation_page>` and try the :ref:`first tutorial<get_started_on_frog_tutorial_page>` with the help of this :ref:`quick overview<overview_tutorial_page>` on how the code works. We recommand :ref:`this tutorial for the optical property<tuto_optical_analysis_overview_page>` to start with QM/MM calculation.
+
+The central object of |frog| is the :ref:`MolecularType<mt_index_page>` (referred as **MT**), which describes a molecule with a set of functions and attributes. Each molecule (water, methanol or sodium cation for instance) used in the MD should be described by a MT. The current available MTs are presented :ref:`here<available_mt_page>`. |frog| aims to be a collaborative and open software: if you want to define by yourself a new MT, see :ref:`this tutorial<what_should_contain_molecular_type_file_page>` or contact us!  
+
+Another important objet is the :ref:`GlobalParameter<gp_index_page>` (referred as **GP**), which contains information and parameters for all the runs. This object is mainly used to help the use of other functionalities of |frog|. 
+
+To perform the analysis and store the results, :ref:`Diagrams<diagram_index_page>` are used. There are as many diagrams as the type of analysis available in |frog|. See :ref:`this page<diagram_list_page>` for the available ones. 
+
+To deal with the quantum calculation and the electrostatic embedding, a set of objects are defined. Therefore, if you want to compute optical properties (QM-based properties), you will have to use them. They are presented in the :ref:`Optical Analysis part<optical_analysis_index_page>` of the wiki, along with a lot of information regarding the :ref:`electrostatic embedding scheme<electrostatic_embedding_page>` or :ref:`how to deal with the QM calculation in the cluster<qm_management_page>`. 
+
+To conclude this short presentation, the authors want to highlight that they are non-professional computer scientists, but rather physicists and chemists. Thus, the code may not be the most numerically efficient code possible. However, efforts have been made to make it not too complicate to read and to update/improve. The wiki is long, but should provide information to help a future potential developer understanding the spirit of the code and how it works. Indeed, if you want to participate to the code and/or give physical or numerical advice, please do not hesitate to contact us. Any help is welcome!
+
+Get the code and Contact Us
+===========================
+
+You can get the code, this wiki, tutorial and some tests from our :frog_github:`Githib page<>`. 
+You can also open issues in this GitHub page to ask for help or raise questions. 
+
+You can also use the :frog_zenodo:`Zenodo page<>` to get the code or contact us. 
+Finally, you can send us e-mail at:
+
+    + guillaume_le_breton@live.fr
+    + claire.loison@univ-lyon1.fr
+
+Licence
+=============
+
+|frog| is under the GNU GPLv3 Licence. See https://www.gnu.org/licenses/gpl-3.0.en.html for more informations. 
+
+
+Publications
+=============
+
+To cite |frog|, use the DOI: |frog_DOI|.
+
+.. bibliography::
+   :all:
+
+
+
+.. toctree::
+   :maxdepth: 2
+   :numbered:
+   :hidden:
+    
+   ./Installation/how_to_install_frog
+   ./Tutorials/tutorial_index
+   ./GlobalParameter/gp_index
+   ./MoleculeType/mt_index
+   ./Diagram/diagram_index
+   ./OpticalAnalysis/optical_analysis_index
+   ./Frog
+
+
+Indices and tables
+==================
+
+ * :ref:`genindex`
+ * :ref:`modindex`
+ * :ref:`search`
+

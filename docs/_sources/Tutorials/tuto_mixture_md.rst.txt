@@ -1,0 +1,215 @@
+.. _tuto_mixture_structural_analysis:
+
+===================================
+Mixture and structural analysis
+===================================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+
+
+Goal and Perquisite: 
+====================
+
+In this tutorial we will explain how to prepare the parameter file to treat an MD simulation with two different molecule type (MT): a Water-Methanol mixture in the bulk phase. We will also see how to initialize the main structural analysis: density, molecular orientation, H-bond and Radial Distribution Function (RDF). 
+
+Finally, we will briefly explain how to load the datas obtained using a Jupyter Notebook Python environment.
+
+You should be familiar to the standard command presented in the :ref:`get started tutorial<get_started_on_frog_tutorial_page>`. 
+
+The file needed to run this tutorial are located at: *Frog/Doc/Tutorial_files/Traj/Mixture/Meth_wat_bulk/* for the MD trajectory and *Frog/Doc/Tutorial_files/Mixture_MD/* for all the other documents.
+
+No QM calculation will be performed in this run.
+
+First is presented how to built the parameter file and then how to analyse the results. 
+
+Parameter file: 
+====================
+
+Defines each MTs: 
+------------------
+
+The *mixture_water_methanol.data* and *mixture_water_methanol.dcd* contains a mixture of 20% methanol in water. The total number of molecule is 2000, therefore there are 400 methanol molecule for 1600 water molecule. In the MD trajectory, the water molecule are the first 1600 molecule, and the methanol the last 400 molecules.
+
+In the orignal framework of this tutorial, several concentration have been used. To make the writting of the |frog| parameter file easier, a concentration variable has been made. In the parameter file named *parameters_mixture_MD.py*, this number of molecule is set using: ::
+    
+    concentration = 20
+    N_total = 2000
+    N_eau = int(N_total - N_total*concentration*0.01)
+    
+And the rest of the parameter file use the variable N_total and N_eau to defines the MTs from the MD trajectory. This is an advantageous of the |frog| parameter file: it is a python file which will be run. You can define comprehensive variable to make more robust/user-friendly parameter files.
+
+After the usual GP definition, the water molecule MT is defined using the Water_TIP4P2005 one: :: 
+
+    molecule_type_name = 'Water_TIP4P2005'
+    where_are_molecules = [1, N_eau]
+
+    moleculetype = MoleculeType(GP, molecule_type_name, where_are_molecules)
+
+    L_diagram_analysis_to_perform = [
+        ['density', 'Plane_xy', [100]],
+        ['molecular_orientation', 'Averaged', [1, 10], 'independent'],
+        ['hbond', 'Averaged', [1, 5, 5], 'Water_TIP4P2005', [3.2, 40*np.pi/180]],
+        ['hbond', 'Averaged', [1, 5, 5], 'Methanol_OPLSAA', [3.2, 40*np.pi/180]],
+        ['rdf', 'Averaged', [1, 100], 'Water_TIP4P2005', 10],
+        ['rdf', 'Averaged', [1, 100], 'Methanol_OPLSAA', 10],
+                                  ]
+
+    moleculetype.read_diagram_input(GP, L_diagram_analysis_to_perform)
+
+    moleculetype.read_optic_properties_input(GP)
+
+    moleculetype.end_initialize(GP)
+    L_moleculetype.append(moleculetype)
+
+
+We will come back later to the diagram definition. For the methanol molecule, the Methanol_OPLSAA MT is used: :: 
+
+    molecule_type_name = 'Methanol_OPLSAA'
+    where_are_molecules = [N_eau+1,N_total]
+
+    moleculetype = MoleculeType(GP, molecule_type_name, where_are_molecules)
+
+    L_diagram_analysis_to_perform = [
+        ['density', 'Plane_yz', [100]],
+        ['molecular_orientation', 'Averaged', [1, 10], 'independent'],
+        ['hbond', 'Averaged', [1, 4, 4], 'Methanol_OPLSAA', [3.4, 45*np.pi/180]],
+        ['rdf', 'Averaged', [1, 101], 'Methanol_OPLSAA', 12],
+                                  ]
+
+    moleculetype.read_diagram_input(GP, L_diagram_analysis_to_perform)
+
+    moleculetype.read_optic_properties_input(GP)
+
+    moleculetype.end_initialize(GP)
+    L_moleculetype.append(moleculetype)
+
+After these 2 blocks, the *L_moleculetype* list contains two MT: the water and the methanol one. 
+
+Note that you should not be able to create a bad molecule assignment in |frog| since geometrical molecular check is performed. For instance, if you try  `where_are_molecules = [N_eau-1,N_total]` for the Methanol assignment, it should crash because some of the molecule contains only 3 atoms (since they are water molecule) where the Methanol_OPLSAA MT should contains 6 atoms.
+
+
+Diagram definition: 
+--------------------
+
+For each MT define, one can define a set of analysis to perform. For the water, the input used is: :: 
+
+    L_diagram_analysis_to_perform = [
+        ['density', 'Plane_xy', [100]],
+        ['molecular_orientation', 'Averaged', [1, 10], 'independent'],
+        ['hbond', 'Averaged', [1, 5, 5], 'Water_TIP4P2005', [3.2, 40*np.pi/180]],
+        ['hbond', 'Averaged', [1, 5, 5], 'Methanol_OPLSAA', [3.2, 40*np.pi/180]],
+        ['rdf', 'Averaged', [1, 100], 'Water_TIP4P2005', 10],
+        ['rdf', 'Averaged', [1, 100], 'Methanol_OPLSAA', 10],
+                                  ]
+    moleculetype.read_diagram_input(GP, L_diagram_analysis_to_perform)
+
+and for the methanol: ::
+
+    L_diagram_analysis_to_perform = [
+        ['density', 'Plane_yz', [100]],
+        ['molecular_orientation', 'Averaged', [1, 10], 'independent'],
+        ['hbond', 'Averaged', [1, 4, 4], 'Methanol_OPLSAA', [3.4, 45*np.pi/180]],
+        ['rdf', 'Averaged', [1, 101], 'Methanol_OPLSAA', 12],
+                                  ]
+    
+    moleculetype.read_diagram_input(GP, L_diagram_analysis_to_perform)
+
+|
+
+**Density:**
+
+The geometrical discretization used is 'Averaged' for most of the analysis since the MD system is a bulk one. However, the density is discretized along the 'z' laboratory axis: this allows you to have an idea of the fluctuation due to bad statistical averaging. If you use enough time step, the density should be a constant with respect to any laboratory axis -- since it is a bulk phase! 
+
+**Molecular Orientation:**
+
+The molecular orientation analysis should not contain meaningfull information either since the system should de centrosymetric: no net orientation is expected. 
+
+**H-bond:**
+
+The H-bond network is way more interesting. 3 H-bond can be defined: Water-Water, Water-Methanol and Methanol-Methanol. For instance, the Water-Water is defined in the water MT definition using the line: :: 
+
+    ['hbond', 'Averaged', [1, 5, 5], 'Water_TIP4P2005', [3.2, 40*np.pi/180]]
+    
+in the diagram definition. Since the H-bond input works as: ['hbond', geometrical discretization, [N, i, j], partner MT, parameters]. The i and j defines the maximal number of 'own' and 'given' H-bond for this interaction. The 'partner MT', here Water_TIP4P2005, is the other MT with which |frog| will try to compute the H-bond. Finally, the 'parameters', here [3.2, 40*np.pi/180], is the parameter used for the function which compute the H-bond. Each pair have its own use of the parameters: look at the Molecule Library file of each MT to see how to defined these parameters. In the case of Water_TIP4P2005-Water_TIP4P2005 interaction, the 3.2 defined the maximal distance upon which the Oxygen atom should be to be considerated as an H-bond. The 40*np.pi/180 defined the maximal angle from 180 degree of the OH--O so that the 2 molecules are considerated in an H-bond interaction. 
+
+Fore more infoirmation, see :ref:`this page for water<MLF_Water_TIP4P2005_page>`, and :ref:`this one for methanol<MLF_Methanol_OPLSAA_page>`.
+
+    + Water-Water
+
+The input for the Water-Water H-bond analysis is given in the water MT definition using: ::
+
+    ['hbond', 'Averaged', [1, 5, 5], 'Water_TIP4P2005', [3.2, 40*np.pi/180]]
+
+|
+
+    + Water-Methanol
+    
+The input for the Water-Methanol H-bond analysis is given in the water MT definition using: ::
+
+    ['hbond', 'Averaged', [1, 5, 5], 'Methanol_OPLSAA', [3.2, 40*np.pi/180]]
+
+Note that we could defined in the methanol MT definition: ::
+    
+    ['hbond', 'Averaged', [1, 5, 5], 'Water_TIP4P2005', [3.2, 40*np.pi/180]]
+    
+To have the same results, except that the 'own' and 'given' H-bond would have been exchanged. 
+|
+
+    + Methanol-Methanol
+
+The input for the Methanol-Methanol H-bond analysis is given in the methanol MT definition using: ::
+
+    ['hbond', 'Averaged', [1, 4, 4], 'Methanol_OPLSAA', [3.4, 45*np.pi/180]]
+
+|
+
+.. note:: Claire, ici ces liaisons ne sont pas trop aboutis pour les melanges avec du methanol. Je pense que je devrait y passer un peu de temps pour verifier que cela marche bien. A discuter donc si  ce est impoortant de le faire ou pas. 
+
+
+**RDF:**
+
+The Radial Distribution Function is also important to understant the structure. The RDF needs a distance. It can be calculated from a particular atom of a target molecule to another atom of a neighborgs. In |frog|, only the 'mean position' are used to compute RDF. As for the H-bond, there are 3 types of RDF: Water-Water, Water-Methanol and Methanol-Methanol.
+
+Contrarily to the definition of the H-bond, the RDF consider only the distance between the "mean position" of the target MT (here one Water_TIP4P2005 molecule for instance) and the "mean position" of the partner MT (all the other Water_TIP4P2005 in the vicinity of the "target" molecule for instance).  This analysis takes one extra argument which is the maximal distance to consider between the target and the partner molecules. The input look like: ['rdf', geometrical discretization, [N, M], partner MT, Dmax]. Where Dmax is the maximal distance to calculate the RDF and M the number of bin used to discretize the distance (from 0 to Dmax) from the target molecule to the 'partner' molecule. 
+
+    + Water-Water
+
+The input for the Water-Water RDF analysis is given in the water MT definition using: ::
+
+    ['rdf', 'Averaged', [1, 100], 'Water_TIP4P2005', 10]
+
+|
+
+    + Water-Methanol
+    
+The input for the Water-Methanol RDF analysis is given in the water MT definition using: ::
+
+    ['rdf', 'Averaged', [1, 100], 'Methanol_OPLSAA', 10]
+
+Note that we could also have defined in the methanol MT definition: ::
+
+    ['rdf', 'Averaged', [1, 100], 'Water_TIP4P2005', 10]
+
+To have the same result. 
+
+|
+
+    + Methanol-Methanol
+
+The input for the Methanol-Methanol RDF analysis is given in the methanol MT definition using: ::
+
+    ['rdf', 'Averaged', [1, 101], 'Methanol_OPLSAA', 12]
+
+|
+
+
+Run and analysis: 
+=================
+
+To perform the run, use: :: 
+
+    $ Frog parameters_mixture_MD.py
+
+This run may take some time since some analysis are required need to built an environment (H-bond and RDF). At the end of the run, you can read the obtained results using the jupyter notebook *mixture_md_analysis.ipynb*. 

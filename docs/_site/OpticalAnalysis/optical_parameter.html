@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>6.2. Optical Parameter &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="6.3. Electrostatic embedding" href="electrostatic_embedding.html" />
+    <link rel="prev" title="6.1. Overview: Optical Analysis" href="overview_opt_analysis.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="optical-parameter">
+<span id="optical-parameter-page"></span><h1><span class="section-number">6.2. </span>Optical Parameter<a class="headerlink" href="#optical-parameter" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#what-can-i-do" id="id6">What can I do?</a></p></li>
+<li><p><a class="reference internal" href="#optical-property-calculation" id="id7">Optical Property Calculation</a></p>
+<ul>
+<li><p><a class="reference internal" href="#generalities" id="id8">Generalities</a></p></li>
+<li><p><a class="reference internal" href="#dipole-and-quadrupole" id="id9">Dipole and Quadrupole</a></p></li>
+<li><p><a class="reference internal" href="#polarizability" id="id10">Polarizability</a></p></li>
+<li><p><a class="reference internal" href="#first-hyperpolarizability" id="id11">First-Hyperpolarizability</a></p></li>
+<li><p><a class="reference internal" href="#second-hyperpolarizability" id="id12">Second-Hyperpolarizability</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#which-molecule-should-be-qm-treated" id="id13">Which molecule should be QM-treated?</a></p></li>
+<li><p><a class="reference internal" href="#optical-parameter-object" id="id14">Optical Parameter object:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#initialization" id="id15">Initialization</a></p></li>
+<li><p><a class="reference internal" href="#attributes" id="id16">Attributes</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>In this page we will present in more details what can be done in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> regarding optical properties calculation. Some of the informations are shared with other pages, so first let’s see a global overview of what can be done and how.</p>
+<section id="what-can-i-do">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">6.2.1. </span>What can I do?</a><a class="headerlink" href="#what-can-i-do" title="Link to this heading">¶</a></h2>
+<p>First of all, here are the optical property available:</p>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">Optical property available</span><a class="headerlink" href="#id3" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 33.3%" />
+<col style="width: 33.3%" />
+<col style="width: 33.3%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>user-accessibility</p></th>
+<th class="head"><p>CPU-demanding</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="#optical-property-dipole-quadrupole-init"><span class="std std-ref">Dipole moment</span></a></p></td>
+<td><p>NYA</p></td>
+<td><p>NYA</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#optical-property-polarizability-init"><span class="std std-ref">Quadrupole moment</span></a></p></td>
+<td><p>NYA</p></td>
+<td><p>NYA</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#optical-property-dipole-quadrupole-init"><span class="std std-ref">Polarizability</span></a></p></td>
+<td><p>easy</p></td>
+<td><p>few-large</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#optical-property-hyperpolarizability-init"><span class="std std-ref">First Hyperpolarizability</span></a></p></td>
+<td><p>easy</p></td>
+<td><p>few-very large</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#optical-property-second-hyperpolarizability-init"><span class="std std-ref">Second Hyperpolarizability</span></a></p></td>
+<td><p>medium</p></td>
+<td><p>large-very large</p></td>
+</tr>
+</tbody>
+</table>
+<p>For all these property, you can compute them at the QM level using <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> or used fixed value. At lease, two reasons can lead you to compute QM-level optical properties:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Environment effects:</p></li>
+</ul>
+</div></blockquote>
+<p>In condensed phase, the environment surronding a molecule will creat an electrostatic field. This electrostatic field impacts the molecule electronic degree of freedom, and therefore its optical responses. You also may have electronic delocalisation accross molecules. In these cases, the optical response of each molecule can be unique: they depends on there environment.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Molecule geometrical deformation:</p></li>
+</ul>
+</div></blockquote>
+<p>For large enough molecule, the geometrical conformation can affect the molecular optical response. Therefore, even in vacuum, these optical properties can be distributions.</p>
+<p>Thus, all of these property can be computed at the QM level using several environment description. All these possibilities are presented in the <a class="reference internal" href="electrostatic_embedding.html#electrostatic-embedding-page"><span class="std std-ref">electrostatic emmbeding scheme page</span></a>.</p>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text">Environment description</span><a class="headerlink" href="#id4" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>description</p></th>
+<th class="head"><p>user-accessibility</p></th>
+<th class="head"><p>CPU-demanding</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="electrostatic_embedding.html#electrostatic-embedding-vacuum-scheme"><span class="std std-ref">Vacuum</span></a></p></td>
+<td><p>No effect of the neighborgs</p></td>
+<td><p>easy</p></td>
+<td><p>few-medium</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="electrostatic_embedding.html#electrostatic-embedding-pe-scheme"><span class="std std-ref">PE</span></a></p></td>
+<td><p>Neigborgs effect only threw electrostatic field</p></td>
+<td><p>medium-hard</p></td>
+<td><p>medium-large</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="electrostatic_embedding.html#electrostatic-embedding-pe-qm-scheme"><span class="std std-ref">PE+QM</span></a></p></td>
+<td><p>Neigborgs effect can be by electrostatic field or QM</p></td>
+<td><p>hard</p></td>
+<td><p>large-very large</p></td>
+</tr>
+</tbody>
+</table>
+<p>Regarding the QM calculation by itself, it is presented in <a class="reference internal" href="qm_box.html#qm-box-page"><span class="std std-ref">this page</span></a>.</p>
+<p>For all these property, you can record them in the molecular or laboratory frame. Using the molecular frame, you have the effect of the neigborhood and the geometrical deformation that can be study. Within the laboratory frame, you have also these effect, plus the orientation of the molecule in the laboratory frame. The laboratory frame is closer to the experimental observation while the molecular frame is more easy to understand. To go from one frame to another, the ‘molecular rotational matrix’ is used, see <a class="reference internal" href="../Mathematics/from_mol_to_lab.html#from-mol-to-lab-page"><span class="std std-ref">here</span></a>.</p>
+<p>In the following Table is recorded the name used in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> for the optical property in the molecular and laboratory frame:</p>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text">Optical property names</span><a class="headerlink" href="#id5" title="Link to this table">¶</a></caption>
+<colgroup>
+<col style="width: 33.3%" />
+<col style="width: 33.3%" />
+<col style="width: 33.3%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Molecular frame</p></th>
+<th class="head"><p>Laboratory frame</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Dipole moment</p></td>
+<td><p>NYA</p></td>
+<td><p>NYA</p></td>
+</tr>
+<tr class="row-odd"><td><p>Quadrupole moment</p></td>
+<td><p>NYA</p></td>
+<td><p>NYA</p></td>
+</tr>
+<tr class="row-even"><td><p>Polarizability</p></td>
+<td><p>alpha</p></td>
+<td><p>iota</p></td>
+</tr>
+<tr class="row-odd"><td><p>First Hyperpolarizability</p></td>
+<td><p>beta</p></td>
+<td><p>chi</p></td>
+</tr>
+<tr class="row-even"><td><p>Second Hyperpolarizability</p></td>
+<td><p>gamma</p></td>
+<td><p>Gamma</p></td>
+</tr>
+</tbody>
+</table>
+<p>Now, let’s see how to required optical calculation and the way it is computed.</p>
+</section>
+<section id="optical-property-calculation">
+<span id="optical-property-calculation-subpage"></span><h2><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">6.2.2. </span>Optical Property Calculation</a><a class="headerlink" href="#optical-property-calculation" title="Link to this heading">¶</a></h2>
+<section id="generalities">
+<h3><a class="toc-backref" href="#id8" role="doc-backlink"><span class="section-number">6.2.2.1. </span>Generalities</a><a class="headerlink" href="#generalities" title="Link to this heading">¶</a></h3>
+<p>For the polarizability or the hyperpolarizability, you can compute them at the QM level or not using <a class="reference internal" href="#autodoc-opticalparameter-alpha-calculation-style"><span class="std std-ref">alpha_calculation_style</span></a> or <a class="reference internal" href="#autodoc-opticalparameter-beta-calculation-style"><span class="std std-ref">beta_calculation_style</span></a>.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>If the polarizability or hyperpolarizability is fixed for all the molecule of an MT, the attribute <a class="reference internal" href="#autodoc-opticalparameter-l-alpha-ref"><span class="std std-ref">L_alpha_ref</span></a> or <a class="reference internal" href="#autodoc-opticalparameter-l-beta-ref"><span class="std std-ref">L_beta_ref</span></a> should be set to give <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> the reference value in the molecular frame.</p></li>
+<li><p>If you compute them at the QM level, the attribute <a class="reference internal" href="#autodoc-opticalparameter-qmparameter"><span class="std std-ref">qmparameter</span></a> should be also intizialised to controle how to perform the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> runs. For more informations about the qmparameter, see the <a class="reference internal" href="electrostatic_embedding.html#electrostatic-embedding-page"><span class="std std-ref">electrostatic emmbeding scheme page</span></a> and <a class="reference internal" href="qm_box.html#qm-box-page"><span class="std std-ref">the page about the QM box properties</span></a>.</p></li>
+<li><p>If you are using electrostatic emmebedded scheme in the QM calculation, you may wants to track the electrostatic field generated by the neighborhood: see <a class="reference internal" href="electrostatic_embedding.html#electrostatic-embedding-feedback"><span class="std std-ref">this page</span></a></p></li>
+<li><p>If you need to compute QM calculations, some attribute of the GP have to be set, see <a class="reference internal" href="qm_management.html#qm-management-page"><span class="std std-ref">this page for general overview</span></a> and <a class="reference internal" href="../GlobalParameter/QM_management.html#gp-qm-management-page"><span class="std std-ref">this one for details</span></a></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="dipole-and-quadrupole">
+<span id="optical-property-dipole-quadrupole-init"></span><h3><a class="toc-backref" href="#id9" role="doc-backlink"><span class="section-number">6.2.2.2. </span>Dipole and Quadrupole</a><a class="headerlink" href="#dipole-and-quadrupole" title="Link to this heading">¶</a></h3>
+<p>Today, the dipola and quadrupole are accessible within the QM calculation results. No automatic reading is available in Frog.</p>
+</section>
+<section id="polarizability">
+<span id="optical-property-polarizability-init"></span><h3><a class="toc-backref" href="#id10" role="doc-backlink"><span class="section-number">6.2.2.3. </span>Polarizability</a><a class="headerlink" href="#polarizability" title="Link to this heading">¶</a></h3>
+<p>To get the polarizability, first you have to defined at least one diagram <a class="reference internal" href="../Diagram/diagram_list.html#autodoc-diagram-alpha"><span class="std std-ref">alpha</span></a> or <a class="reference internal" href="../Diagram/diagram_list.html#autodoc-diagram-iota"><span class="std std-ref">iota</span></a> for the molecular or laboratory frame respectively. Then, you have to set the Optical Parameter attributes <a class="reference internal" href="#autodoc-opticalparameter-alpha-calculation-style"><span class="std std-ref">alpha_calculation_style</span></a> using the <span class="incremental">read_optic_properties_input</span> function to define how the polarizability should be computed.</p>
+<p>If you want to compute the polarizability at the QM level, set OpticalProperty.alpha_calculation_style to ‘QM’. In this case, the attribute <a class="reference internal" href="#autodoc-opticalparameter-qmparameter"><span class="std std-ref">qmparameter</span></a> should also be provided along with many GP parameters. The polarizability are computed using the frequency-dependent response theory within <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/>. You may defined several frequency using the attribute REF.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>mettre des examples?</p>
+</div>
+</section>
+<section id="first-hyperpolarizability">
+<span id="optical-property-hyperpolarizability-init"></span><h3><a class="toc-backref" href="#id11" role="doc-backlink"><span class="section-number">6.2.2.4. </span>First-Hyperpolarizability</a><a class="headerlink" href="#first-hyperpolarizability" title="Link to this heading">¶</a></h3>
+<p>To get the polarizability, first you have to defined at least one diagram <a class="reference internal" href="../Diagram/diagram_list.html#autodoc-diagram-beta"><span class="std std-ref">beta</span></a> or <a class="reference internal" href="../Diagram/diagram_list.html#autodoc-diagram-chi"><span class="std std-ref">chi</span></a> for the molecular or laboratory frame respectively. Then, you have to set the Optical Parameter attributes <a class="reference internal" href="#autodoc-opticalparameter-beta-calculation-style"><span class="std std-ref">beta_calculation_style</span></a> using the <span class="incremental">read_optic_properties_input</span> function to define how the polarizability should be computed.</p>
+<p>If you want to compute the hyperpolarizability at the QM level, set OpticalProperty.beta_calculation_style to ‘QM’. In this case, the attribute <a class="reference internal" href="#autodoc-opticalparameter-qmparameter"><span class="std std-ref">qmparameter</span></a> should also be provided along with many GP parameters. The hyperpolarizability are computed using the frequency-dependent response theory within <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/>. You may defined several frequency using the attribute REF.</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>mettre des examples?</p>
+</div>
+</section>
+<section id="second-hyperpolarizability">
+<span id="optical-property-second-hyperpolarizability-init"></span><h3><a class="toc-backref" href="#id12" role="doc-backlink"><span class="section-number">6.2.2.5. </span>Second-Hyperpolarizability</a><a class="headerlink" href="#second-hyperpolarizability" title="Link to this heading">¶</a></h3>
+<p>Today, the second-hyperpolarizability within an electrostatic emmebbeding is not computed by <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/>. Therefore, to get its value you have to do it using a finite field methode. In short, several QM calculation are performed for the same molecule with varying electrostatic field shone in top of the one generated by the environment. The first hyperpolarizability is recorded for every electrostatic field: the second-hyperpolarizability is defined to be the slope:</p>
+<div class="math">
+<p><img src="../_images/math/da91289fd705017da4211f703bb91ca132f48d5b.png" alt="\gamma (2 \omega; \omega, \omega, 0)_{ijkl} = \frac{ \delta \beta (2 \omega; \omega, \omega)_{ijk}}{\delta \bold{E}_l}"/></p>
+</div><p>A tutorial to compute it is available HERE.</p>
+<p>If you want to compute the second hyperpolarizability in the vacuum phase, it is possible in <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/>. However, since <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> has been specifically designed to deal with electrostatic emmebedded QM calculation, no automatic procedure is available to deal with this case. However, you can:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Initialized all the QM calculation in the vacuum phase using <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> and creat the submission file.</p></li>
+<li><p>Change the dalton.dal file for the molecule you want to have the second-hyperpolarizability – see the well-written <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> documentation.</p></li>
+<li><p>Run the QM calculation, and extract by yourself the second-hyperpolarizability.</p></li>
+</ol>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you really want to have the second-hyperpolarizability in the vaccum phase automatically, please contact us.</p>
+</div>
+</section>
+</section>
+<section id="which-molecule-should-be-qm-treated">
+<span id="optical-property-which-molecule-should-be-qm-treated-subpage"></span><h2><a class="toc-backref" href="#id13" role="doc-backlink"><span class="section-number">6.2.3. </span>Which molecule should be QM-treated?</a><a class="headerlink" href="#which-molecule-should-be-qm-treated" title="Link to this heading">¶</a></h2>
+<p>Finaly, an important aspect to the calculation of optical property at the QM level is the numerical cost. Depending on the system you are dealing with, you may compute the response of only some molecules according to several parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The Molecule Type</p></li>
+</ul>
+</div></blockquote>
+<p>This is already done by default since you define for each type of molecule what analysis should be perform!</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The Molecule position</p></li>
+</ul>
+</div></blockquote>
+<p>Historically, we have in mind 2D interfaces like liquid-gas. In this case, the main interest is given to the molecule close to the interface. Therefore, to compute at the QM level the response of molecule only if they respect some geometrical-based conditions, use the <a class="reference internal" href="#autodoc-opticalparameter-where-to-run-qm"><span class="std std-ref">OpticalParameter.where_to_run_QM</span></a> attribute.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The molecule number</p></li>
+</ul>
+</div></blockquote>
+<p>If you want to sample the optical property of only few molecule in time, you may want to use the <a class="reference internal" href="#autodoc-opticalparameter-selection-tool"><span class="std std-ref">OpticalParameter.selection_tool</span></a> attribute. This attribute allows you to select only some molecules to reduce further the number of QM calculations.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All of these selection can be made together. Only the molecules respecting all the condtions will undergo a QM calculation.</p>
+</div>
+<p>In the following is presented in more details the Optical Parameter object. You will find also more details about the possible attribute and options.</p>
+</section>
+<section id="optical-parameter-object">
+<h2><a class="toc-backref" href="#id14" role="doc-backlink"><span class="section-number">6.2.4. </span>Optical Parameter object:</a><a class="headerlink" href="#optical-parameter-object" title="Link to this heading">¶</a></h2>
+<section id="initialization">
+<h3><a class="toc-backref" href="#id15" role="doc-backlink"><span class="section-number">6.2.4.1. </span>Initialization</a><a class="headerlink" href="#initialization" title="Link to this heading">¶</a></h3>
+<p>The Optical Parameter object is defined in the <a class="reference internal" href="../MoleculeType/mt_structure.html#autodoc-mt-mtparameter"><span class="std std-ref">MoleculeTypeParameter</span></a> object of an MoleculeType: myMT.mtparameter.optparameter. It contains the parameters needed to deal with optical analysis. These parameters are initialized using the MT function:</p>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">Frog.class_Molecule.MoleculeType.</span></span><span class="sig-name descname"><span class="pre">read_optic_properties_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_calculation_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_alpha_ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_calculation_style</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_beta_ref</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'dipole'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effective_field_on_beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">efparameter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">effective_field_distance_neigh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where_to_run_QM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qmparameter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection_tool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Defines the Optical Parameter of this MT.</p>
+<p>One input is mandatory: the GlobalParameter (GP) of the run as first argument.</p>
+<p>The other arguments are optional in the sens that they have a default value is not given by the user. See the Optical Parameter attribute for more information about them.</p>
+<p class="rubric">Example</p>
+<p>A good habit can be to first defines the attributes value in your input file, and then to pass them to this function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">alpha_calculation_style</span> <span class="o">=</span> <span class="s1">&#39;Fixed for all&#39;</span>
+<span class="n">L_alpha_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">9.8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">9.8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">9.8</span><span class="p">]])</span>
+<span class="n">myMT</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">alpha_calculation_style</span><span class="o">=</span><span class="n">alpha_calculation_style</span><span class="p">,</span> <span class="n">L_alpha_ref</span><span class="o">=</span><span class="n">L_alpha_ref</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Today, the attributes effective_field_on_beta, efparameter and effective_field_distance_neigh SHALL NOT be used. They were designed for effective field calculation, which is not yet complete in Frog.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function was made to make the user input simplier, right?</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the rest of the documentation, this function call is often written as read_optic_properties_input(…, the_argument=value, …). In any case, you should defines always the GP first, and all the other attribute you need in only one call. If you are not using an attribute, just do not define it or set its value to the default one.</p>
+</div>
+</dd></dl>
+
+<p>All the attribute of this object are the same for all the time steps, except 2 attributes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>OpticalParameter.L_QM_todo: contains the QM calculation to perform for each time step</p></li>
+<li><p>OpticalParameter.qmparameter: some attributes may change depending on the emmebbeding style used.</p></li>
+</ul>
+</div></blockquote>
+<p>Now here is the list of all the attributes available in the Optical Parameter. Note that some of them are not user defined – meaning that they depend on the option you have chosen, but is not directly set by the MoleculeType.read_optic_properties_input function.</p>
+</section>
+<section id="attributes">
+<h3><a class="toc-backref" href="#id16" role="doc-backlink"><span class="section-number">6.2.4.2. </span>Attributes</a><a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<dl class="py attribute" id="autodoc-opticalparameter-alpha-calculation-style">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">alpha_calculation_style</span></span></dt>
+<dd><p><strong>Type</strong> [bool or str]</p>
+<p>If no analysis (<em>i.e.</em> diagram) declared are of type alpha or iota, the alpha_calculation_style have to be False, default value. Otherwise the run will crash. In the same way, if you have declared an alpha or iota analysis, you have to set alpha_calculation_style to one of the possible value:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘Fixed for all’:</p></li>
+</ul>
+</div></blockquote>
+<p>The alpha tensor is given by the attribute OpticalParameter.L_alpha_ref . In this case, the polarizability in the molecular frame is fixed and equal to this value. The polarizability in the laboratory frame is given by the molecule orientation: it is a product of this OpticalParameter.L_alpha_ref with the SingleMolecule.rot_mat using the function: L_iota = Frog.toolbox.rotate_2nd_order_tensor(SingleMolecule.rot_mat.T, OpticalParameter.L_alpha_ref). Note that the rotational matrix,  SingleMolecule.rot_mat is given by the molecular library file function Frog.Molecules.my_MT.compute_rotational_matrix .</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘QM’:</p></li>
+</ul>
+</div></blockquote>
+<p>The polarizability is computed for each molecule selected, see the OpticalParameter.where_to_run_QM and OpticalParameter.selection_tool attributes, at the QM level. The polarizablity is computed using the parameters provided in the OpticalParameter.qmparameter object. For a single molecule, the polarizability in the laboratory frame is computed (iota), and the alpha is obtained using the molecule orientation: L_alpha = toolbox.rotate_2nd_order_tensor(SingleMolecule.rot_mat, L_iota) .</p>
+<p class="rubric">Example</p>
+<p>In your input parameter file, declare the OpticalParameter.alpha_calculation_style value using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">myMT</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="n">alpha_calculation_style</span><span class="o">=</span><span class="n">your_value</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the ‘…’ stands for the other parameter you may need to use.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No ‘iota_calculation_style’ has been defined since the alpha and iota are related by the molecule orientation.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-l-alpha-ref">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">L_alpha_ref</span></span></dt>
+<dd><p><strong>Type</strong> [bool or list]</p>
+<p>If the OpticalParameter.alpha_calculation_style=’Fixed for all’, the  OpticalParameter.L_alpha_ref has to be set to a 3x3 list. This value is used to defined the polarizability of every molecule of this MT in their molecular frame.</p>
+<p>If OpticalParameter.alpha_calculation_style is set to any other value, OpticalParameter.L_alpha_ref should be False, its default value.</p>
+<p class="rubric">Example</p>
+<p>In your input parameter file, declare the OpticalParameter.L_alpha_ref value using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">myMT</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="n">L_alpha_ref</span><span class="o">=</span><span class="n">your_value</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the ‘…’ stands for the other parameter you may need to use.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The unit to declare the polarizability should be atomic unit. For instance, the polarizability of water at optical freuqnecy is around: L_alpha_ref = [[9.8, 0, 0,], [0, 9.8, 0], [0, 0, 9.8]].</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-beta-calculation-style">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">beta_calculation_style</span></span></dt>
+<dd><p><strong>Type</strong> [bool or str]</p>
+<p>If no analysis (<em>i.e.</em> diagram) declared are of type beta or chi, the beta_calculation_style have to be False, default value. Otherwise the run will crash. In the same way, if you have declared a beta or chi analysis, you have to set beta_calculation_style to one of the possible value:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘Fixed for all’:</p></li>
+</ul>
+</div></blockquote>
+<p>The beta tensor is given by the attribute OpticalParameter.L_beta_ref . In this case, the hyperpolarizability in the molecular frame is fixed and equal to this value. The hyperpolarizability in the laboratory frame is given by the molecule orientation: it is a product of this OpticalParameter.L_beta_ref with the SingleMolecule.rot_mat using the function: L_chi = Frog.toolbox.rotate_3rd_order_tensor(SingleMolecule.rot_mat.T, OpticalParameter.L_beta_ref). Note that the rotational matrix,  SingleMolecule.rot_mat is given by the molecular library file function Frog.Molecules.my_MT.compute_rotational_matrix .</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘QM’:</p></li>
+</ul>
+</div></blockquote>
+<p>The hyperpolarizability is computed for each molecule selected, see the OpticalParameter.where_to_run_QM and OpticalParameter.selection_tool attributes, at the QM level. The hyperpolarizablity is computed using the parameters provided in the OpticalParameter.qmparameter object. For a single molecule, the hyperpolarizability in the laboratory frame is computed (chi), and the beta is obtained using the molecule orientation: L_beta = toolbox.rotate_3rd_order_tensor(SingleMolecule.rot_mat, L_chi) .</p>
+<p class="rubric">Example</p>
+<p>In your input parameter file, declare the OpticalParameter.beta_calculation_style value using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">myMT</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="n">beta_calculation_style</span><span class="o">=</span><span class="n">your_value</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the ‘…’ stands for the other parameter you may need to use.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>No ‘chi_calculation_style’ has been defined since the beta and chi are related by the molecule orientation.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-l-beta-ref">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">L_beta_ref</span></span></dt>
+<dd><p><strong>Type</strong> [bool or list]</p>
+<p>If the OpticalParameter.beta_calculation_style=’Fixed for all’, the  OpticalParameter.L_beta_ref has to be set to a 3x3x3 list. This value is used to defined the hyperpolarizability of every molecule of this MT in their molecular frame.</p>
+<p>If OpticalParameter.alpha_calculation_style is set to any other value, OpticalParameter.L_beta_ref should be False, its default value.</p>
+<p class="rubric">Example</p>
+<p>In your input parameter file, declare the OpticalParameter.L_beta_ref value using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">myMT</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="n">L_beta_ref</span><span class="o">=</span><span class="n">your_value</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the ‘…’ stands for the other parameter you may need to use.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The unit to declare the hyperpolarizability should be atomic unit. For instance, the hyperpolarizability of water in vacuum at the DFT/CAMB3LYP level with basis d-aug-cpVTZ at 800~nm is: L_beta_ref = [[[0, 0, -12.4,], [0, 0, 0], [-12.4, 0, 0]], [[0, 0, 0,], [0, 0, -7.4], [0, -7.4, 0]], [[-12.5, 0, 0,], [0, -5.0, 0], [0, 0, -15.3]].</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-where-to-run-qm">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">where_to_run_QM</span></span></dt>
+<dd><p><strong>Type</strong> [bool or list]</p>
+<p>This attribute set a first set of selection to the molecule which should be QM-treated. Indeed, you may want to not perform for all the molecule of a MT QM calculations: it may be too much time-consuming for litle interest. Therefore, this attribute works very similary to the <a class="reference internal" href="../Diagram/diagram_structure.html#autodoc-diagramparameter-special-selection"><span class="std std-ref">DiagramParameter.special_selection</span></a>. Another selection can be added in top of this one usin the attribute OpticalParameter.selection_tool. The molecule that will be QM computed have to respect all the 3 attributes restrictions.</p>
+<p>The format of this attribute is very similar to the geometrical discretisation option when declaring a diagram. As an user, when declaring  list of diagram to performed, you can define this special geometrical selection using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">myMT</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="n">where_to_run_QM</span><span class="o">=</span><span class="n">where_to_run_QM</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here are the available values for <span class="incremental">where_to_run_QM</span>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">False</span> or <span class="incremental">True</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>No extra special selection is made. All the molecule of the MT may be QM treated.</p>
+<p>In this case, the OpticalParameter.where_to_run_QM attribute is set to [-1].</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">[‘All’]</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>No extra special selection is made. All the molecule of the MT may be QM treated.</p>
+<p>In this case, the OpticalParameter.where_to_run_QM attribute is set to [-1].</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">[‘Plane_ij’, bin_number, list_of_bin]</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>For each time step, the box is discretized along plane with the axis ij. bin_number number of bin is used. Every molecules are assigned to one of these bin according to there mean position. If this bin is within the list_of_bin, the molecule is QM treated.</p>
+<p>In this case, the OpticalParameter.where_to_run_QM attribute is set to [axis where the space is decretize (0, 1 or 2), bin_number, list_of_bin]</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">[‘Layer’, nbr_layer, list_layer]</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>For each time step, the molecule are assigned to a layer, using ‘nbr_layer’ number of layer. If a molecule is in the layer number given by list_layer, it is QM-treated.</p>
+<p>In this case, the OpticalParameter.where_to_run_QM object is set to [10, 2*nbr_layer+1, list_layer]</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">myMT</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="n">where_to_run_QM</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Plane_xy&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">61</span><span class="p">,</span> <span class="mi">62</span><span class="p">,</span> <span class="mi">63</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">66</span><span class="p">]],</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the ‘…’ stands for the other parameter you may need to use.</p>
+<p>The box in discretize along the z axis using 100 bins. Only the molecule within the 60 to 66 bin are treated using QM. The other molecule will have a null value regarding the optical analysis based on QM calculation. For instance, if OpticalParameter.beta_calculation_style = ‘QM’, the molecule which does not respect the previous condition will have for beta and chi 3x3x3 matrices with only zero values.</p>
+<p>Note that the list of authorized bin can be not continous.</p>
+<p class="rubric">Example</p>
+<p><span class="incremental">where_to_run_QM = [‘Layer’, 4, [-4, -3, 0, 1, 4]]</span></p>
+<p>Here, nbr_layer = 4. A molecule can be assigned to the layer number 4, 3, 2 or 1 for the upper interface (the 1st is the closest to the bulk phase, the 4th the farthest), to -4, -3, -2, -1 for the lower interface (the -4 is the farest from the bulk phase) or to 0 for the molecule in the bulk-like phase. Only molecule with layer number -4, -3, 0, 1 or 4 will be QM-treated using Dalton.</p>
+<p>Note that the list of authorized layer can be not continous.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This condition is made after the one regarding the diagram parameters – given by DiagramParameter.special_selection .</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This selection does not affect the diagram space discretization. Keep just in mind that if a molecule does not respect the  OpticalParameter.where_to_run_QM  conditions, its optical value may be zeros. Therefore, the total diagram can contains molecules which are QM-treated, and other with zero values.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For develloper: the concrete action of OpticalParameter.where_to_run_QM is made in geometry_manager.optparameter_where_to_run_QM_molecule. Use this function to update new option for this attribute.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-selection-tool">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">selection_tool</span></span></dt>
+<dd><p><strong>Type</strong> [bool or list or str]</p>
+<p>Defines another way of selecting the molecule of this MT which should be QM-treated. This method are very different from the one proposed in OpticalParameter.where_to_run_QM: they are not based on laboratory-based geometrical selection. Both selection, OpticalParameter.where_to_run_QM and OpticalParameter.selection_tool, can be used simultaneously to minimize the QM calculation time.</p>
+<p>Today, the option available in this attribute is small, but if you want to implement easy-to-use selection for the QM calculation, you may want to define them here.</p>
+<p>Possible value for OpticalParameter.selection_tool:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">False</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>Default value, no extra selection is defined using this attribute.</p>
+<p>In this case, the OpticalParameter.selection_tool is set to False.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><span class="incremental">[‘traking_molecules’, list of the molecule]</span>:</p></li>
+</ul>
+</div></blockquote>
+<p>Only the molecule with there molecule number in the list provided as second argument are QM-treated. Note that the labbeling is the same as the one given in MoleculeType.where_are_molecules: it refers to the MD topology labelling.</p>
+<p>In this case, the pticalParameter.selection_tool is set to ‘traking_molecules’. The list of the authorised molecule os stored in OpticalParameter.L_molecule_tracked.</p>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">traking_molecules</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;traking_molecules&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">1005</span><span class="p">,</span> <span class="mi">1050</span><span class="p">]]</span>
+<span class="n">myMT</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="n">traking_molecules</span><span class="o">=</span><span class="n">traking_molecules</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where the ‘…’ stands for the other parameter you may need to use. In this case, only the molecule numbered 1005 and 1050 can be QM-treated for all the time step. It is not the 1005th and 1050th molecule of the MT, but the 1005th and 1050th molecule of the MD labbeling – except when you have only one MT where the 2 labbeling are the same or if it is the first MT declared.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For develloper: the concrete action of OpticalParameter.selection_tool is made in geometry_manager.optparameter_selection_tool_molecule. Use this function to update new option for this attribute.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-l-molecule-tracked">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">L_molecule_tracked</span></span></dt>
+<dd><p><strong>Type</strong> [bool or list]</p>
+<p>Contained the list of the autorised molecule by the OpticalParameter.selection_tool attribute.</p>
+<p>Note user defined.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-qmparameter">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">qmparameter</span></span></dt>
+<dd><p><strong>Type</strong> [bool or QMParameter]</p>
+<p>The QMParameter for this MT. This attribute has to be defined if one optical analysis required QM calculation. If no QM calculation is needed for this MT, should be set to False. See the part relating to this QMParameter class for more information about it.</p>
+<p class="rubric">Example</p>
+<p>To set the QMParameter, initialize it first, then fill the required attribute. Enventualy set it to the OpticalProperty using the usual  read_optic_properties_input function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qmparameter</span> <span class="o">=</span> <span class="n">QMParameter</span><span class="p">()</span> <span class="c1"># empty object</span>
+<span class="n">qmparameter</span><span class="o">.</span><span class="n">calculation_style</span> <span class="o">=</span> <span class="s1">&#39;PE&#39;</span> <span class="c1"># example of attribute</span>
+<span class="n">qmparameter</span><span class="o">.</span><span class="n">theory_lv</span> <span class="o">=</span> <span class="s1">&#39;DFT&#39;</span> <span class="c1"># example of attribute</span>
+<span class="n">myMT</span><span class="o">.</span><span class="n">read_optic_properties_input</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="n">qmparameter</span><span class="o">=</span><span class="n">qmparameter</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="c1"># set it to the optparameter</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-is-run-qm">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">IS_run_QM</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>True if there are QM calculation to perform, False otherwise.</p>
+<p>Not user defined</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Instead we can use the qmparameter to know if there is QM calculation or not for this optparameter. But we felt that it would be more readable/understanable this way.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-l-qm-todo">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">L_QM_todo</span></span></dt>
+<dd><p><strong>Type</strong> [bool or list]</p>
+<p>The list of the localisation of the QM calculation to perform for this MT at this time step. This list is built after the first part and is used as a starting point during the second part to built all the QM calculation to do.</p>
+<p>You can check by opening this list at a given time step that the dalton files are indeed written in the directories and that the molecule respect the OpticalParameter.where_to_run_QM and OpticalParameter.selection_tool requirements.</p>
+<p>If no QM calculation should be done for this MT, OpticalParameter.L_QM_todo is set to False. If there can be QM calculation but none have to be done (because the QM calculation have aloready been performed or if no molecule respect both OpticalParameter.where_to_run_QM and OpticalParameter.selection_tool requirements) for this time step, OpticalParameter.L_QM_todo = []</p>
+<p>Not user defined</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-pe-level">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">pe_level</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>The maximal PE level used for this MT. It should be the same as the one defined in the OpticalParameter.qmparameter in many cases.</p>
+<p>If no electrostatic environement have to be built, default value, OpticalParameter.pe_level = -1.</p>
+<p>Not user defined</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-opticalparameter-compute-electric-field-pe">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">OpticalParameter.</span></span><span class="sig-name descname"><span class="pre">compute_electric_field_PE</span></span></dt>
+<dd><p><strong>Type</strong> [bool]</p>
+<p>Set to True of there are diagrams defined which track the electrostatic field generated by the environment during the QM calculation. Originaly related to the option ‘PE’ of an electric_field analysis.</p>
+<p>If set to False, default, the electric field generated by the environement for each configuration is not computed by Frog nor store. But Dalton will still do it during the QM calculation.</p>
+<p>Not user defined</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="optical_analysis_index.html">6. Optical Analysis</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview_opt_analysis.html">6.1. Overview: Optical Analysis</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">6.2. Optical Parameter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="electrostatic_embedding.html">6.3. Electrostatic embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qm_box.html">6.4. QM box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qm_management.html">6.5. QM Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advices_for_qm.html">6.6. Some Advices for the QM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/OpticalAnalysis/optical_parameter.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

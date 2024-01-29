@@ -1,0 +1,337 @@
+.. _tuto_mixture_qm_page:
+
+============
+Mixture QM  
+============
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+    
+.. warning:: Ne pas utiliser ce wiki/tuto pour l instant, je dois relire
+
+In this tutorial we will explain some of Frog functionalities around the
+electrostatic environment. In previous tutorial, we have presented how
+Frog can built an environment around molecule in order to compute H-bond
+or Radial Distribution Function (RDF). These functionalities only
+require the molecular positions given by the MD trajectory. Here, we
+will go a steps further by adding an electrostatic description to any
+molecule present in the simulation. These electrostatic descriptions
+goes along with the definition of a Molecule Type (MT) and is define in
+its molecular module.
+
+For instance, for the MT ''Water\_TIP4P2005'', the electrostatic
+description is the same as the one of the force field TIP4P/2005: the
+Hydrogen atoms carry a +0.5564 e charge an the Oxygen atoms carry no
+charge. Instead, the -1.1128] e negative charge is located at the dipole
+moment position: 0.1546 Angstrom away from the Oxygen atom location in
+the dipole direction. (comprehensible?)
+
+Therefore, when attributing MT to the molecule of the simulation, the
+electrostatic medium is also built. Thus, for a given molecule, finding
+its neighbors also provide information about its electrostatic
+environment, for instance the electrostatic field it feel. Moreover,
+using this setup, Frog can prepare QM simulation file where a single
+molecule is embedded in an electrostatic environment.
+
+An important point to keep in mind is that the electrostatic description
+is not related to the MD files (contrarily to the molecule's position)
+but to the MT defines in Frog. You can find the electrostatic
+description for a MT by looking to its molecular module function
+``electrostatic_description``.
+
+We will see how to prepare the parameter file to setup the electrostatic
+field analysis and QM calculation in an embedded environment. Then, we
+will see how to launch the QM simulation and finally how to make sure
+the run have been performed well. This tutorial will be made using a
+mixture of water-methanol in the bulk phase.
+
+Requirement
+-----------
+
+First some requirements. You should have the files:
+
+-  The parameter file: *parameters\ *example*\ mixture\_environment.py*
+
+-  The file to launch Frog: *RUN\ *ME*\ FROG.py*
+
+-  The trajectory file *mixture\_bulk.dcd* and the relative topology
+   *system.data* (in the Mixture\_MD directory of the trajectory
+   tutorial repository)
+
+-  The template script to launch the QM calculation on a cluster
+   *template\ *run*\ dalton\_parr.sh*
+
+-  The directory *QM\ *calculation*\ results* which contains the QM
+   results in case you do not want to perform the QM calculations.
+
+-  The notebook to read the datas: *NAME*
+
+Here we will note explain in details the General Parameter
+initialization procedure, see the tutorial How to launch FROG for more
+details. Moreover, we will no go in the details of how to defines
+several MT, see the tutorial Mixture and the structural analysis.
+
+QM calculation should be performed in this run. However, you may not
+want to perform these calculations and just use the results to see the
+global Frog procedure. In this case, you will have to change the name of
+the directory *QM\ *calculation*\ results* to fool Frog. Details will be
+given later on.
+
+Note that, we do not recommend to use exactly this QM description to
+compute hyperpolarizability -- due to the poor basis set use. This
+example is made to be quick to perform, consider using a much larger
+base set if you want to have reliable results.
+
+Ask for QM based properties
+---------------------------
+
+We will take later in details about the definition of the GP in
+*parameters\ *example*\ mixture\_environment.py* , so let's skip this
+part first and focus on the ''Water*TIP4P2005'' MT. As for the tutorial
+Mixture and the structural analysis, the MD simulation contains 2 types
+of molecule: water and methanol which we will describe using the
+''Water*\ TIP4P2005'' and ''Methanol*OPLSAA'' MT. The analysis required
+are the electric field in both ''PE'' and ''on*\ fly'' option and the
+polarizability (alpha and iota) and hyperpolarizability (beta and chi)
+in the molecular and laboratory frame. For these analysis, we have to
+define how to compute them since they are ''optical'' properties. In
+this tutorial, we will see how to compute them using QM calculation
+threw the software Dalton.
+
+Let's have a look at the line:
+
+``moleculetype.read_optic_properties_input(GP, alpha_calculation_style='QM', L_alpha_ref=False, beta_calculation_style='QM', L_beta_ref=False, where_to_run_QM=where_to_run_QM, qmparameter=qmparameter, selection_tool=traking_molecules)``
+
+In order to compute the individual polarizability/hyperpolarizability
+using a QM calculation, we have to set ``alpha_calculation_style='QM'``
+and ``beta_calculation_style='QM'``. The ``L_alpha_ref=False`` and
+``L_beta_ref=False`` optional argument should be set to their default
+value: False (or not defined). In this case, two optinal argument should
+be set: ``where_to_run_QM`` and ``qmparameter``.
+
+Because the number of QM calculations and the CPU time needed to run
+them, can grow very dramatically,\ ``where_to_run_QM`` defined what
+molecule of this MT should be treated using this QM method threw a space
+selection. For instance, using:
+``where_to_run_QM = ['Plane_xy', 400, [107, 52, 389, 253]]`` select only
+the molecules at a certain position with respect to the *z* laboratory
+axis at any time. Here, it discretize the space into 400 *xy*-slice:
+only the molecule position with the slice number 107, 52, 389 or 253 are
+treated using this QM method. The other molecule of this MT are skipped
+and do not contribute to the relevant diagrams. This space-selection can
+be very handfull to tackle interfaces or systems which you already know
+a particular zone of interest. In order to not use any space selection,
+use: ``where_to_run_QM = ['All']``.
+
+In top of this space-selection, you can add another one using the
+optional argument ``selection_tool``. In this example, we will only
+considere the molecule number 1 and 50 using:
+``traking_molecules = ['traking_molecules', [1, 50]]`` . Please note
+that for a molecule to be treated, it has to respect the space selection
+and the ``selection_tool``.
+
+Now that we have define which molecule of this MT will be treated by a
+QM method, let's define this QM description using the Frog object
+``qmparameter``. This object has special properties/function and should
+be initialized by calling ``frog_class.QMParameter()``. There is two
+main information hold by this object: how to describe the molecule and
+how to describe its environment.
+
+QM description for the target molecule:
+---------------------------------------
+
+The ''QM description'' of a molecule of a MT is done threw the function
+``qm_target_description`` in its molecular file. For instance for the
+''Water\_TIP4P2005'' MT:
+
+.. code:: python
+
+    def qm_target_description(qmparameter, qmdescription, L_pos=False):
+        '''
+        QM description for the Water TIP4P2005 MT. 
+        '''
+        if qmparameter.type_basis != 'Global basis':
+            raise Exception('WARNING: No other way to defined basis have been defined yet for this molecule. Possible value: < Global basis >. We can also defined basis for each atoms (TODO).') 
+    qmdescription.L_atom_type = [[8, 1, [['O', 0]]], [1, 2, [['H', 1], ['H', 2]]]]
+     
+    if isinstance(L_pos, bool) and not L_pos:
+        L_pos = typical_geometry()
+
+    qmdescription.L_coordinate = L_pos
+
+    return(qmdescription)
+
+This MT QM description contains two information: the position of the
+atom ``qmdescription.L_coordinate`` and their type
+``qmdescription.L_atom_type``. Note that there is no restriction with
+respect to this definition with respect to the number/position of the
+atom. The most natural use should be to keep the atom position from the
+MD trajectory and there charge as done in this example. For more
+information about how to implement a new QM description, please see the
+Tutorial: How to create a new Molecular Type.
+
+The description available in the molecular module is thus very light:
+almost everything except the atomic position/charge should be defined in
+the ``qmparameter`` object in the input file.
+
+First, what is the theory framework, for instance DFT:
+``qmparameter.theory_lv = 'DFT'``. In this case, you should also define
+the functional used: ``qmparameter.functional = 'Camb3lyp'`` for
+example. Please note that the functional should be written in the exact
+same way as the one of .dal input of Dalton (juste after the WAVE
+FUNCTIONS and DFT lines), see the Dalton documentation to see what
+functional are available. Then, what type of basis and basis should be
+used. For instance the same basis for all the atom
+``qmparameter.type_basis = 'Global basis'`` and a small basis:
+``qmparameter.global_basis_value = 'cc-pVDZ'``. As for the functional
+available, see the dalton main documentation for more information about
+the basis available. Please note that the hyperpolarizability is
+**very** sensitive to the basis set.
+
+You can add more physical attributes for the QM calculation, like a non
+zero charge or a permanent electric field. Please see the main
+documentation for more information.
+
+Then, you have to define at which frequency the polarizability and
+hyperpolarizability will be computed. Use the attribute
+``qmparameter.polarizability_response`` and ``qmparameter.shg_response``
+to set the frequency **in atomic unit**.
+
+Important note: if the polarizability and the hyperpolarizability are
+computed threw QM method (``alpha_calculation_style='QM'`` and
+``beta_calculation_style='QM'``), you the frequency available for the
+polarizability depend on the one of the hyperpolarizability. The
+frequency available are the one of the hyperpolarizability plus their
+double. For instance ``qmparameter.shg_response = [0.0, 0.05686]`` will
+allow you to compute the polarizability frequency at 0 and 0.05686
+atomic unit plus the one at 0.11372 atomic unit.
+
+For every frequency required, a new diagram will be generated: you can
+thus see the impact of the frequency on these ''optical'' properties.
+
+The effect of the environment on the QM calculation:
+----------------------------------------------------
+
+Now that we have define how one molecule of this MT behaves
+quantum-mechanically-speaking and at which frequency compute the optical
+properties, let's define how the environment should impact the molecule
+properties. Indeed, the aim of Frog is to compute (expensive) molecular
+property in the liquid phase at the quantum level. To take into account
+the neighbors in a single molecule QM calculation, the first possibility
+is to consider the electrostatic field environment.
+
+Electrostatic embedding:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is done by: ``qmparameter.calculation_style = 'PE'``. PE stands for
+Polarizable Environment as in the Dalton framework. In this example, we
+will treat only the first order of interaction: the electrostatic
+components (point charge, dipole, quadrupole...) affect the QM
+properties of the molecule, but there molecular values are independent
+of the neighborhood and the QM properties -- no neighbors interaction
+nor QM to neighbors influence threw neighbor polarizations. This is done
+by ``qmparameter.pe_level = 1``. For a given molecule of this MT, the
+surrounding of **all** the molecule up to a certain distance; set by
+``qmparameter.max_pe_distance_neigh = 10`` in angstrom, is computed.
+This local neighborhood can be printed out using
+``qmparameter.write_xyz_environment = True``. For all the molecule of
+this surrounding, their electrostatic description are calculated and
+added. The QM calculation will then be performed with a
+**heterogeneous** electric field due to the molecule neighborhood.
+
+As explain previously, an analysis which require an electrostatic
+embedding implies that all the MT provide an electrostatic description
+-- contrarily to H-bond for instance where only the target and partner
+molecules are considerated. In other words, since this analysis implies
+potentially all the MT, all the MT should be able to contribute if
+needed. Note that if you want to avoid a particular MT to contribute,
+you can modify its electrostatic description and cancels all the charges
+-- see the following paragraph.
+
+Electrostatic description of a single molecule:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is given by the function ``electrostatic_description`` in the
+molecular library file. For instance, for the ''Methanol*OPLSAA'' MT,
+the function \`electrostatic*\ description\` in the molecular module
+*Methanol\_OPLSAA.py* (located as all the molecular module in the
+repository: /source/Molecules) Electrostatic description:
+
+.. code:: python
+
+    def electrostatic_description(pe_order, electro_neigh, L_pos=False):
+        '''
+        Electrostatic description of the Methanol_OPLSAA molecule type. These charges are the same as the usual OPLS/AA force field. The charge are given in e units. 
+        '''
+        if isinstance(L_pos, bool) and not L_pos: # needed during Frog initialization. 
+            L_pos = typical_geometry() # test geometry
+            
+        electro_neigh.multipole_order = 0
+        electro_neigh.polarization_order = 0
+        electro_neigh.L_localization_type = ['O', 'H', 'C', 'H', 'H', 'H']
+        electro_neigh.L_localization_site = L_pos
+        electro_neigh.L_charge_order_0 = [[1, -0.683], [2, 0.418], [3, 0.145], [4, 0.04], [5, 0.04], [6, 0.04]] #Warning: contrarily to the rest of the code/python uses, the site are label from 1 (no 0!)
+        return(electro_neigh)
+
+Note that the expected topology of the methanol molecule in this case
+is: Oxygen atom, the hydrogen linked to the Oxygen, Carbone atom, the 3
+last Hydrogen atoms linked to the Carbon.
+
+You can describe the electrostatic properties of a MT using several
+multipolar order. The order 0 is point charges, 1 is dipoles and 2
+quadrupoles. The maximal order used is encoded in the
+``electro_neigh.multipole_order`` variable. In this example, only point
+charge are used.
+
+TODO: polarization order.
+
+In order to place in space the charges, dipoles or quadrupoles generic
+''sites'' are defined using the attribute
+``electro_neigh.L_localization_type`` and
+``electro_neigh.L_localization_site``. The first attribute contains
+strings with the ''name'' of these site. Note that these name have no
+physical impact: they are used only if an .xyz file is required to have
+a look at a neighborhood. The second attribute contains the list of the
+position of these site. In many cases you can just use the atom
+position, but you can also define news one based on the molecule's
+position. It is important to point out that the number of site can be
+anything: there is no constrain with respect to the number of atom.
+
+Once you have define the sites, you can attribute charges/dipole
+moments/quadrupole moments to any of them. Note that you can define a
+charge, dipole and a quadrupole to the same site or none. In this
+example, ``electro_neigh.L_charge_order_0`` defines the charge for every
+sites (which is the same as the atomic position here). Here, the charge
+will be the same as the one given by the OPLS/AA force field for the
+methanol molecule: -0.683 for the oxygen atom, 0.418 for the Hydrogen
+linked to the Oxygen, 0.145 for the Carbon atom and 0.04 for the three
+Hydrogen linked to the Carbone atom. For more information about how to
+implement a new electrostatic description, please see the Tutorial: How
+to create a new Molecular Type.
+
+Note: if you want to avoid the contribution of a certain MT, you can set
+all the charges to zero. In this way, you will still see the molecule in
+the .xyz neighborhood file, but with no physical impact on the QM
+results.
+
+Built the environment: 
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The main information to built the environment of a molecule is the
+maximal distance authorized defined by
+``qmparameter.max_pe_distance_neigh`` - in angstrom from the molecule
+''mean position'' to the neighbors ''mean position''. You can also add
+more specific condition, see the main documentation. We will just pay
+attention to the case where this maximal distance is larger then some
+box dimension. In this case, the periodic boundary condition will be
+used in order to duplicate the neigbors in the given authorized
+direction. For instance, is the
+
+GP.env\ *authorised*\ pbc\_condition
+
+You can add more options to defined
+
+Keep track of the electrostatic embedding: 'PE' option of the electrostatic field
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

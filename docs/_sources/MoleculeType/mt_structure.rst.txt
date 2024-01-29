@@ -1,0 +1,162 @@
+.. _mt_structure_page:
+
+========================
+Molecule Type structure
+========================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+Here is a list of all the possible attribute of an MT object. 
+
+.. note:: These object should not be added directly since special function are defined for this purpose. However, at the end of the file, you can open this MT object in a python environment in order to check these attributes.
+
+
+
+Core information
+-------------------
+
+To create the MT, you need to define the two following attributes: :ref:`MoleculeType.name<autodoc_mt_name>` and :ref:`MoleculeType.where_are_molecules<autodoc_mt_where_are_molecules>`. To do so, create the MT using: ::
+
+    myMT = MoleculeType(GP, name, where_are_molecules)
+    
+See :ref:`this page<how_to_create_mt_page>` for more informations. 
+
+.. _autodoc_mt_name:
+.. autoattribute:: Frog.class_Molecule.MoleculeType.name
+    :noindex:
+
+|
+
+.. _autodoc_mt_where_are_molecules:
+.. autoattribute:: Frog.class_Molecule.MoleculeType.where_are_molecules
+    :noindex:
+   
+|
+
+
+
+Internal information
+----------------------
+
+These attributes are used by |frog| during the procedure. There are created according to the :ref:`MoleculeType.name<autodoc_mt_name>` and :ref:`MoleculeType.where_are_molecules<autodoc_mt_where_are_molecules>` attributes. 
+
+.. _autodoc_mt_L_key_mol:
+.. autoattribute:: Frog.class_Molecule.MoleculeType.L_key_mol
+    :noindex:
+   
+|
+
+.. _autodoc_mt_L_key_selection_traj:
+.. autoattribute:: Frog.class_Molecule.MoleculeType.L_key_selection_traj
+    :noindex:
+   
+|
+
+.. _autodoc_mt_population:
+.. autoattribute:: Frog.class_Molecule.MoleculeType.population
+    :noindex:
+   
+|
+
+
+
+Molecule Type Parameter
+-----------------------
+
+
+The MoleculeTypeParameter object (:ref:`MoleculeType.mtparameter<autodoc_mt_mtparameter>`) contains the parameters and important information relative to the MT. The mtparameter of an MT does not change after the initialization and is the same for every frame. 
+
+.. _autodoc_mt_mtparameter:
+.. autoattribute:: Frog.class_Molecule.MoleculeType.mtparameter
+    :noindex:
+ 
+
+The mtparameter object contains the parameters relative to several part of |frog|. There are:
+
++ SingleMoleculeParameter: This object is fully defined in the molecular library file and contains information relative to the geometry of the molecule for instance. The :ref:`SingleMoleculeParameter object is presented here<single_molecule_parameter_page>`.
+
++ DiagramParameter: The parameters relative to the diagrams of this MT. The :ref:`DiagramParameter object is presented here<diagram_parameter_page>`
+
++ OpticalParameter: The parameters relative to the optical analysis and QM calculations. The :ref:`OpticalParameter object is presented here<optical_parameter_page>`.
+
+
+.. note:: To call an attribute from the dparameter, like L_diagram, use: `myMT.mtparameter.dparameter.L_diagram`. 
+
+
+.. _autodoc_mtparameter_smparameter:
+.. autoattribute:: Frog.class_Molecule.MoleculeTypeParameter.smparameter
+    :noindex:
+   
+|
+
+.. _autodoc_mtparameter_dparameter:
+.. autoattribute:: Frog.class_Molecule.MoleculeTypeParameter.dparameter
+    :noindex:
+   
+|
+
+.. _autodoc_mtparameter_optparameter:
+.. autoattribute:: Frog.class_Molecule.MoleculeTypeParameter.optparameter
+    :noindex:
+
+
+
+List of the molecule
+---------------------
+
+
+All the molecule at this time step are stored in the list: :ref:`L_molecule<autodoc_mt_L_molecule>`. Each molecules are described using an object from the class SingleMolecule REF – the object are usually called singlemolecule. 
+
+.. _autodoc_mt_L_molecule:
+.. autoattribute:: Frog.class_Molecule.MoleculeType.L_molecule
+    :noindex:
+
+|
+
+You can call a molecule using: `singlemolecule=myMT.L_molecule[2]` to have the third molecule of this MT. If you want to refer to the general labeling (for instance the molecule number 1000 from the MD may be the 2nd molecule of this Molecule Type ensemble), let’s say the label number is general_label, use: ::
+
+    singlemolecule=myMT.L_molecule[general_label - myMT.L_key_mol[0]]
+
+During the initialization, the list of the attribute of all these molecule will be update according to the analysis to perform. For instance, if the molecular orientation has to be computed, the attribute molecular_orientation will be initialized to False for every molecule. During the first step of the run, the value will be computed and update to the molecules. If you want to know all attribute defined for these molecules use the attribute L_attribute of a SingleMolecule object: singlemolecule.L_attribute. Each diagram will create new attribute depending of the analysis required, see HERE for more details.
+
+.. note:: Some molecule may not have these attribute filled with value (therefore the value is False) if some special selection for the analysis are set. See :ref:`here<diagram_geometry_selection_page>` for the general diagram or :ref:`here<optical_property_which_molecule_should_be_qm_treated_subpage>` for QM calculation. 
+
+
+
+.. _single_molecule_object_page:
+
+Single Molecule Object
+----------------------
+
+Mettre:
+mean position et comment on les as
+layer et comment on les as et les assignements de pytim -> frog
+rot matrix et comment on les as
+
+Pour le reste, mettre un lien vers les diagrams. C est la bas qu on defini les smolecule attribute qui sont cree par chaque analyse.
+
+
+
+.. todo:: todo
+
+
+
+.. _mt_how_diagram_are_stored_subpage:
+
+Diagrams
+---------
+
+
+Each diagrams are directly added in the MT object using its own name as attribute name. In order to have the full list of the available diagrams, see the object myMT.dparameter.L_diagram. ADD LINK. These diagram are part of the general class Diagram. Each diagram has its own class defined, for instance Dia_density for the density, which inherite from the class Diagram. Using this architecture, each diagram as its own set of function defines.
+
+
+To call and use the diagram, see HERE
+
+
+.. Todo:: Dans le MT on stacke directement les diagram avec comme nom d attribute le nom du diagram. Je trouve cela pratique, mais c est pas super propre. QUoique c est vraiment du details. A voir si on remet cela autre part?
+
+
+.. Todo:: Refaire ce paragraph in fois la partie diagram bien termine.
+

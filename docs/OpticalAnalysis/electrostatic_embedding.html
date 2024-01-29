@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>6.3. Electrostatic embedding &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="6.4. QM box" href="qm_box.html" />
+    <link rel="prev" title="6.2. Optical Parameter" href="optical_parameter.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="electrostatic-embedding">
+<span id="electrostatic-embedding-page"></span><h1><span class="section-number">6.3. </span>Electrostatic embedding<a class="headerlink" href="#electrostatic-embedding" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#formalism" id="id4">Formalism</a></p>
+<ul>
+<li><p><a class="reference internal" href="#how-to-describe-the-environment" id="id5">How to describe the environment?</a></p></li>
+<li><p><a class="reference internal" href="#environment-building-procedure" id="id6">Environment building procedure</a></p></li>
+<li><p><a class="reference internal" href="#what-should-i-use" id="id7">What should I use?</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#select-the-emmebeding-scheme" id="id8">Select the emmebeding scheme:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#vacuum" id="id9">Vacuum</a></p></li>
+<li><p><a class="reference internal" href="#pe" id="id10">PE</a></p>
+<ul>
+<li><p><a class="reference internal" href="#order-0" id="id11">Order 0</a></p></li>
+<li><p><a class="reference internal" href="#order-1" id="id12">Order 1</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#pe-long" id="id13">PE long</a></p></li>
+<li><p><a class="reference internal" href="#pe-qm" id="id14">PE + QM</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#feedback-on-the-emmebding" id="id15">Feedback on the emmebding:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#visualisation-of-the-embedding" id="id16">Visualisation of the embedding</a></p></li>
+<li><p><a class="reference internal" href="#electrostatic-diagram" id="id17">Electrostatic Diagram</a></p></li>
+<li><p><a class="reference internal" href="#electrostatic-map" id="id18">Electrostatic Map</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#electrostatic-description-object" id="id19">Electrostatic Description object</a></p>
+<ul>
+<li><p><a class="reference internal" href="#attributes" id="id20">Attributes</a></p></li>
+<li><p><a class="reference internal" href="#procedure" id="id21">Procedure</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<p>In this page is presented the electrostatic embedding scheme available in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>. Not only some numerical and pratical tool are presented, but also some though about this method in general. It is very difficult to talk about numerics without the scientific taget in mind. So first let’s remind some principle and defines the vocabulary used.</p>
+<p>Note that you can find more details in <span class="xref std std-ref">this annex page</span>.</p>
+<section id="formalism">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">6.3.1. </span>Formalism</a><a class="headerlink" href="#formalism" title="Link to this heading">¶</a></h2>
+<section id="how-to-describe-the-environment">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">6.3.1.1. </span>How to describe the environment?</a><a class="headerlink" href="#how-to-describe-the-environment" title="Link to this heading">¶</a></h3>
+<p>First, let’s define a target molecule, for instance a water molecule at given time step. This molecule is composed of 3 atoms and 18 electrons. One can first wants to see how the geometrical deformation of this molecule can impacts the optical properties. Indeed, in an MD dynamics, even the tiniest molecule can have geometrical fluctuation due to thermal effects (gas phase) or intermolecular interaction (condensed phase). In this case, the quantum problem can be: ‘’what is the optical property of a molecule with fluctuating geometry in the vacuum phase’’, where the geometry sampling is made over a given dynamics. The quantum Hamiltonian used will be the one of the vacuum phase: only the atoms of the molecule and the electronics interactions creat quantum potential. The effect of the environment is taken into account by the molecule geometry.</p>
+<p>This case is defined as ‘’Vacuum’’ in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> because the environment does not generate a new Quantum potential. In this case, extracting the optical property of a molecule is quite straightforward from the MD dynamics: the only difference between each calculation of a molecule type will be the position of the atoms in the QM box. If there are no geometrical deformation, all the results will be the same in the molecular frame.</p>
+<p>This Vacuum case is very usefull to try your QM parameters and to have a first overview of the molecule optical property. However, using <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> to only compute vacuum-like property is quite overkill. The real purpose is to take into account the effect of the molecule environment to the electronic degree of freedom, and thus to the optical property. To do so, we use an explicite effect of the neighborhood using the Polarizable Environment (PE) formalism of the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> software.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Implicite solvant effect like PCMN are not implemented (yet) in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>. Indeed, these calculations are quite similar to the pure ‘’vacuum-like’’ one in the sens that fpr the same target molecule geometry, the same result should be found. There is a far less need for sampling compared to explicite sampling.</p>
+</div>
+<p>In the PE formalisme, the neigbors impact the molecule geometry through the MD dynamics and also the electrostic degree of freedom by adding a new electrostic potential. This potential depends on the electrostic description of the neighborgs. Indeed, in <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> the neighborgs can be described by a point charge, a dipole or a quadrupole. The electrostatic field generated by this neighborgs will be heterogenous within the molecule vinicity. Hence, each neighbors around the target molecule add a heterogenous electrostic potential, creating an almost unique quantum Hamiltonian. In <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, we will call this a ‘’configuration’’: the geometry of the target molecule plus its electrostatic surrounding.</p>
+<p>This method have several advantages:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>First, the neighborhood is taken into account in the quantum probleme without increasing the number of electron. Eventhough a more complexe potential is used, it is often cheapier then more electrons.</p></li>
+<li><p>Moreover it include the effect of the neighborgs explicitly and thus takes into account the configuration fluctuation. This is very important for many optical property such as the hyperpolarizability – for instance the one of water.</p></li>
+<li><p>Finaly, the effect of the neighborgs can be refine using dipole or quadrupole description. You may even include electrostatic polarization of the neighborhood!</p></li>
+</ul>
+</div></blockquote>
+<p>The main drawbacks is the number of calculation to be done. Indeed, for a given molecule, each frame of the MD in a condensed phase would very probably lead to different configuration. Not only the geometrical deformation of the target molecule should be sample, but also the electrostatic envrionment surrounding it.</p>
+<p>Another drawbacks is that the QM box is containing only one molecule: electron inter-molecular sharing may not be properly described – for instance H-bonds. Morever, unrealistic electronic spill-out (the electronic density of a molecule being too much localised close to a positive charge of the local neighborghood) can occurs due to this electrostic emebbeding since no electron-electron repulsion with the neighborghood is present.</p>
+<p>To tackle this last problem, instead of resolving the quantum probleme for a single molecule, you can solve it for a grasp. For instance, let’s say we want to compute the optical response of an Na cation surrounded by water molecule. Since very strong intermolecular interaction occurs between the cation and the first solvatation shell, it can seems more mainingfull to compute the optical response of the systeme defined by the cation and its closest neighborgs. As if it were only one ‘’super-molecule’’. In this case, the QM box will be defined by the Na cation, and the water molecule up to a given distance. Therefore, more atoms and electrons are involved in this Quantum Hamiltonian, but the intermolecular electronic interation will also be correctly discribed. Within this scheme, the water molecule futher away from the Na cation which are not taken into account in the box will aslo contribute to the Hamiltonina by addind an electrostatic potential, as for the previous PE method.</p>
+<p>In <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> this method is called ‘PE + QM’. Its main advantage is that it take even better into account the neighborghood effect. For some molecule with intense intermolecular interaction, it would made few sens to compute condensed phase-like property without these intermolecular quantum effect. However, the main drawbacks is it numerical cost: it increases the number of electrons. For todays numerical electronic quantum resolution, the scaling is far for being linear: it is largy faster to perform N QM calculations with M electrons than N/2 QM calculations with 2xM electrons.</p>
+<p>Now that we have presented shortly the different method available, let’s takle a bit about how it is handle in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>.</p>
+</section>
+<section id="environment-building-procedure">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">6.3.1.2. </span>Environment building procedure</a><a class="headerlink" href="#environment-building-procedure" title="Link to this heading">¶</a></h3>
+<p>Once you have define the electrostatic embedding you want, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will create the relative electrostatic embedding and write the corresponding input file for <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> <strong>fully automatically</strong>. To do so, it will use the Molecular Type architecture, which has been built for this purpose.</p>
+<p>To acheive this, two type of object are used: the <a class="reference internal" href="qm_box.html#qm-description-object-page"><span class="std std-ref">QMDescription object</span></a> and <a class="reference internal" href="#electrostatic-description-object-page"><span class="std std-ref">ElectrostaticDescription object</span></a></p>
+<p>The QMDescription defines for a Molecule Type how it should be described if involved in a QM box, <em>i.e.</em> the atomic position, charge and the number of electrons. The ElectrostaticDescription defines how it should impact a QM environement if involved in a PE environment – <em>i.e.</em> the point charge localisation and values, and or the dipolar or quadrupolar moment ect… Each Molecule Type shall have available in its molecular module the functions (qm_target_description and electrostatic_description) that create these objects.</p>
+<p>For instance, let’s say a water molecule should contribute to the electrostatic environment of a target molecule, and that this molecule is described using the Molecule Type <a class="reference internal" href="../MoleculeType/MolecularLibraryFile/Solvant/Water/Water_TIP4P2005.html#mlf-water-tip4p2005-page"><span class="std std-ref">Water_TIP4P2005</span></a>. In this case, 3 point charges are used to describe this neighborgs: a negative one close to the oxygen atom and 2 positive ones at the hydrogen position. The position of these charges are given within the target molecule frame and is included in this electrostatic environment. If the water molecule is the target molecule, the position of the atom and their charge is given by the qm_target_description function. Hence, in the case a molecule is the target molecule or is in the neighborghood, the function qm_target_description and electrostatic_description of the relative MT return geometrical-dependent descriptions.</p>
+<p>Thus, as a user, it is very important to check how each MT describes the molecule: using point charge? Point charge and dipole? It is really up to you to decide and to try out. Moreover, you can also defined the MT you wants: to defines your own electrostatic description for instance. This part was made to be as user-friendly as possible, and <a class="reference internal" href="../Tutorials/what_should_contain_molecular_type_file.html#what-should-contain-molecular-type-file-page"><span class="std std-ref">this tutorial</span></a> should help you to do so. <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> provides you a solid architecture but today not much MT are available. If you want to defines your own MT, please do not hesitate to contact us and to provide feedback: we will be more than happy to increase and improve <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> possibilities!</p>
+</section>
+<section id="what-should-i-use">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">6.3.1.3. </span>What should I use?</a><a class="headerlink" href="#what-should-i-use" title="Link to this heading">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Je ne sais pas si cela a sa place ici. Je l ecris car cela me parrait important, mais a voir si je le met pas autre part (tutotrial) ou pas du tout (et ca devient une annexe de ma these? ou un document interne?).</p>
+</div>
+<p>To sum up, you can use several embedding scheme: vacuum-like, PE (one molecule surrounded by static or dynamic electrostatic environment) or PE+QM (one or several molecules surrounded by static or dynamic electrostatic environment). Plus, once you have the dynamics, you can chose to use the same electrostatic description as in the MD or not. Finaly, to increase even more the complexity, you can solve the quantum problem by several method (DFT, CCSD ect…) and where the basis choice is not always obvious.</p>
+<p>So what to use?</p>
+<p>Sadly, today the <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> authors are not able to provide you a solid and simple method to decide. It will probably be very dependent of your system. For some ‘good behaviour’, you can see this tutorial. Moreover, here are some thoughs:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Electrostatic scheme:</p></li>
+</ul>
+</div></blockquote>
+<p>You should first try out the vacuum one to have an idea of the numerical cost of a single calculation. This will also give you some numbers for the optical property you are looking for. Then, you can try the PE ones. You really should think twice before using the PE+QM. First because it is way more CPU-demanding. Second because the interpretation of the result will be much more difficult to do. Indeed, the ‘’optical property’’ obtained by this method will be no longer the one of the target molecule, but the one of the graps.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Electrostatic Description:</p></li>
+</ul>
+</div></blockquote>
+<p>This is maybe the one with the more possibilities. The main question is: should you use the same electrostatic description as in your MD run? Indeed, what is the validity of computing the electronic degree of freedom using one electrostatic embedding while the geometry has not been obtained with the same parameters? This is trully a difficult question to answer.</p>
+<p>In any case, you may want to compare the obtained results with different electrostatic description. This may help you to find what results are robust from the one which are more ‘parameter-dependent’.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>QM parameters</p></li>
+</ul>
+</div></blockquote>
+<p>The choice of the functional (in the DFT case) and the basis is primordial for optical property, and espcially for non-linear one. If you want to validate your parameters you are using in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, the basis is really the one you want to check first.</p>
+<p>Now, let’s be more precise about the electrostatic scheme available and how to use them in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>.</p>
+</section>
+</section>
+<section id="select-the-emmebeding-scheme">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink"><span class="section-number">6.3.2. </span>Select the emmebeding scheme:</a><a class="headerlink" href="#select-the-emmebeding-scheme" title="Link to this heading">¶</a></h2>
+<p>First of all, the electrostatic emmebeding scheme is related to a QM calculation of an MT. Therefore, all the option for this behaviour will be treated using the <a class="reference internal" href="qm_box.html#qm-parameter-object-page"><span class="std std-ref">QMParameter object</span></a>. Moreover, in the OpticalParameter, a QM calculation has to be required: either using the <a class="reference internal" href="optical_parameter.html#autodoc-opticalparameter-alpha-calculation-style"><span class="std std-ref">QMParameter.alpha_calculation_style</span></a> or <a class="reference internal" href="optical_parameter.html#autodoc-opticalparameter-beta-calculation-style"><span class="std std-ref">QMParameter.beta_calculation_style</span></a> attributes.</p>
+<p>In the following is presented how to initialized the electrostatic emmebbeding along with some precise detailed. For more information about how to deal with the rest of the QM calculation, see <a class="reference internal" href="qm_box.html#qm-box-page"><span class="std std-ref">this page</span></a>.</p>
+<section id="vacuum">
+<span id="electrostatic-embedding-vacuum-scheme"></span><h3><a class="toc-backref" href="#id9" role="doc-backlink"><span class="section-number">6.3.2.1. </span>Vacuum</a><a class="headerlink" href="#vacuum" title="Link to this heading">¶</a></h3>
+<p>To have vacuum like QM calculation, <em>i.e.</em> no environement, set the <a class="reference internal" href="qm_box.html#autodoc-qmparameter-calculation-style"><span class="std std-ref">QMParameter.calculation_style</span></a> to PE and the <a class="reference internal" href="qm_box.html#autodoc-qmparameter-pe-level"><span class="std std-ref">QMParameter.pe_level</span></a> to -1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">calculation_style</span> <span class="o">=</span> <span class="s1">&#39;PE&#39;</span>
+<span class="n">QMParameter</span><span class="o">.</span><span class="n">pe_level</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</section>
+<section id="pe">
+<span id="electrostatic-embedding-pe-scheme"></span><h3><a class="toc-backref" href="#id10" role="doc-backlink"><span class="section-number">6.3.2.2. </span>PE</a><a class="headerlink" href="#pe" title="Link to this heading">¶</a></h3>
+<p>To have the original PE embedding electrostatic scheme, set the <a class="reference internal" href="qm_box.html#autodoc-qmparameter-calculation-style"><span class="std std-ref">QMParameter.calculation_style</span></a> to PE:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">calculation_style</span> <span class="o">=</span> <span class="s1">&#39;PE&#39;</span>
+</pre></div>
+</div>
+<p>Then, you can choose two different order: 0 or 1. The zero order do not take into account the polarizability of the environment, the first order does.</p>
+<section id="order-0">
+<h4><a class="toc-backref" href="#id11" role="doc-backlink"><span class="section-number">6.3.2.2.1. </span>Order 0</a><a class="headerlink" href="#order-0" title="Link to this heading">¶</a></h4>
+<p>To choose the zeroth order, set the <a class="reference internal" href="qm_box.html#autodoc-qmparameter-pe-level"><span class="std std-ref">QMParameter.pe_level</span></a> to 0:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">pe_level</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>Another important parameter is <a class="reference internal" href="qm_box.html#autodoc-qmparameter-max-pe-distance-neigh"><span class="std std-ref">QMParameter.max_pe_distance_neigh</span></a> which set the maximal distance between the ‘mean position’ of the target molecule and the ‘mean position’ of a neighborgs. Neighbors further away then this distance are not considerated in the electrostatic environement. The distance is given in Angstrom:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">max_pe_distance_neigh</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>In this case, the neighborgs are described using point charge, dipole and quadrupole moment. See the <a class="reference internal" href="#electrostatic-description-object-page"><span class="std std-ref">bottom of this page</span></a> for more information about how to described a neighbors electrostatic property.</p>
+</section>
+<section id="order-1">
+<h4><a class="toc-backref" href="#id12" role="doc-backlink"><span class="section-number">6.3.2.2.2. </span>Order 1</a><a class="headerlink" href="#order-1" title="Link to this heading">¶</a></h4>
+<p>To choose the first order, set the <a class="reference internal" href="qm_box.html#autodoc-qmparameter-pe-level"><span class="std std-ref">QMParameter.pe_level</span></a> to 1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">pe_level</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Here two distance are taken into account: <a class="reference internal" href="qm_box.html#autodoc-qmparameter-max-pe-polarization-distance-neigh"><span class="std std-ref">QMParameter.max_pe_polarization_distance_neigh</span></a> and <a class="reference internal" href="qm_box.html#autodoc-qmparameter-max-pe-distance-neigh"><span class="std std-ref">QMParameter.max_pe_distance_neigh</span></a> :</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">max_pe_polarization_distance_neigh</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">QMParameter</span><span class="o">.</span><span class="n">max_pe_distance_neigh</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>In this case, the neighborgs within 5 Angstrom of the target molecule are described with polarizabilities, the neighborgs within 5 to 10 are described without polarizabilities. The nieghborgs futher awat then 10 Angstrom are not taken into account in the electrostatic environement.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If <span class="incremental">QMParameter.max_pe_polarization_distance_neigh = 12</span> and <span class="incremental">QMParameter.max_pe_distance_neigh = 10</span>, only neighborgs within 10 Angstrom are considerated, and they are all described using polarizabilities.</p>
+</div>
+<p>In the neighbors are described with polarizabilities, it means that they are described using point charge, dipole, quadrupole and a induced dipole moment. See the <a class="reference internal" href="#electrostatic-description-object-page"><span class="std std-ref">bottom of this page</span></a> for more information about how to described a neighbors electrostatic property.</p>
+</section>
+</section>
+<section id="pe-long">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink"><span class="section-number">6.3.2.3. </span>PE long</a><a class="headerlink" href="#pe-long" title="Link to this heading">¶</a></h3>
+<p>To have an environment where <strong>all</strong> the molecule of the box contributes to the electrostatic environement, set <a class="reference internal" href="qm_box.html#autodoc-qmparameter-calculation-style"><span class="std std-ref">QMParameter.calculation_style</span></a> to PE long:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">calculation_style</span> <span class="o">=</span> <span class="s1">&#39;PE long&#39;</span>
+<span class="n">QMParameter</span><span class="o">.</span><span class="n">pe_level</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>Today, only the <a class="reference internal" href="qm_box.html#autodoc-qmparameter-pe-level"><span class="std std-ref">QMParameter.pe_level</span></a> 0 is accepted. Moreover, the molecule in the box should not contains dipole nor quadrupole moment in their electrostatic description. Hence, the neighborgs are described using only point charge.  See the <a class="reference internal" href="#electrostatic-description-object-page"><span class="std std-ref">bottom of this page</span></a> for more information about how to described a neighbors electrostatic property.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>dev the ‘PE long’ for dipole and quadrupole and for pe order 1, and the ‘PE long + QM’. This is not complicated but have to answer to a need.</p>
+</div>
+<p>In this scheme, two areas are defined: ‘direct’ and ‘long-range’.</p>
+<p>If a neighborgs contribute ‘directly’ to the electrostatic environment, it has to be understand as the ‘PE’ or ‘PE + QM’ scheme: its contribution will be deal by Dalton though the potential.pot file. It means that for a point charge, the electrostatic field generated within the QM box vinicity is <strong>heterogenous</strong>.</p>
+<p>If a neighborgs contribute by the ‘long-range’ scheme, its precise electrostatic description (for instance poitn charge at a given position with respect to the target molecule) is replace by the static electrostatic field it generated at the target molecule ‘mean position’.</p>
+<p>Pratically, the electrostatic field generated by each point charge composing the neighborgs is calculated at the target molecule mean position. These electrostatic field are summed up for every neighborgs in this ‘long-range’ area. The resulting electrostatic field is added to the QM calculation as being an <strong>homogenous</strong> electrostatic field. This approximation is good if the charge of the neighborgs are small enough or far enough from the target molecule. A major benefit is that it reduces dramatically the number of molecule to put in the potential.pot file: it reduces the calculation time and the disk-space.</p>
+<p>To determine where starts this ‘long-range’ part, use <a class="reference internal" href="qm_box.html#autodoc-qmparameter-rcut-pe-direct"><span class="std std-ref">QMParameter.rcut_PE_direct</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">rcut_PE_direct</span> <span class="o">=</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>In this case, the neighborgs within 10 Angstrom from the target molecule are treated ‘directly’. All other molecule further away contributes to the electrostatic environement in the ‘long-range’ part.</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>Parler des smothing part ici. Mais une fois que cela sera bien tester. Actuellement je ne m en sert pas et je vois pas vraiment l interet? Peut etre plus pour des ions? A voir avec plus d experience sur cette methode?</p>
+</div>
+<p>The long-range part can be even extented using the <a class="reference internal" href="qm_box.html#autodoc-qmparameter-pe-k-vector-range"><span class="std std-ref">QMParameter.PE_k_vector_range</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">PE_k_vector_range</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>In this case, the QM box will be duplicated in the laboratory +X, -X, +Y, -Y, +Z and -Z direction 2 times. All the molecule in the repeated box contributes to the long-range part, including the PBC images of the target molecule.</p>
+<p>This attribute has been mamde in order to deal with geometrical embedding problem. Let’s say we are in the bulk phase. If you are using a very large PE embedding scheme, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will duplicate the MD box if needed in order to built a spherical environement. If you are using the PE long scheme with a cubic MD box, the electrostatic environement is cubic, which can arise some problems. Therefore, to avoid this, you can built <strong>very large</strong> cubic environement using <a class="reference internal" href="qm_box.html#autodoc-qmparameter-pe-k-vector-range"><span class="std std-ref">QMParameter.PE_k_vector_range</span></a>. You will still have a cubic enviroenement instead of a spherical one, but one can expect that if the environment is large enough, the 2 geometry converges – at least regarding the obtained result for the optical property we are looking for.</p>
+</section>
+<section id="pe-qm">
+<span id="electrostatic-embedding-pe-qm-scheme"></span><h3><a class="toc-backref" href="#id14" role="doc-backlink"><span class="section-number">6.3.2.4. </span>PE + QM</a><a class="headerlink" href="#pe-qm" title="Link to this heading">¶</a></h3>
+<p>To have an environment where the neighborgs can contribute to the QM box and to the electrostatic one, set <a class="reference internal" href="qm_box.html#autodoc-qmparameter-calculation-style"><span class="std std-ref">QMParameter.calculation_style</span></a> to PE + QM</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">calculation_style</span> <span class="o">=</span> <span class="s1">&#39;PE + QM&#39;</span>
+</pre></div>
+</div>
+<p>This scheme share very similar option then the ‘PE’ one: you can choose two different order: 0 or 1 using <a class="reference internal" href="qm_box.html#autodoc-qmparameter-pe-level"><span class="std std-ref">QMParameter.pe_level</span></a>. The zero order do not take into account the polarizability of the environment, the first order does.</p>
+<p>To chose which neighborgs should be included in the QM box, use <a class="reference internal" href="qm_box.html#autodoc-qmparameter-max-qm-box-distance-neigh"><span class="std std-ref">QMParameter.max_qm_box_distance_neigh</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QMParameter</span><span class="o">.</span><span class="n">pe_level</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">QMParameter</span><span class="o">.</span><span class="n">max_qm_box_distance_neigh</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="n">QMParameter</span><span class="o">.</span><span class="n">max_pe_polarization_distance_neigh</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">QMParameter</span><span class="o">.</span><span class="n">max_pe_distance_neigh</span> <span class="o">=</span> <span class="mi">15</span>
+</pre></div>
+</div>
+<p>In this case, the neighborgs within 2.5 Angstrom of the target molecule are included in the QM box. The number of atom and electron for the QM calculation is thus increased. Neighborgs within 2.5 and 4 Angstrom of the target moleculeare described with polarizabilities, the neighborgs within 4 to 15 are described without polarizabilities. The neighborgs futher awat then 15 Angstrom are not taken into account in the electrostatic environement or in the QM box.</p>
+<p>See the <a class="reference internal" href="#electrostatic-description-object-page"><span class="std std-ref">bottom of this page</span></a> for more information about how to described a neighbors electrostatic property.</p>
+</section>
+</section>
+<section id="feedback-on-the-emmebding">
+<span id="electrostatic-embedding-feedback"></span><h2><a class="toc-backref" href="#id15" role="doc-backlink"><span class="section-number">6.3.3. </span>Feedback on the emmebding:</a><a class="headerlink" href="#feedback-on-the-emmebding" title="Link to this heading">¶</a></h2>
+<p>In all of the scheme, tracking the electrostatic environement is very important. To do so, 2 main possibilities are available: look at the obtained electrostatic neighborhood or at the electrostatic field generated by them. First, we will see how to visualized the embedding, using the <a class="reference internal" href="qm_box.html#autodoc-qmparameter-write-xyz-environment"><span class="std std-ref">QMParameter.write_xyz_environment</span></a> attribute. Then how to use the <a class="reference internal" href="../Diagram/diagram_list.html#autodoc-diagram-electric-field"><span class="std std-ref">Electrostatic Field diagram</span></a> to track the electrostatic effect of the environement on the molecule type in average (or not).</p>
+<section id="visualisation-of-the-embedding">
+<h3><a class="toc-backref" href="#id16" role="doc-backlink"><span class="section-number">6.3.3.1. </span>Visualisation of the embedding</a><a class="headerlink" href="#visualisation-of-the-embedding" title="Link to this heading">¶</a></h3>
+<p>During the QMParameter definition, you can keep track of the electrostatic direct environment using the attribute <a class="reference internal" href="qm_box.html#autodoc-qmparameter-write-xyz-environment"><span class="std std-ref">QMParameter.write_xyz_environment</span></a>.  A file named <em>potential.xyz</em> is created in the directory: <a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-torun-qm"><span class="std std-ref">GlobalParameter.dir_torun_QM</span></a>/Name_of_the_MT/Time_step/Molecule_number. It is designed to work with the open software VMD (<a class="reference external" href="https://www.ks.uiuc.edu/Research/vmd/">https://www.ks.uiuc.edu/Research/vmd/</a>) but may work with other. In the console, type: <span class="incremental">vmd potential.xyz</span> to open the file using VMD.</p>
+<p>In this potential.xyz file, the target molecule and its environment is recorded for a given frame. The coordinates are written in the laboratory frame, but recentered arround the target molecule – only translation are used. The target molecule atom are named ‘X’ instead of their real name. This is done to make it easier to see in the visualisaion.</p>
+<p>In the <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/> PE environment, and thus in <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>, the electrostatic environement is described by a set of ‘’sites’’. Each sites can hold a point charge, dipole moment ect… In the potential.xyz file, all the site are composting the (direct) electrostatic environement are recorded. The site name are given by <a class="reference internal" href="#autodoc-electrodescription-l-localization-type"><span class="std std-ref">ElectrostaticDescription.L_localization_type</span></a>. If you want to have the corresponding charge, dipole moment or polarizability, see the potential.pot file.</p>
+<p>For each <a class="reference internal" href="qm_box.html#autodoc-qmparameter-calculation-style"><span class="std std-ref">QMParameter.calculation_style</span></a>, the output will be a bit different:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PE</p></li>
+</ul>
+</div></blockquote>
+<p>The target molecule is alone in its QM box. The potential.xyz file contains all the neighbors that contribute to the electrostatic environement of the target molecule.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PE long</p></li>
+</ul>
+</div></blockquote>
+<p>The target molecule is alone in its QM box. The potential.xyz file contains the neighbors that contribute to the <strong>direct</strong> electrostatic environement of the target molecule. The long-range part is not represented in this file. See the following part for the tracking of the long-range electrostatic field.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PE + QM</p></li>
+</ul>
+</div></blockquote>
+<p>The target molecule may not be alone in its QM box. The neigborgs molecule with are included in the QM box as well are written using the ‘Y’ atom. The rest of the potential.xyz file contains all the neighbors that contribute to the electrostatic environement of the target molecule.</p>
+<p>To conclude this part, here are some aspects that you may want to check:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Does the symetry (3D, 2D, 1D?) is respected in this file? If not, see <a class="reference internal" href="qm_box.html#autodoc-qmparameter-calculation-style"><span class="std std-ref">QMParameter.calculation_style</span></a> and <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-env-authorised-pbc-condition"><span class="std std-ref">GlobalParameter.env_authorised_pbc_condition</span></a>.</p></li>
+<li><p>If the direct environment is very large, does the PBC condition are working? If not, see <a class="reference internal" href="../GlobalParameter/usual_parameters.html#autodoc-gp-env-authorised-pbc-condition"><span class="std std-ref">GlobalParameter.env_authorised_pbc_condition</span></a>.</p></li>
+<li><p>Are their some molecule in top of each other? If it is so, check the MD simulation!</p></li>
+<li><p>Is the electrostatic description matching the one you intented to use? You can cross check the coordinate given in the potential.xyz file and their value in the potential.pot one. If not, see the molecular library file function  <a class="reference internal" href="../Tutorials/what_should_contain_molecular_type_file.html#molecular-library-file-electrostatic-description-function-page"><span class="std std-ref">electrostatic_description</span></a> of your MT which provide the electrostatic description.</p></li>
+<li><p>Does the QM box make sens? You can also cross check the coordinate given in the potential.xyz file and the values and QM details in the molecule.mol file.</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="electrostatic-diagram">
+<h3><a class="toc-backref" href="#id17" role="doc-backlink"><span class="section-number">6.3.3.2. </span>Electrostatic Diagram</a><a class="headerlink" href="#electrostatic-diagram" title="Link to this heading">¶</a></h3>
+<p>Using the <a class="reference internal" href="qm_box.html#autodoc-qmparameter-write-xyz-environment"><span class="std std-ref">QMParameter.write_xyz_environment</span></a> can be very helpfull to have a precise picture of single situation. However, it is very tidious to check all the inputs what <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> generates automatically. Therefore, to help the tracking of the electrostatic environement, the <a class="reference internal" href="../Diagram/diagram_list.html#autodoc-diagram-electric-field"><span class="std std-ref">electrostatic_field diagram</span></a> can be used. Using the ‘PE’ option, the electrostatic field generated by the environement will be recorded in this diagram and SingleMolecule attributes.</p>
+<p>More precisely, the electrostatic field generated by the environement at the ‘mean position’ of the molecule is calculated for each molecule, and also its derivative. The values are available in the laboratory and in the molecular frame. See the <a class="reference internal" href="../Diagram/diagram_list.html#autodoc-diagram-electric-field"><span class="std std-ref">electrostatic_field diagram</span></a> for more information.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The unit used to stored the electrostatic field is V/A and the derivative V/A^2 in the electrostatic_field diagram</p>
+</div>
+<p>The value stored will be different for each <a class="reference internal" href="qm_box.html#autodoc-qmparameter-calculation-style"><span class="std std-ref">QMParameter.calculation_style</span></a>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PE</p></li>
+</ul>
+</div></blockquote>
+<p>The electrostatic field, and its derivative, generated by the electrostatic environement is stored for each molecule. All the molecule that contributed to this field can be also seen in the potential.xyz file.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PE long</p></li>
+</ul>
+</div></blockquote>
+<p>A neighborgs in the electrostatic environement can affect the QM box either <strong>directly</strong> or either in the <strong>long-range</strong> part. The direct part work as the usual ‘PE’ method: the electrostatic field generated is heterogenous and all the molecule contributing to this part are also stored in the potential.xyz file. The electrostatic field stored in the electrostatic_field diagram is the one felt at the ‘mean position’ of the target molecule. The long-range part is affected by all the molecue in the box which do not contribute to the direct part, plus the PBC copies – see <a class="reference internal" href="qm_box.html#autodoc-qmparameter-pe-k-vector-range"><span class="std std-ref">QMParameter.PE_k_vector_range</span></a>. The total electrostatic field generated by all these neighborgs are stored in the ‘long-range’ part of the  electrostatic_field diagram, as well as the electrastic field derivative.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are using correctly the ‘PE long’ method, the long-range electrostatic field derivative should be very small!</p>
+</div>
+<p>The long-range electrostatic field is also accessible in the dalton.dal file of each configuration. Please note that it is written in the laboratory frame, and using atomic unit.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>PE + QM</p></li>
+</ul>
+</div></blockquote>
+<p>The target molecule may not be alone in its QM box. If a neigborg is included in the QM box, it does no longer contribute to the direct electrostatic environement (it is not included in the potential.pot file!). Thuse, the electrostatic field stored in the electrostatic_field diagram do not take into account this type of neighborgs.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The electrostic field stored in the diagram using the ‘PE’ option is calculated along with the QM input preparation in the code. Therefore, if you are using the option <a class="reference internal" href="../GlobalParameter/QM_management.html#autodoc-gp-redo-qm"><span class="std std-ref">GlobalParameter.redo_QM</span></a> <span class="incremental">do_not_redo</span>, some of the QM configuration may not be initialized if the result if available – it is the purpose of this <span class="incremental">do_not_redo</span> option. Thus, no electrostatic field will be available during the third part of the run, and <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will crash. Therefore, issues can happend if using the electrostatic_field diagram in the ‘PE’ option along with the <span class="incremental">GP.redo_QM=do_not_redo</span>. To avoid this problem, here is a trick: do not use at all the  electrostatic_field diagram at first. Perform all the QM claculation, using the <span class="incremental">GP.redo_QM=do_not_redo</span> to avoid redoing the same QM calculation. Once it is done, save the <a class="reference internal" href="../GlobalParameter/directory_management.html#autodoc-gp-dir-torun-qm"><span class="std std-ref">GlobalParameter.dir_torun_QM</span></a> directory (which thus contain all the QM result), and clear all the file/directory. Rerun <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> with the same parameters, but this time with the  electrostatic_field diagram in the ‘PE’ mode. <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> will re-creat all the QM input and compute all the electostatic field (because there are no QM results available), and stops at the end of the second part. Then, do not launch again the QM run but copy the previous results. Run again <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>: it should have detected the QM results and end corretly the run.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>la note ci dessus est un peu fastidieuse, mais helas je n ai pas trop de ‘bonne’ solution qui me vienne. Deja, est ce que je raconte au dessus est comprehensible?</p>
+</div>
+</section>
+<section id="electrostatic-map">
+<h3><a class="toc-backref" href="#id18" role="doc-backlink"><span class="section-number">6.3.3.3. </span>Electrostatic Map</a><a class="headerlink" href="#electrostatic-map" title="Link to this heading">¶</a></h3>
+<div class="admonition-todo admonition" id="id3">
+<p class="admonition-title">Todo</p>
+<p>TODO</p>
+</div>
+</section>
+</section>
+<section id="electrostatic-description-object">
+<span id="electrostatic-description-object-page"></span><h2><a class="toc-backref" href="#id19" role="doc-backlink"><span class="section-number">6.3.4. </span>Electrostatic Description object</a><a class="headerlink" href="#electrostatic-description-object" title="Link to this heading">¶</a></h2>
+<p>In this section is detailed precisly the different attribute of the ElectrostaticDescription object and how is encoded the different electrostatic parameters presented above. This section is of primor interest if you intend to define yourself a new electrostatic description of a MT. If you want a quick overview, skip this part to read the other part of this page, or this tutorial ADD REF and <a class="reference internal" href="../Tutorials/what_should_contain_molecular_type_file.html#molecular-library-file-electrostatic-description-function-page"><span class="std std-ref">this one</span></a>.</p>
+<p>For more information and pratical example, see also the molecular library file function <a class="reference internal" href="../Tutorials/what_should_contain_molecular_type_file.html#molecular-library-file-electrostatic-description-function-page"><span class="std std-ref">electrostatic_description</span></a> which assign for each molecule the individual ElectrostaticDescription object.</p>
+<section id="attributes">
+<h3><a class="toc-backref" href="#id20" role="doc-backlink"><span class="section-number">6.3.4.1. </span>Attributes</a><a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h3>
+<dl class="py attribute" id="autodoc-electrodescription-multipole-order">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">ElectrostaticDescription.</span></span><span class="sig-name descname"><span class="pre">multipole_order</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>The maximal order of charge distribution description used in this ElectrostaticDescription object.</p>
+<p>If multipole_order=0, only point charge are used.
+If multipole_order=1 dipole are also used.
+If multipole_order=2, quadrupolar moment are also used.</p>
+<p>This attribute is used to keep track of the maximal multipole order to make esier the writting of the dalton potential input file.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-electrodescription-polarization-order">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">ElectrostaticDescription.</span></span><span class="sig-name descname"><span class="pre">polarization_order</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>The maximal order of polarizability used in this ElectrostaticDescription object.</p>
+<p>If multipole_order=0, no polarizable molecule are defined.
+If multipole_order=1 some molecule are polarizable..</p>
+<p>This attribute is used to keep track of polarizability to make esier the writting of the dalton potential input file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This attribute is not directly related to the QMParameter.pe_order used. It refers to the polarizability of the neighborhood. If the electrostatic scheme used allows to use polarizability but no molecule are polarizable according to their MT electrostatic description, then the result will be same as if QMParameter.pe_order=0 is used.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-electrodescription-l-localization-site">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">ElectrostaticDescription.</span></span><span class="sig-name descname"><span class="pre">L_localization_site</span></span></dt>
+<dd><p><strong>Type</strong> [list or str]</p>
+<p>The space-position of every site needed for the electrostatic description of the molecule. These positions will be used later on by the L_charge_order_0, L_charge_order_1, L_charge_order_2 and L_polarization_order_1_1 attribute. Note that these position are given in the same referential as the molecule position. There are as many element in this list as ‘site’. However, each ‘site’ can have only point charge value, and or dipole, and or quadrupole moments, or nothing.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>At the initialization, L_localization_site = ‘NotProvided’. If you do not want to assign any electrostatic description to a molecule type, just do not update any value in the electrostatic_description molecular module function. If L_localization_site = ‘NotProvided’, Frog will considere this as an empty electrostatic description an will pass this molecule when building the electrostatic environment.</p>
+<p>However, this way the molecule will not be printed if an .xyz file is generated to keep a track of every configuration. Thus, if you want that a MT has no impact in an electrostatic scheme, but you still want to have it printed in the .xyz file, you can define the L_localization_site attribute, the L_localization_type, an nothing more.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-electrodescription-l-localization-type">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">ElectrostaticDescription.</span></span><span class="sig-name descname"><span class="pre">L_localization_type</span></span></dt>
+<dd><p><strong>Type</strong> [list or str]</p>
+<p>The list of the site name associated to each localization site. The length of L_localization_site and L_localization_type should be the same. The name attributed to each site are arbitrary and have no incidence on the QM calculation. They are used if the .xyz electrostatic environment should be printed.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-electrodescription-l-charge-order-0">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">ElectrostaticDescription.</span></span><span class="sig-name descname"><span class="pre">L_charge_order_0</span></span></dt>
+<dd><p><strong>Type</strong> [list or str]</p>
+<p>If defined to a list, means that some site defined in L_localization_site are associated to a point charge. In this case, L_charge_order_0 defines the site number and the charge of every point charge.</p>
+<p class="rubric">Example</p>
+<p>L_charge_order_0 = [[2, -1.1128], [3, 0.5564], [4, 0.5564]]</p>
+<p>3 point charge are defined. The first point charge is negativly charged, q=-1.1128 e, and is located at the 2nd element of L_localization_site. The 2nd and 3rd point charge are positivly charged, q=0.5564 e, and are located at the 3rd and 4th element of the L_localization_site. Here, the first element of L_localization_site has no point charge attached.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The assignement of the charge with the site location starts at 1 instead of 0.</p>
+<p>L_charge_order_0 = [[1, q1], [2, q2]…]</p>
+<p>Assigns to the first site of L_localization_site the charge q1, to the 2th site the charge q2 ect…</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-electrodescription-l-charge-order-1">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">ElectrostaticDescription.</span></span><span class="sig-name descname"><span class="pre">L_charge_order_1</span></span></dt>
+<dd><p><strong>Type</strong> [list or str]</p>
+<p>If defined to a list, means that some site defined in L_localization_site are associated to a dipole moment. In this case, L_charge_order_1 defines the site number and the dipole vector.</p>
+<p class="rubric">Example</p>
+<p>L_charge_order_1 = [[1, [-0.25, -0.25, -0.25]]]</p>
+<p>1 dipole is defined at the position L_localization_site[0] with a dipole moment [-0.25, -0.25, -0.25] in a.u. .</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The assignement of the dipole with the site location starts at 1 instead of 0.</p>
+<p>L_charge_order_1 = [[1, vec1], [2, vec2]…]</p>
+<p>Assigns to the first site of L_localization_site the dipole moment vec1, to the 2th site the dipole moment vec2 ect…</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-electrodescription-l-charge-order-2">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">ElectrostaticDescription.</span></span><span class="sig-name descname"><span class="pre">L_charge_order_2</span></span></dt>
+<dd><p><strong>Type</strong> [list or str]</p>
+<p>If defined to a list, means that some site defined in L_localization_site are associated to a quadrupole moment. In this case, L_charge_order_2 defines the site number and the quadrupole value. The quadrupole have to be symetric: they are define only by the [xx xy xz yy yz zz] values.</p>
+<p class="rubric">Example</p>
+<p>L_charge_order_2 =  [[1, [-0.25, -0.25, -0.25, -0.25, -0.25, -0.25]]]</p>
+<p>1 quadrupole is defined at the position L_localization_site[0] with a quadrupole value moment [xx xy xz yy yz zz] = [-0.25, -0.25, -0.25, -0.25, -0.25, -0.25] in a.u. .</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The assignement of the quadrupole with the site location starts at 1 instead of 0.</p>
+<p>L_charge_order_2 = [[1, qua1], [2, qua2]…]</p>
+<p>Assigns to the first site of L_localization_site the quadrupole qua1, to the 2th site the quadrupole qua2 ect…</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-electrodescription-l-polarization-order-1-1">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">ElectrostaticDescription.</span></span><span class="sig-name descname"><span class="pre">L_polarization_order_1_1</span></span></dt>
+<dd><p><strong>Type</strong> [list or str]</p>
+<p>If defined to a list, means that some site defined in L_localization_site are associated to a polarizable dipole. In this case, L_polarization_order_1_1 defines the site number and the polarizability of these site. The polarizability have to be symetric: they are define only by the [xx xy xz yy yz zz] values.</p>
+<p class="rubric">Example</p>
+<p>L_polarization_order_1_1 =  [[1, [-0.25, -0.25, -0.25, -0.25, -0.25, -0.25]]]</p>
+<p>1 polarizable site is defined at the position L_localization_site[0] with a polarizability [xx xy xz yy yz zz] = [-0.25, -0.25, -0.25, -0.25, -0.25, -0.25] in a.u. . It means that a dipole moment can be created at the first site location by the neighborhood using this polarizability value.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The assignement of the polarizability with the site location starts at 1 instead of 0.</p>
+<p>L_charge_order_2 = [[1, alpha1], [2, alpha2]…]</p>
+<p>Assigns to the first site of L_localization_site the polarizability alpha1, to the 2th site the polarizability alpha2 ect…</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-electrodescription-l-polarization-exclude">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">ElectrostaticDescription.</span></span><span class="sig-name descname"><span class="pre">L_polarization_exclude</span></span></dt>
+<dd><p><strong>Type</strong> [list or str]</p>
+<p>Defines for some dipole a list of dipole from which they cannot be polarized.</p>
+<p class="rubric">Example</p>
+<p>L_polarization_exclude = [[1, [2, 3, 4]]]</p>
+<p>The dipole located at the site 1 (position L_localization_site[0]) cannot be polarized by the dipole localted at the site 2, 3 and 4.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The assignement of this list with the site location starts at 1 instead of 0, as the similar attribute of the Electrostatic Description object.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This behavior has not been extensively tested, please read the relative part on the Dalton manual (polarizable electrostatic emmebedding, and the exclude partern).</p>
+</div>
+</dd></dl>
+
+</section>
+<section id="procedure">
+<h3><a class="toc-backref" href="#id21" role="doc-backlink"><span class="section-number">6.3.4.2. </span>Procedure</a><a class="headerlink" href="#procedure" title="Link to this heading">¶</a></h3>
+<p>A faire tout a la fin une fois que les aspects generals ont ete explique. Ici ne garder que vraiment les parties les plus techniques.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="optical_analysis_index.html">6. Optical Analysis</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="overview_opt_analysis.html">6.1. Overview: Optical Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optical_parameter.html">6.2. Optical Parameter</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">6.3. Electrostatic embedding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qm_box.html">6.4. QM box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qm_management.html">6.5. QM Management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advices_for_qm.html">6.6. Some Advices for the QM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/OpticalAnalysis/electrostatic_embedding.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

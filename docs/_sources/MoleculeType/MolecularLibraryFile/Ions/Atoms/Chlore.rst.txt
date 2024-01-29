@@ -1,0 +1,30 @@
+.. _MLF_Chlore_page:
+
+    
+    
+==================
+Cl-: Full charge
+==================
+
+To call this Molecule Type description in |frog|, use: ::
+
+    myMT = frog_class.MoleculeType(GP, 'Chlore', where_are_molecules)
+
+
+Description
+------------
+
+
+
+Test performed
+--------------
+
+
+
+Module
+------
+.. automodule:: Frog.Molecules.Chlore
+    :noindex:
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog.geometry_manager &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Frog.geometry_manager</h1><div class="highlight"><pre>
+<span></span><span class="c1">##############################################################################</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    FROG: FROm molecular dynamics to second harmonic Generation             #</span>
+<span class="c1">#    Copyright (C) 2024                                                      #</span>
+<span class="c1">#    Author list                                                             #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    Guillaume Le Breton                                                     #</span>
+<span class="c1">#    Oriane Bonhomme                                                         #</span>
+<span class="c1">#    Emmanuel Benichou                                                       #</span>
+<span class="c1">#    Claire Loison                                                           #</span>
+<span class="c1">#                                                                            # </span>
+<span class="c1">#    This program is free software: you can redistribute it and/or modify    #</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by    #</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or       #</span>
+<span class="c1">#    (at your option) any later version.                                     #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is distributed in the hope that it will be useful,         #</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #</span>
+<span class="c1">#    GNU General Public License for more details.                            #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License       # </span>
+<span class="c1">#    along with this program.  If not, see &lt;https://www.gnu.org/licenses/    #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">##############################################################################</span>
+
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">MDAnalysis</span>
+
+<span class="kn">import</span> <span class="nn">Frog.universe_manager</span> <span class="k">as</span> <span class="nn">universe_manager</span>
+<span class="kn">import</span> <span class="nn">Frog.error_messages</span> <span class="k">as</span> <span class="nn">error_messages</span>
+<span class="kn">import</span> <span class="nn">Frog.toolbox</span> <span class="k">as</span> <span class="nn">toolbox</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="PBC">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.PBC">[docs]</a>
+<span class="k">class</span> <span class="nc">PBC</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">GP</span><span class="p">,</span><span class="n">ts</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        The class containing usefull data on the box and PBC tools at a given timestep. </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">L_box_size</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">env_authorised_pbc_condition</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">L_movment_environment_building_pbc</span> <span class="o">=</span> <span class="n">universe_manager</span><span class="o">.</span><span class="n">construct_pbc_movement</span><span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">env_authorised_pbc_condition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L_box_size</span><span class="p">)</span> </div>
+
+
+
+<div class="viewcode-block" id="find_closest_position_threw_pbc">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.find_closest_position_threw_pbc">[docs]</a>
+<span class="k">def</span> <span class="nf">find_closest_position_threw_pbc</span><span class="p">(</span><span class="n">L_target</span><span class="p">,</span> <span class="n">L_neigh</span><span class="p">,</span> <span class="n">L_box_size</span><span class="p">,</span> <span class="n">L_box_authorised</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return the shift to apply to the L_neigh position so that it is the closest to the L_target position using the PBC condition available in L_box_size.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">relevant_distance</span> <span class="o">=</span> <span class="n">L_box_size</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">L_box_authorised</span><span class="p">:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">L_target</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">-</span><span class="n">L_neigh</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">temp</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">relevant_distance</span><span class="p">[</span><span class="n">axis</span><span class="p">]:</span>
+            <span class="n">shift</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">L_box_size</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">temp</span>  <span class="o">&gt;</span> <span class="n">relevant_distance</span><span class="p">[</span><span class="n">axis</span><span class="p">]:</span>
+            <span class="n">shift</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">+=</span> <span class="n">L_box_size</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span></div>
+
+            
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="pbc_condition">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.pbc_condition">[docs]</a>
+<span class="k">def</span> <span class="nf">pbc_condition</span><span class="p">(</span><span class="n">pos_ref</span><span class="p">,</span> <span class="n">pos_tomove</span><span class="p">,</span> <span class="n">max_norm</span><span class="p">,</span> <span class="n">L_pbc_parameter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function move the target atom at the position &lt; pos_tomove &gt; closer to the reference one &lt; pos_ref &gt;  if their distance is larger than &lt; max_norm &gt;. To achieve that, it uses the vector &lt; L_pbc_parameter &gt; assuming periodic boundary condition in the 3 directions. Returns the moved positions of the target atom.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">pos_temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pos_tomove</span><span class="p">)</span>
+    <span class="c1">#print(pos_ref, pos_temp, max_norm)</span>
+    <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">pos_temp</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">-</span> <span class="n">pos_ref</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+        <span class="k">while</span> <span class="n">delta</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">max_norm</span><span class="p">:</span>
+            <span class="n">pos_temp</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">+=</span> <span class="n">L_pbc_parameter</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">pos_temp</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">-</span> <span class="n">pos_ref</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+        <span class="k">while</span> <span class="n">delta</span> <span class="o">&gt;</span> <span class="n">max_norm</span><span class="p">:</span>
+            <span class="n">pos_temp</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">L_pbc_parameter</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="n">pos_temp</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span> <span class="o">-</span> <span class="n">pos_ref</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+            
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">pos_ref</span> <span class="o">-</span> <span class="n">pos_temp</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">max_norm</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_messages</span><span class="o">.</span><span class="n">e_100</span><span class="p">(</span><span class="n">pos_tomove</span><span class="p">,</span> <span class="n">pos_ref</span><span class="p">,</span> <span class="n">max_norm</span><span class="p">,</span> <span class="n">L_pbc_parameter</span><span class="p">,</span> <span class="n">pos_temp</span><span class="p">))</span>
+        
+    <span class="c1">#print(pos_ref, pos_temp, max_norm)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">pos_temp</span><span class="p">)</span></div>
+
+        
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################        </span>
+        
+<div class="viewcode-block" id="check_molecule_geometry">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.check_molecule_geometry">[docs]</a>
+<span class="k">def</span> <span class="nf">check_molecule_geometry</span><span class="p">(</span><span class="n">smparameter</span><span class="p">,</span> <span class="n">L_pos_mol</span><span class="p">,</span> <span class="n">L_box_size</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Check that their are no PBC problems within the molecule. The L_max_norm array is the parameters to tune to set the maximal accepted distance between the first atom and the others - distance given in the same unit as the molecular position. If the distance btween one atom and the first one is larger than the accepted value, the program will try to reduce this distance by using PBC condition.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    for atom in range(0, smparameter.nbr_atom, 1):</span>
+<span class="sd">        if atom != smparameter.max_distance_atom[0]:</span>
+<span class="sd">            if smparameter.max_distance_atom[atom+1][0] != &#39;Ref&#39;:</span>
+<span class="sd">                L_pos_mol[atom] = pbc_condition(L_pos_mol[smparameter.max_distance_atom[atom+1][0]], L_pos_mol[atom], smparameter.max_distance_atom[atom+1][1], L_box_size)</span>
+<span class="sd">    &#39;&#39;&#39;</span>             
+    <span class="c1"># reference_atom_number = smparameter.max_distance_atom[0]             </span>
+    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">smparameter</span><span class="o">.</span><span class="n">nbr_atom</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">atom</span> <span class="o">!=</span> <span class="n">smparameter</span><span class="o">.</span><span class="n">max_distance_atom</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">L_pos_mol</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="n">pbc_condition</span><span class="p">(</span><span class="n">L_pos_mol</span><span class="p">[</span><span class="n">smparameter</span><span class="o">.</span><span class="n">max_distance_atom</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">L_pos_mol</span><span class="p">[</span><span class="n">atom</span><span class="p">],</span> <span class="n">smparameter</span><span class="o">.</span><span class="n">max_distance_atom</span><span class="p">[</span><span class="n">atom</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">L_box_size</span><span class="p">)</span>            
+    <span class="k">return</span><span class="p">(</span><span class="n">L_pos_mol</span><span class="p">)</span>                        </div>
+
+            
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+            
+<div class="viewcode-block" id="init_plane_axis">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.init_plane_axis">[docs]</a>
+<span class="k">def</span> <span class="nf">init_plane_axis</span><span class="p">(</span><span class="n">L_xyz_todo</span><span class="p">,</span> <span class="n">box_size</span><span class="p">,</span> <span class="n">nbr_bin_space</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function return some software friendly parameter from humain-frendly inputs during diagrams initialization.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">L_xyz</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]</span>
+    <span class="c1"># What is the axis requested?</span>
+    <span class="n">which_direction</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">L_xyz_todo</span><span class="p">:</span>
+        <span class="n">which_direction</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="s1">&#39;y&#39;</span> <span class="ow">in</span> <span class="n">L_xyz_todo</span><span class="p">:</span>
+        <span class="n">which_direction</span> <span class="o">+=</span> <span class="mi">5</span>
+    <span class="k">if</span> <span class="s1">&#39;z&#39;</span> <span class="ow">in</span> <span class="n">L_xyz_todo</span><span class="p">:</span>
+        <span class="n">which_direction</span> <span class="o">+=</span> <span class="mi">10</span>
+    
+    <span class="k">if</span> <span class="n">which_direction</span> <span class="o">==</span> <span class="mi">15</span><span class="p">:</span> <span class="c1">#Plan yz detected:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">which_direction</span> <span class="o">==</span> <span class="mi">11</span><span class="p">:</span> <span class="c1">#Plan xz detected:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">which_direction</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span> <span class="c1">#Plan xy detected:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: The plane option for the analysis has not been understood. The input should be like: &quot;Plane_xy&quot;. I have read from the input file: Plane_&#39;</span> <span class="o">+</span> <span class="n">L_xyz_todo</span><span class="p">)</span>
+        
+    <span class="n">direction_toprint</span> <span class="o">=</span> <span class="n">L_xyz</span><span class="p">[</span><span class="n">direction</span><span class="p">]</span>            
+    <span class="n">bit_length</span> <span class="o">=</span> <span class="n">box_size</span><span class="p">[</span><span class="n">direction</span><span class="p">]</span><span class="o">/</span><span class="n">nbr_bin_space</span>
+    <span class="n">slice_size</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">axis_t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">axis_t</span> <span class="o">==</span> <span class="n">direction</span><span class="p">:</span>
+            <span class="n">slice_size</span> <span class="o">=</span> <span class="n">slice_size</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">bit_length</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">slice_size</span> <span class="o">=</span> <span class="n">slice_size</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">box_size</span><span class="p">[</span><span class="n">axis_t</span><span class="p">])</span>
+            
+        <span class="k">if</span> <span class="n">axis_t</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">slice_size</span> <span class="o">=</span> <span class="n">slice_size</span> <span class="o">+</span> <span class="s1">&#39;x&#39;</span>
+   
+    <span class="k">return</span><span class="p">(</span><span class="n">direction</span><span class="p">,</span> <span class="n">direction_toprint</span><span class="p">,</span> <span class="n">slice_size</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="compute_angle_3_atoms">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.compute_angle_3_atoms">[docs]</a>
+<span class="k">def</span> <span class="nf">compute_angle_3_atoms</span><span class="p">(</span><span class="n">L_angle</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compute the angle between 3 atoms. The angle is return in radians.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">v1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">L_angle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">L_angle</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">v2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">L_angle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">L_angle</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v2</span><span class="p">)))</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">angle</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="discretization_space">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.discretization_space">[docs]</a>
+<span class="k">def</span> <span class="nf">discretization_space</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">smolecule</span><span class="p">,</span> <span class="n">sdparameter</span><span class="p">,</span> <span class="n">L_box_size</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return the spatial bin for a molecule according to the spatial discretization of the diagram. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">discretization_type</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1">#Mean value</span>
+        <span class="n">discretization_space</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">discretization_type</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span> <span class="c1">#slices</span>
+        <span class="n">discretization_space</span> <span class="o">=</span> <span class="n">toolbox</span><span class="o">.</span><span class="n">binarize_array</span><span class="p">(</span><span class="n">smolecule</span><span class="o">.</span><span class="n">mean_position</span><span class="p">[</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">discretization_type</span><span class="p">],</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">bin_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">L_box_size</span><span class="p">[</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">discretization_type</span><span class="p">],</span> <span class="n">pbc</span><span class="o">=</span><span class="n">L_box_size</span><span class="p">[</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">discretization_type</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">real_space_discretization_bin_number</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">discretization_space</span> <span class="o">=</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">L_reassignation_selection</span><span class="p">[</span><span class="n">discretization_space</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">discretization_space</span> <span class="o">==</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">real_space_discretization_bin_number</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: code probleme. This case should not happen!&#39;</span><span class="p">)</span>
+                
+    <span class="k">elif</span> <span class="n">sdparameter</span><span class="o">.</span><span class="n">discretization_type</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">nbr_layer_d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">bin_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">diff_nbr_layer</span> <span class="o">=</span> <span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span> <span class="o">-</span> <span class="n">nbr_layer_d</span>
+        <span class="c1">#print(sdparameter.name, sdparameter.bin_size[0], GP.layer_nbr_max, nbr_layer_d, smolecule.layer)</span>
+        <span class="k">if</span> <span class="n">diff_nbr_layer</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">smolecule</span><span class="o">.</span><span class="n">layer</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">diff_nbr_layer</span><span class="p">:</span>
+                <span class="n">discretization_space</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">+</span> <span class="n">nbr_layer_d</span>
+            <span class="k">elif</span> <span class="n">smolecule</span><span class="o">.</span><span class="n">layer</span> <span class="o">&gt;</span> <span class="n">diff_nbr_layer</span><span class="p">:</span>
+                <span class="n">discretization_space</span> <span class="o">=</span> <span class="n">smolecule</span><span class="o">.</span><span class="n">layer</span> <span class="o">-</span> <span class="n">diff_nbr_layer</span> <span class="o">+</span> <span class="n">nbr_layer_d</span>
+            <span class="k">elif</span> <span class="n">smolecule</span><span class="o">.</span><span class="n">layer</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">diff_nbr_layer</span><span class="p">:</span>
+                <span class="n">discretization_space</span> <span class="o">=</span> <span class="n">smolecule</span><span class="o">.</span><span class="n">layer</span> <span class="o">+</span> <span class="n">diff_nbr_layer</span> <span class="o">+</span> <span class="n">nbr_layer_d</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: this case should not happens!&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">discretization_space</span> <span class="o">=</span> <span class="n">smolecule</span><span class="o">.</span><span class="n">layer</span> <span class="o">+</span> <span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARINING: code problem, sdparameter.discretization_type value not understood!&#39;</span><span class="p">)</span>
+    
+    <span class="k">return</span><span class="p">(</span><span class="n">discretization_space</span><span class="p">)</span></div>
+
+        
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="special_selection_assignement_for_molecules">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.special_selection_assignement_for_molecules">[docs]</a>
+<span class="k">def</span> <span class="nf">special_selection_assignement_for_molecules</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">moleculetype</span><span class="p">,</span> <span class="n">L_box_size</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Used to allowed molecule to be treated or not depending on the moleculetype.mtparameter.dparameter.special_selection option. This function is very similar to the discretization_space one: it uses the space discretization procedure to return a &#39;bin&#39; for every molecule. If the bin has been authorized by the user, the molecule is treated. </span>
+<span class="sd">    </span>
+<span class="sd">    This function has been made to make the first part lighter to read. Make sure to update it if you implement any new moleculetype.mtparameter.dparameter.special_selection option. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">special_selection</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="n">L_allowed_molecule</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">special_selection</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">special_selection</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span> <span class="c1"># Plane like selection</span>
+                <span class="n">axis_of_interest_t</span> <span class="o">=</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">special_selection</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">nbr_bin_space_t</span> <span class="o">=</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">special_selection</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">:</span> 
+                    <span class="n">discretization_z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="s1">&#39;mean_position&#39;</span><span class="p">)[</span><span class="n">axis_of_interest_t</span><span class="p">]</span><span class="o">-</span><span class="mf">0.000001</span><span class="p">)</span><span class="o">/</span><span class="n">L_box_size</span><span class="p">[</span><span class="n">axis_of_interest_t</span><span class="p">]</span><span class="o">*</span><span class="n">nbr_bin_space_t</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">discretization_z</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">special_selection</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                        <span class="n">L_allowed_molecule</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kkk</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">special_selection</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span> <span class="c1">#Layer like selection</span>
+                <span class="n">nbr_layer_d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">special_selection</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">diff_nbr_layer</span> <span class="o">=</span> <span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span> <span class="o">-</span> <span class="n">nbr_layer_d</span>
+                <span class="k">for</span> <span class="n">kkk</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">:</span> 
+                    <span class="n">molecule_layer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="s1">&#39;layer&#39;</span><span class="p">)</span> 
+                    <span class="k">if</span> <span class="n">diff_nbr_layer</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">molecule_layer</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">diff_nbr_layer</span><span class="p">:</span>
+                            <span class="n">discretization_z</span> <span class="o">=</span> <span class="mi">0</span> 
+                            <span class="c1">#print(molecule_layer, nbr_layer_d, discretization_z)</span>
+                        <span class="k">elif</span> <span class="n">molecule_layer</span> <span class="o">&gt;</span> <span class="n">diff_nbr_layer</span><span class="p">:</span>
+                            <span class="n">discretization_z</span> <span class="o">=</span> <span class="n">molecule_layer</span> <span class="o">-</span> <span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span> <span class="o">-</span> <span class="n">nbr_layer_d</span><span class="p">)</span>
+                            <span class="c1">#print(molecule_layer, nbr_layer_d, discretization_z)</span>
+                        <span class="k">elif</span> <span class="n">molecule_layer</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">diff_nbr_layer</span><span class="p">:</span>
+                            <span class="n">discretization_z</span> <span class="o">=</span> <span class="n">molecule_layer</span> <span class="o">+</span> <span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span> <span class="o">-</span> <span class="n">nbr_layer_d</span><span class="p">)</span>
+                            <span class="c1">#print(molecule_layer, nbr_layer_d, discretization_z)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: this case should not happens!!! Code error.&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">discretization_z</span> <span class="o">=</span> <span class="n">molecule_layer</span>
+                    <span class="k">if</span> <span class="n">discretization_z</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">special_selection</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+                        <span class="c1">#print(molecule_layer, nbr_layer_d, discretization_z,  moleculetype.mtparameter.dparameter.special_selection[2])</span>
+                        <span class="n">L_allowed_molecule</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kkk</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: code error, this should not happens!&#39;</span><span class="p">)</span>            
+        <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">L_allowed_molecule</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">L_allowed_molecule</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">dparameter</span><span class="o">.</span><span class="n">L_allowed_molecule</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">)</span>  </div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<div class="viewcode-block" id="optparameter_selection_tool_molecule">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.optparameter_selection_tool_molecule">[docs]</a>
+<span class="k">def</span> <span class="nf">optparameter_selection_tool_molecule</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">moleculetype</span><span class="p">,</span> <span class="n">kkk</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Used to allow molecule to be treated or not depending on the moleculetype.mtparameter.optparameter.selection_tool option. This function is very quite different from the discretization_space one</span>
+<span class="sd">    </span>
+<span class="sd">    This function has been made to make the Prepare_run_QM (fake) diagram lighter to read. Make sure to update it if you implement any new moleculetype.mtparameter.optparameter.selection_tool option. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">should_this_calculation_be_done</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">selection_tool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">selection_tool</span> <span class="o">==</span> <span class="s1">&#39;traking_molecules&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kkk</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">L_molecule_tracked</span><span class="p">:</span>
+                <span class="n">should_this_calculation_be_done</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="k">return</span><span class="p">(</span><span class="n">should_this_calculation_be_done</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<div class="viewcode-block" id="optparameter_where_to_run_QM_molecule">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.optparameter_where_to_run_QM_molecule">[docs]</a>
+<span class="k">def</span> <span class="nf">optparameter_where_to_run_QM_molecule</span><span class="p">(</span><span class="n">GP</span><span class="p">,</span> <span class="n">moleculetype</span><span class="p">,</span> <span class="n">kkk</span><span class="p">,</span> <span class="n">L_box_size</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Used to allow molecule to be treated or not depending on the moleculetype.mtparameter.optparameter.where_to_run_QM option. This function is very similar to the discretization_space one: it uses the space discretization procedure to return a &#39;bin&#39; for every molecule. If the bin has been authorized by the user, the molecule is treated. </span>
+<span class="sd">    </span>
+<span class="sd">    This function has been made to make the Prepare_run_QM (fake) diagram lighter to read. Make sure to update it if you implement any new moleculetype.mtparameter.optparameter.where_to_run_QM option. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># does it matches the geometrical requirement?</span>
+    <span class="k">if</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">where_to_run_QM</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1"># All</span>
+        <span class="n">should_this_calculation_be_done</span> <span class="o">=</span> <span class="s1">&#39;TODO&#39;</span>
+    <span class="k">elif</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">where_to_run_QM</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span> <span class="c1"># Slice like selection</span>
+        <span class="n">axis_of_interest_t</span> <span class="o">=</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">where_to_run_QM</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nbr_bin_space_t</span> <span class="o">=</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">where_to_run_QM</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">discretization_z</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="s1">&#39;mean_position&#39;</span><span class="p">)[</span><span class="n">axis_of_interest_t</span><span class="p">]</span><span class="o">-</span><span class="mf">0.000001</span><span class="p">)</span><span class="o">/</span><span class="n">L_box_size</span><span class="p">[</span><span class="n">axis_of_interest_t</span><span class="p">]</span><span class="o">*</span><span class="n">nbr_bin_space_t</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">discretization_z</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">where_to_run_QM</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> 
+            <span class="n">should_this_calculation_be_done</span> <span class="o">=</span> <span class="s1">&#39;TODO&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">should_this_calculation_be_done</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">where_to_run_QM</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span> <span class="c1"># Layer like selection</span>
+        <span class="n">nbr_layer_d</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">where_to_run_QM</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">diff_nbr_layer</span> <span class="o">=</span> <span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span> <span class="o">-</span> <span class="n">nbr_layer_d</span>
+        <span class="n">molecule_layer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_molecule</span><span class="p">[</span><span class="n">kkk</span><span class="o">-</span><span class="n">moleculetype</span><span class="o">.</span><span class="n">L_key_mol</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="s1">&#39;layer&#39;</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="n">diff_nbr_layer</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">molecule_layer</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">diff_nbr_layer</span><span class="p">:</span>
+                <span class="n">discretization_z</span> <span class="o">=</span> <span class="mi">0</span> 
+            <span class="k">elif</span> <span class="n">molecule_layer</span> <span class="o">&gt;</span> <span class="n">diff_nbr_layer</span><span class="p">:</span>
+                <span class="n">discretization_z</span> <span class="o">=</span> <span class="n">molecule_layer</span> <span class="o">-</span> <span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span> <span class="o">-</span> <span class="n">nbr_layer_d</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">molecule_layer</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">diff_nbr_layer</span><span class="p">:</span>
+                <span class="n">discretization_z</span> <span class="o">=</span> <span class="n">molecule_layer</span> <span class="o">+</span> <span class="p">(</span><span class="n">GP</span><span class="o">.</span><span class="n">layer_nbr_max</span> <span class="o">-</span> <span class="n">nbr_layer_d</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: this case should not happens!!! Code error.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">discretization_z</span> <span class="o">=</span> <span class="n">molecule_layer</span>
+            
+        <span class="k">if</span> <span class="n">discretization_z</span> <span class="ow">in</span> <span class="n">moleculetype</span><span class="o">.</span><span class="n">mtparameter</span><span class="o">.</span><span class="n">optparameter</span><span class="o">.</span><span class="n">where_to_run_QM</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+            <span class="n">should_this_calculation_be_done</span> <span class="o">=</span> <span class="s1">&#39;TODO&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">should_this_calculation_be_done</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: code probleme. This case should not happen!!!&#39;</span><span class="p">)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">should_this_calculation_be_done</span><span class="p">)</span></div>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+        
+<div class="viewcode-block" id="selection_absolute_position">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.selection_absolute_position">[docs]</a>
+<span class="k">def</span> <span class="nf">selection_absolute_position</span><span class="p">(</span><span class="n">L_list_name_MT</span><span class="p">,</span> <span class="n">L_neighbourhood_names_number</span><span class="p">,</span> <span class="n">L_environment</span><span class="p">,</span> <span class="n">L_target_mean_pos</span><span class="p">,</span> <span class="n">qmparameter</span><span class="p">,</span> <span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    TODO</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">L_list_name_MT_new</span><span class="p">,</span> <span class="n">L_neighbourhood_names_number_new</span><span class="p">,</span> <span class="n">L_environment_new</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L_list_name_MT</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span> <span class="c1">#case where their are neighbourgs:</span>
+        <span class="n">trotter_neigh</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">K_MT_trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_list_name_MT</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">name_neigh_temp</span> <span class="o">=</span> <span class="n">L_list_name_MT</span><span class="p">[</span><span class="n">K_MT_trotter</span><span class="p">]</span>
+            <span class="n">L_list_name_MT_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name_neigh_temp</span><span class="p">)</span>
+            <span class="n">L_neighbourhood_names_number_new</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="k">for</span> <span class="n">k_neigh_trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_neighbourhood_names_number</span><span class="p">[</span><span class="n">K_MT_trotter</span><span class="p">]),</span> <span class="mi">1</span><span class="p">):</span> <span class="c1"># Goes over all the neighbourging molecules. </span>
+                <span class="n">num_neigh_temp</span> <span class="o">=</span> <span class="n">L_neighbourhood_names_number</span><span class="p">[</span><span class="n">K_MT_trotter</span><span class="p">][</span><span class="n">k_neigh_trotter</span><span class="p">]</span> <span class="c1"># number of the molecule wrt the global labelling.</span>
+                <span class="n">pos_neigh_temp</span> <span class="o">=</span> <span class="n">L_environment</span><span class="p">[</span><span class="n">trotter_neigh</span><span class="p">]</span> <span class="c1"># Position of the neighbourg molecule in the target molecule framework </span>
+<span class="w">                </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                # Find the name of the neigh molecule </span>
+<span class="sd">                for k_mol_rep in range(len(GP.L_mt_key_mt)): </span>
+<span class="sd">                    if GP.L_mt_key_mt[k_mol_rep][0] == name_neigh_temp</span>
+<span class="sd">                    molecule_type_rep = GP.L_mt_key_mt[k_mol_rep]</span>
+<span class="sd">                    if num_neigh_temp in molecule_type_rep[1]:</span>
+<span class="sd">                        name_neigh_temp = molecule_type_rep[0]</span>
+<span class="sd">                        molecule_type_neigh = L_moleculetype[k_mol_rep]</span>
+<span class="sd">                &#39;&#39;&#39;</span>            
+                <span class="n">neigh_molecule_type_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">toolbox</span><span class="o">.</span><span class="n">creat_name_for_MT_module_load</span><span class="p">(</span><span class="n">name_neigh_temp</span><span class="p">))</span>
+                <span class="n">pos_neigh_mean_temp</span> <span class="o">=</span> <span class="n">neigh_molecule_type_module</span><span class="o">.</span><span class="n">compute_mean_position</span><span class="p">(</span><span class="n">pos_neigh_temp</span><span class="p">)</span>
+                <span class="n">pos_neigh_mean_temp_absolut</span> <span class="o">=</span> <span class="n">pos_neigh_mean_temp</span> <span class="o">+</span> <span class="n">L_target_mean_pos</span>
+                
+                <span class="n">IS_allowed</span> <span class="o">=</span> <span class="kc">False</span> 
+                <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">more_selection_up_or_down</span> <span class="o">!=</span> <span class="s1">&#39;larger&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">pos_neigh_mean_temp_absolut</span><span class="p">[</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">more_selection_axis_of_interest</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">more_selection_distance_max_authorized</span><span class="p">:</span>
+                        <span class="n">IS_allowed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">elif</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">more_selection_up_or_down</span> <span class="o">!=</span> <span class="s1">&#39;smaller&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">pos_neigh_mean_temp_absolut</span><span class="p">[</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">more_selection_axis_of_interest</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">more_selection_distance_max_authorized</span><span class="p">:</span>
+                        <span class="n">IS_allowed</span> <span class="o">=</span> <span class="kc">True</span>
+                        
+                <span class="k">if</span> <span class="n">IS_allowed</span><span class="p">:</span> <span class="c1"># add the allowed neighbors </span>
+                    <span class="n">L_neighbourhood_names_number_new</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">num_neigh_temp</span><span class="p">)</span>
+                    <span class="n">L_environment_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pos_neigh_temp</span><span class="p">)</span>
+                
+                <span class="n">trotter_neigh</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_neighbourhood_names_number_new</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1">#no neighbours after this new selection:</span>
+                <span class="n">L_list_name_MT_new</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">L_neighbourhood_names_number_new</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_environment_new</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">L_list_name_MT_new</span><span class="p">,</span> <span class="n">L_neighbourhood_names_number_new</span><span class="p">,</span> <span class="n">L_environment_new</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+ 
+<div class="viewcode-block" id="selection_relative_position">
+<a class="viewcode-back" href="../../Frog.html#Frog.geometry_manager.selection_relative_position">[docs]</a>
+<span class="k">def</span> <span class="nf">selection_relative_position</span><span class="p">(</span><span class="n">L_list_name_MT</span><span class="p">,</span> <span class="n">L_neighbourhood_names_number</span><span class="p">,</span> <span class="n">L_environment</span><span class="p">,</span> <span class="n">qmparameter</span><span class="p">,</span> <span class="n">GP</span><span class="p">,</span> <span class="n">L_moleculetype</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    TODO</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">L_list_name_MT_new</span><span class="p">,</span> <span class="n">L_neighbourhood_names_number_new</span><span class="p">,</span> <span class="n">L_environment_new</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L_list_name_MT</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span> <span class="c1">#case where their are neighbourgs:</span>
+        <span class="n">trotter_neigh</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">K_MT_trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_list_name_MT</span><span class="p">),</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">name_neigh_temp</span> <span class="o">=</span> <span class="n">L_list_name_MT</span><span class="p">[</span><span class="n">K_MT_trotter</span><span class="p">]</span>
+            <span class="n">L_list_name_MT_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name_neigh_temp</span><span class="p">)</span>
+            <span class="n">L_neighbourhood_names_number_new</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="k">for</span> <span class="n">k_neigh_trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_neighbourhood_names_number</span><span class="p">[</span><span class="n">K_MT_trotter</span><span class="p">]),</span> <span class="mi">1</span><span class="p">):</span> <span class="c1"># Goes over all the neighbourging molecules. </span>
+                <span class="n">num_neigh_temp</span> <span class="o">=</span> <span class="n">L_neighbourhood_names_number</span><span class="p">[</span><span class="n">K_MT_trotter</span><span class="p">][</span><span class="n">k_neigh_trotter</span><span class="p">]</span> <span class="c1"># number of the molecule wrt the global labelling.</span>
+                <span class="n">pos_neigh_temp</span> <span class="o">=</span> <span class="n">L_environment</span><span class="p">[</span><span class="n">trotter_neigh</span><span class="p">]</span> <span class="c1"># Position of the neighbourg molecule in the target molecule framework </span>
+                            
+                <span class="n">neigh_molecule_type_module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">toolbox</span><span class="o">.</span><span class="n">creat_name_for_MT_module_load</span><span class="p">(</span><span class="n">name_neigh_temp</span><span class="p">))</span>
+                <span class="n">pos_neigh_mean_temp</span> <span class="o">=</span> <span class="n">neigh_molecule_type_module</span><span class="o">.</span><span class="n">compute_mean_position</span><span class="p">(</span><span class="n">pos_neigh_temp</span><span class="p">)</span>
+                
+                <span class="n">IS_allowed</span> <span class="o">=</span> <span class="kc">False</span> 
+                <span class="k">if</span> <span class="n">pos_neigh_mean_temp</span><span class="p">[</span><span class="n">qmparameter</span><span class="o">.</span><span class="n">more_selection_axis_of_interest</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">more_selection_distance_max_authorized</span><span class="p">:</span>
+                    <span class="n">IS_allowed</span> <span class="o">=</span> <span class="kc">True</span>
+                        
+                <span class="k">if</span> <span class="n">IS_allowed</span><span class="p">:</span> <span class="c1"># add the allowed neighbors </span>
+                    <span class="n">L_neighbourhood_names_number_new</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">num_neigh_temp</span><span class="p">)</span>
+                    <span class="n">L_environment_new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pos_neigh_temp</span><span class="p">)</span>
+                
+                <span class="n">trotter_neigh</span> <span class="o">+=</span> <span class="mi">1</span>
+                
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_neighbourhood_names_number_new</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="c1">#no neighbours after this new selection:</span>
+                <span class="n">L_list_name_MT_new</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">L_neighbourhood_names_number_new</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_environment_new</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="n">L_list_name_MT_new</span><span class="p">,</span> <span class="n">L_neighbourhood_names_number_new</span><span class="p">,</span> <span class="n">L_environment_new</span><span class="p">)</span>
+
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    #old implementation:</span>
+<span class="sd">    </span>
+<span class="sd">    L_environment_new = []</span>
+<span class="sd">    L_neighbourhood_cleaned_new = []</span>
+<span class="sd">    if not isinstance(L_environment, bool): #case where their are neighbourgs:</span>
+<span class="sd">        for k_neigh in range(0, len(L_environment), 1): # Goes over all the neighbourging molecules. </span>
+<span class="sd">            pos_neigh_temp = L_environment[k_neigh] # Position of the neighbourg molecule in the target molecule framework </span>
+<span class="sd">            num_neigh_temp = L_neighbourhood_cleaned[k_neigh] # number of the molecule wrt the global labelling. </span>
+<span class="sd">            # Find the name of the neigh molecule </span>
+<span class="sd">            for k_mol_rep in range(len(GP.L_mt_key_mt)): </span>
+<span class="sd">                molecule_type_rep = GP.L_mt_key_mt[k_mol_rep]</span>
+<span class="sd">                if num_neigh_temp in molecule_type_rep[1]:</span>
+<span class="sd">                    name_neigh_temp = molecule_type_rep[0]</span>
+<span class="sd">                    molecule_type_neigh = L_moleculetype[k_mol_rep]</span>
+<span class="sd">                            </span>
+<span class="sd">            neigh_molecule_type_module = importlib.import_module(name_neigh_temp)</span>
+<span class="sd">            pos_neigh_mean_temp = neigh_molecule_type_module.compute_mean_position(pos_neigh_temp)</span>
+<span class="sd">            </span>
+<span class="sd">            if pos_neigh_mean_temp[qmparameter.more_selection_axis_of_interest] &lt; qmparameter.more_selection_distance_max_authorized:</span>
+<span class="sd">                L_environment_new.append(pos_neigh_temp)</span>
+<span class="sd">                L_neighbourhood_cleaned_new.append(num_neigh_temp)</span>
+
+<span class="sd">    return(L_environment_new, L_neighbourhood_cleaned_new)   </span>
+<span class="sd">    &#39;&#39;&#39;</span></div>
+
+        
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

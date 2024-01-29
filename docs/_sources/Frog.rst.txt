@@ -1,0 +1,173 @@
+Frog package
+============
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   Frog.Molecules
+
+Submodules
+----------
+
+Frog.check module
+-----------------
+
+.. automodule:: Frog.check
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.class\_DiagramParameter module
+-----------------------------------
+
+.. automodule:: Frog.class_DiagramParameter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.class\_Diagrams module
+---------------------------
+
+.. automodule:: Frog.class_Diagrams
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.class\_Molecule module
+---------------------------
+
+.. automodule:: Frog.class_Molecule
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.class\_OpticalParameter module
+-----------------------------------
+
+.. automodule:: Frog.class_OpticalParameter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.class\_modules module
+--------------------------
+
+.. automodule:: Frog.class_modules
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.dalton\_manager\_module module
+-----------------------------------
+
+.. automodule:: Frog.dalton_manager_module
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.electric\_field\_module module
+-----------------------------------
+
+.. automodule:: Frog.electric_field_module
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.error\_messages module
+---------------------------
+
+.. automodule:: Frog.error_messages
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.first\_part module
+-----------------------
+
+.. automodule:: Frog.first_part
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.frog\_class module
+-----------------------
+
+.. automodule:: Frog.frog_class
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.frog\_data\_analysis module
+--------------------------------
+
+.. automodule:: Frog.frog_data_analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.geometry\_manager module
+-----------------------------
+
+.. automodule:: Frog.geometry_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.main module
+----------------
+
+.. automodule:: Frog.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.messages module
+--------------------
+
+.. automodule:: Frog.messages
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.second\_part module
+------------------------
+
+.. automodule:: Frog.second_part
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.third\_part module
+-----------------------
+
+.. automodule:: Frog.third_part
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.toolbox module
+-------------------
+
+.. automodule:: Frog.toolbox
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Frog.universe\_manager module
+-----------------------------
+
+.. automodule:: Frog.universe_manager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: Frog
+   :members:
+   :undoc-members:
+   :show-inheritance:

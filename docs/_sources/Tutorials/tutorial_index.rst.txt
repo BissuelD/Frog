@@ -1,0 +1,35 @@
+.. _tutorial_index_page:
+
+==========
+Tutorials 
+==========
+
+For beginer, we warlmy recommand to try the :ref:`get started tutorial<get_started_on_frog_tutorial_page>` with the help of the :ref:`overview page<overview_tutorial_page>`.
+
+The :ref:`space discretization tutorial<tuto_space_discretization_page>` and the :ref:`liquid mixture<tuto_mixture_structural_analysis>` one should help you understanding the *structural* analysis available and how to deal with complexe systems. 
+
+Then, the :ref:`optical analysis overview<tuto_optical_analysis_overview_page>` present the main goal of |frog|: perform QM/MM calculation to obtained the first hyperpolarizability in the liquid phase. 
+You can try the :ref:`more advanced QM/MM tutorial<tuto_quadrupole_long_page>` which presents how to refine the PE environment description, see :cite:p:`gle2022first` or :cite:p:`thesis2022` Chapter IV, and how to compute the first hyperpolarizability up to the quadrupole order. See :cite:p:`thesis2022` Chapter VI.
+
+A short :ref:`tutorial about the second hyperpolarizability<tuto_gamma_calculation_page>` is proposed for advanced users, see :cite:p:`gle2022first`.  
+
+Finally, we explain how to write by yourself a new MoleculeType, which is the backbone of |frog|, for any molecule not yet available. This tutorial may require some knowledge about the |frog| functionment explained throughout this wiki. 
+
+Every tutorial are in the directory *Tutorials* which you should find in the :frog_github:`GitHub repository<>`. Each sub-directory correspond to a tutorial. In every directory you will find input for |frog|, sometimes QM results, and also a jupyter notebook file (.ipynb) that can be used for the analysis. The trajectories needed for the tutorials are in *Tutorials/Traj*. 
+
+.. toctree::
+   :maxdepth: 2
+     
+   ./overview  
+   ./get_started
+   ./tuto_space_discretization
+   ./tuto_mixture_md
+   ./tuto_optical_analysis_overview
+   ./tuto_quadrupole_long
+   ./tuto_gamma_calculation
+   ./read_frog_data
+   ./what_should_contain_molecular_type_file
+
+.. bibliography::
+    :cited:
+

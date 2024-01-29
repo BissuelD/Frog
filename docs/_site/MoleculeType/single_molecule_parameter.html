@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>4.3. Single Molecule Parameter &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="4.4. Available MT" href="MolecularLibraryFile/available_mt.html" />
+    <link rel="prev" title="4.2. Molecule Type structure" href="mt_structure.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="single-molecule-parameter">
+<span id="single-molecule-parameter-page"></span><h1><span class="section-number">4.3. </span>Single Molecule Parameter<a class="headerlink" href="#single-molecule-parameter" title="Link to this heading">¶</a></h1>
+<p>This object is fully defined in the molecular library file attached to the  MT. More informations about how to construct these quantity using the molecular library file are provided HERE.</p>
+<p>It is important to be coherent between the topology of the MD and the single molecule parameter: since <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> does not read the atom type name from the topology, you may have a case where there is no error due to geometrical mismatch, but the atomic assignation are wrong. Therefore, take some time to open your MD and to check that the 2 description matches.</p>
+<p>If there is a difference of description, you can either redo your MD with the same description, or modify the molecular library file.</p>
+<p>The single molecule parameter object contains:</p>
+<dl class="py attribute" id="autodoc-smparameter-name-mt">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleMoleculeParameter.</span></span><span class="sig-name descname"><span class="pre">name_mt</span></span></dt>
+<dd><p><strong>Type</strong> [str]</p>
+<p>The name of the MT used to defined this ensemble. Should be the same as the libreary molecular file and the MT.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-smparameter-nbr-atom">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleMoleculeParameter.</span></span><span class="sig-name descname"><span class="pre">nbr_atom</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>The number of atom of this molecule type.</p>
+<p class="rubric">Example</p>
+<p>For water, if the MD provides the atom position set nbr_atom to 3.</p>
+<p>If the MD provides also the position of the dipole, you should set as many ‘atom’ as position stored in the MD trajectory – so maybe 4.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-smparameter-l-type-atom">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleMoleculeParameter.</span></span><span class="sig-name descname"><span class="pre">L_type_atom</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>The list of atom. The size of L_type_atom should be equal to nbr_atom.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The list can be completly different from the labelling of the MD. This labelling is used for user-friendly prints only.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The name can de different from the one of qm_target_description and electrostatic_description.</p>
+</div>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-smparameter-size-typical-molecule">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleMoleculeParameter.</span></span><span class="sig-name descname"><span class="pre">size_typical_molecule</span></span></dt>
+<dd><p><strong>Type</strong> [float]</p>
+<p>A typical value of the size of the molecule. The idea is to help Frog to reconstruct the geometry of the molecule is PBC condition are applied. If also help Frog to find neighborgs.</p>
+<p class="rubric">Example</p>
+<p>For water, you can set size_typical_molecule to 2 Angstrom.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-smparameter-max-distance-atom">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleMoleculeParameter.</span></span><span class="sig-name descname"><span class="pre">max_distance_atom</span></span></dt>
+<dd><p><strong>Type</strong> [list]</p>
+<p>Defines maximal distance for every atom with respect to a ‘’reference’’ atom. The aim is to help Frog to deal with ‘cutted’ molecule due to PBC condition.</p>
+<p>This value should be a list: [The ‘’reference’’ atom, Value for atom 0, Value for atom 1, …].</p>
+<p>Where “Value for atom 0” should be ‘Ref’ or the maximal distance allowed from the ‘’reference’’ atom. Note that the atom numerotation starts from 0. If one atom of a molecular trajectory does not respect this maximal distance from the reference atom, Frog tries to move it using the box size of the MD simulation at the given time step. Thus, it is important to be strict enough with respect to these distance – being too restrictive will lead to crashes (with error message) if Frog fails to respect these conditions.</p>
+<p class="rubric">Example</p>
+<p>For water, L_type_atom = [O, H, H], one can set:</p>
+<p>max_distance_atom = [0, ‘Ref’, 2, 2]</p>
+<p>The Oxygen atom is the reference atom, and the Hydrogens should not be more away from it then 2 Angstrom.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<dl class="py attribute" id="autodoc-smparameter-d-molecular-orientation">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">SingleMoleculeParameter.</span></span><span class="sig-name descname"><span class="pre">d_molecular_orientation</span></span></dt>
+<dd><p><strong>Type</strong> [int]</p>
+<p>The number of number needed to defined the ‘orientation’ of the molecule in the laboratoy frame. You can go from 1 to N.</p>
+<p class="rubric">Example</p>
+<p>For the water molecule, you can define the orientation using 3 ‘angles’.</p>
+<p>For more complexe molecule, you can use many more ‘angles’.</p>
+</dd></dl>
+
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="mt_index.html">4. Molecule Type</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="how_to_create_mt.html">4.1. How to create MT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mt_structure.html">4.2. Molecule Type structure</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">4.3. Single Molecule Parameter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MolecularLibraryFile/available_mt.html">4.4. Available MT</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/MoleculeType/single_molecule_parameter.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

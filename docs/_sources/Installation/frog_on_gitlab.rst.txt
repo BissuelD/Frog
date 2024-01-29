@@ -1,0 +1,115 @@
+.. _frog_on_gitlab_page:
+
+Use of Gitlab on Cameleon as a beta tester
+==========================================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+Before eveything, one have to ask for an account to Cameleon server at
+ILM and ask to Guillaum to be invited to Frog project. Moreover, do not
+forget to install git on your computer to use shell command !
+
+First connexion to the project on the server:
+---------------------------------------------
+
+::
+
+    $ git clone https://cameleon.univ-lyon1.fr/glebreton/frog.git
+
+
+-  need to enter you login and password to access cameleon server.
+
+-  create a copy of the project on your computer (in the current path)
+
+::
+
+    $ cd frog
+
+
+-  move to the file extracted from cameleon to have access to git
+   functions
+
+::
+    
+    $ git checkout beta\_tester
+
+
+
+-  move on the *beta\_tester* branch.
+
+   Note : it is recommanded to work on this branch only. *Dev* branch is
+   for Guillaume only with his last version of the code and *Master*
+   branch will contain the version of the code that we will reveal when
+   we will submit an article for exemple.
+
+Modification on files on the server
+-----------------------------------
+
+Take care to be in the local git file before using the following code
+lines..
+
+::
+    
+    $ git pull
+
+
+-  Download the last version of the project on the server
+
+-  Necessary to do this step before any modification to avoid version
+   conflicts !
+
+::
+
+    $ git commit -a-m 'mon commentaire'
+
+
+
+-  register the modifications made on the computer with a version
+   history. The label *mon commentaire* allow to explain the main
+   modification made to facilitate the tracking of changes.
+   
+
+::
+
+    $ git push
+
+
+-  upload the correction on the on-line server.
+
+Creation of a file and uploading it on the server
+-------------------------------------------------
+
+You have to create your file separately and to put it manually on the
+wanted repository. Then, the procedure is quite similar to the
+modification of file, you just have to index your file.
+
+::
+    $ git pull
+    $ git add path/file
+
+-  Begin to indexing the file. This step is necessary before uploading
+   it on the server
+
+-  You can check if your file is indexed with $git status -s : if it is
+   note, you wil have *??* in front of your file name.
+
+::
+
+    $ git commit -a-m 'mon commentaire'
+
+
+::
+
+    $ git push
+
+
+Miscellaneous
+-------------
+
+::
+    
+    $ git status -s
+
+-  short information about the status of your files

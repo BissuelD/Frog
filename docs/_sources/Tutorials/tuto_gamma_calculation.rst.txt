@@ -1,0 +1,110 @@
+.. _tuto_gamma_calculation_page:
+
+==================
+Gamma calculation
+==================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+
+Goal and Perquisite: 
+====================
+
+
+In this advanced tutorial we will see how to compute the secopnd hyperpolarizability using a mixed Finite Field and Response scheme as proposed in this article. REF    
+This tutorial do not go into much details and presents only the procedure.
+    
+You should be familiar to the standard command presented in the :ref:`get started tutorial<get_started_on_frog_tutorial_page>` and the one presented in the :ref:`optical property overview<tuto_optical_analysis_overview_page>`. 
+
+The file needed to run this tutorial are located at: *Frog/Doc/Tutorial_files/Traj/Tutorial_files/Traj/Tuto_get_strated* for the MD trajectory and *Frog/Doc/Tutorial_files/Gamma_calculation* for all the other documents.
+
+
+Overview: 
+===========
+
+The goal is to compute the frequency dependent second hyperpolarizability which correct the first hyperpolarizability from an external weak and homogenous electrtostatic field: :math:`\gamma^{(3)} (2 \omega, \omega, \omega, 0)` noted :math:`\gamma` later on 
+
+.. math::
+    \beta^{(2)}(2 \omega, \omega, \omega)[\bold{e}] = \beta^{(2)}(2 \omega, \omega, \omega) +  \gamma^{(3)} (2 \omega, \omega, \omega, 0) \cdot \bold{e}
+    
+
+Where :math:`\bold{e}` is the external electrostatic field, :math:`\beta^{(2)}(2 \omega, \omega, \omega)[\bold{e}]` the first hyperpolarizability in the presence of this external field and :math:`\beta^{(2)}(2 \omega, \omega, \omega)` without. 
+
+.. note:: Here the optical frequency :math:`\omega` can be none-zero. 
+
+To compute this corrective term, we will used a Finite Field (FF) approach.
+Several :math:`\beta^{(2)}(2 \omega, \omega, \omega)[\bold{e}]` is computed for increasing field in all the direction. 
+Then, a linear fit is performed to obtained :math:`\gamma`. 
+
+
+One Parameter file: 
+====================
+
+The key to achieve this is to compute the first hyperpolarizability (in the vacuum or in an electrostatic environement) with an extra homogenous electrostatic field. 
+To do so, use the attribute :ref:`qmparameter.static_electric_field<autodoc_qmparameter_static_electric_field>` and :ref:`qmparameter.static_electric_field_direction<autodoc_qmparameter_static_electric_field_direction>`: :: 
+
+    qmparameter.static_electric_field = [0, 0, 0.001] # in atomic units
+    qmparameter.static_electric_field_direction = 'Laboratory' #Laboratory or Molecular
+    
+This will add an sptialy-homogeneous electrostatic field in the QM box along the laboratory direction with value (0, 0, 0.001) in atomic units.
+|frog| will creat the usual |dalton| file with this extra electrostatic field. 
+Then, you should perform the QM calculation where the ground state is obtimized with this field and the first hyperpolarizability is extracted. 
+
+.. note:: Adding an extra electrostatic field is compatible with the PE scheme available in |frog|, including the long-range decomposition. 
+
+Appart from this parameter, no changes should be made in the parameter file. 
+
+Procedure: 
+============
+
+For a single parameter file (*i.e.* value of extra electrostatic field), you should not experience any differences compare to other |frog| run. 
+However, to get the second hyperpolarizability, several run should be performed. 
+To do so, you can use the scripts: *to_creat_gamma.sh*. 
+It will generated automatically several directory for several extra electrostatic field. 
+In each directory should should run |frog| and perform the QM calculation. 
+
+.. note:: You can further automatize this procedure by sending the |frog| run automatically with a bit of bash writting, for instance see *to_creat_gamma.sh*. However keep in mind to test the procedure for a single extra field before! 
+
+Finally, you can load all of the results and perform linear fit to obtained the second hyperpolarizability. 
+An example is given as jupyter notebook. Note that this file can not be tested if you have not performed the QM calculations, see *example_gamma_post_prod.ipynb*. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

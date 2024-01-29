@@ -1,0 +1,87 @@
+.. _installation_page:
+
+#############
+Installation
+#############
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+    
+
+Get the code from Git
+----------------------
+
+To get the code from the Git server, see :ref:`this page.<frog_on_gitlab_page>`
+You can also click here for the last version of the code on :frog_zenodo:`Zenodo<>`. 
+ 
+
+Installation using pip
+-----------------------
+
+.. _installation_using_pip:
+
+|frog| is a Python module which can be installed using pip once the *Frog-version.tar.gz* file is downloaded. For that, use: ::
+
+    $ pip install dist/Frog-1.0.0.tar.gz
+
+or similarly: ::
+    
+    $ python -m pip install dist/Frog-1.0.0.tar.gz
+
+Local python environment
+------------------------
+If you want to work with a local package installation, with a specific python version for example, you can use python environment. For instance, to create a python environment with a specific version at the localization 'vfrog', use: ::
+
+    $ virtualenv --python=python3.6.1 --system-site-packages vfrog
+
+Then, to use this python version, write: ::
+
+    $ source vfrog/bin/activate
+
+You can check that you are within the correct environment using 'which': ::
+    
+    $ which pip
+    $ which python
+    
+Then, install |frog| using this version of pip: ::
+
+    $ pip install dist/Frog-1.0.0.tar.gz
+
+Finally, when you want to run |frog|, you shall initialize this version of python with 'source': ::
+    
+    $ source vfrog/bin/activate
+    
+Then, you can run |frog| from the shell: :: 
+
+    $ Frog my_parameter.py
+
+For  environment creation, see also https://docs.conda.io/projects/conda/en/latest/user-gui ?TODO?
+
+Check the installation
+----------------------
+
+You can call |frog| within a python environment using the classical import function: ::
+    
+    import Frog
+
+And modules: ::
+
+        import Frog.main as main
+
+Note that the function Frog.main.frog_run is the main gate to run |frog|. See the :ref:`get started tutorial<get_started_on_frog_tutorial_page>`.
+
+.. note:: This has been tested on Debian. May work on iOs, probably not work on Windows?
+
+You can run |frog| with the parameter file *my_parameter.py* using in the shell: ::
+    
+    $ Frog my_parameter.py
+
+If you want more information about the numerical requirement, see :ref:`this page.<numerical_notes_and_requirements_page>`
+
+You can also run Frog using python: ::
+
+    $ python -m Frog my_parameter.py  
+
+
+

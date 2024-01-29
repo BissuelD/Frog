@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Frog.check &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/_static/css/s4defs-roles.css" />
+    <script src="../../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for Frog.check</h1><div class="highlight"><pre>
+<span></span><span class="c1">##############################################################################</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    FROG: FROm molecular dynamics to second harmonic Generation             #</span>
+<span class="c1">#    Copyright (C) 2024                                                      #</span>
+<span class="c1">#    Author list                                                             #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    Guillaume Le Breton                                                     #</span>
+<span class="c1">#    Oriane Bonhomme                                                         #</span>
+<span class="c1">#    Emmanuel Benichou                                                       #</span>
+<span class="c1">#    Claire Loison                                                           #</span>
+<span class="c1">#                                                                            # </span>
+<span class="c1">#    This program is free software: you can redistribute it and/or modify    #</span>
+<span class="c1">#    it under the terms of the GNU General Public License as published by    #</span>
+<span class="c1">#    the Free Software Foundation, either version 3 of the License, or       #</span>
+<span class="c1">#    (at your option) any later version.                                     #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    This program is distributed in the hope that it will be useful,         #</span>
+<span class="c1">#    but WITHOUT ANY WARRANTY; without even the implied warranty of          #</span>
+<span class="c1">#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           #</span>
+<span class="c1">#    GNU General Public License for more details.                            #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">#    You should have received a copy of the GNU General Public License       # </span>
+<span class="c1">#    along with this program.  If not, see &lt;https://www.gnu.org/licenses/    #</span>
+<span class="c1">#                                                                            #</span>
+<span class="c1">##############################################################################</span>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="is_it_python_file">
+<a class="viewcode-back" href="../../Frog.html#Frog.check.is_it_python_file">[docs]</a>
+<span class="k">def</span> <span class="nf">is_it_python_file</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Verification if the file has a .py format.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">file</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span> <span class="o">!=</span> <span class="s1">&#39;.py&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;The file has not an &quot;.py&quot; format. Please use it.&#39;</span><span class="p">)</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="check_file_write_read">
+<a class="viewcode-back" href="../../Frog.html#Frog.check.check_file_write_read">[docs]</a>
+<span class="k">def</span> <span class="nf">check_file_write_read</span><span class="p">(</span><span class="n">name_file</span><span class="p">,</span> <span class="n">message_to_write</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function write on the file &#39;name_file&#39; the message &#39;message_to_write&#39;. Then, it tries to read it and check that the message in retrived. This function have been tested for simple messages (no &#39;\\n&#39; !!). This function goes with GlobalParameter.check_GP and help checking the GlobalParameter value after reading the input file. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_file</span> <span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">the_file</span><span class="p">:</span>
+        <span class="n">the_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message_to_write</span><span class="p">)</span>
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">name_file</span> <span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">the_file</span><span class="p">:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">the_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">message_to_write</span><span class="p">),</span> <span class="s1">&#39;The writing or reading of the file: &#39;</span> <span class="o">+</span> <span class="n">name_file</span> <span class="o">+</span> <span class="s1">&#39; has a problem, the software stops here. You should find in this file the message: &#39;</span> <span class="o">+</span> <span class="n">message_to_write</span> <span class="o">+</span> <span class="s1">&#39;which I have not find while the file exist.&#39;</span></div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="check_GP_env_authorised_pbc_condition">
+<a class="viewcode-back" href="../../Frog.html#Frog.check.check_GP_env_authorised_pbc_condition">[docs]</a>
+<span class="k">def</span> <span class="nf">check_GP_env_authorised_pbc_condition</span><span class="p">(</span><span class="n">GP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Check what PBC direction have been authorised for building the environment </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">axis_authorised</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">GP</span><span class="o">.</span><span class="n">env_authorised_pbc_condition</span><span class="p">:</span>
+        <span class="n">axis_authorised</span> <span class="o">=</span> <span class="n">axis_authorised</span> <span class="o">+</span> <span class="s1">&#39;x, &#39;</span>
+    <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">GP</span><span class="o">.</span><span class="n">env_authorised_pbc_condition</span><span class="p">:</span>
+        <span class="n">axis_authorised</span> <span class="o">=</span> <span class="n">axis_authorised</span> <span class="o">+</span> <span class="s1">&#39;y, &#39;</span>
+    <span class="k">if</span> <span class="mi">2</span> <span class="ow">in</span> <span class="n">GP</span><span class="o">.</span><span class="n">env_authorised_pbc_condition</span><span class="p">:</span>   
+        <span class="n">axis_authorised</span> <span class="o">=</span> <span class="n">axis_authorised</span> <span class="o">+</span> <span class="s1">&#39;z, &#39;</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">axis_authorised</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No PBC direction have been authorised in order to increase the box. Note that this can lead to strange environment if the maximal distance for building the environment is close to/larger than the simulation box size. We strongly recommand to check the environment built. </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">GP</span><span class="o">.</span><span class="n">env_authorised_pbc_condition</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">axis_authorised</span> <span class="o">=</span> <span class="n">axis_authorised</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The PBC direction &#39;</span> <span class="o">+</span> <span class="n">axis_authorised</span> <span class="o">+</span> <span class="s1">&#39; will be used in order to increase the environment further than the initial box size if asked. </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> </div>
+
+
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+
+<div class="viewcode-block" id="check_name_diagram_uniqueness">
+<a class="viewcode-back" href="../../Frog.html#Frog.check.check_name_diagram_uniqueness">[docs]</a>
+<span class="k">def</span> <span class="nf">check_name_diagram_uniqueness</span><span class="p">(</span><span class="n">L_diagram</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Check if the name of the diagram are unique. Otherwise we can have big troubles later on</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">L_name_diagram</span> <span class="o">=</span> <span class="p">[</span><span class="n">sdparameter</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">sdparameter</span> <span class="ow">in</span> <span class="n">L_diagram</span><span class="p">]</span>
+    <span class="n">N_analysis</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_name_diagram</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">L_name_diagram</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">trotter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_analysis</span><span class="p">):</span>
+        <span class="n">name_diagram</span> <span class="o">=</span> <span class="n">L_name_diagram</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">name_diagram</span> <span class="ow">in</span> <span class="n">L_name_diagram</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: at least 2 diagram with the exact same name have been required for this MT. Please do not do that! If you have defined only once the diagram during the diagram definition in the input file, it means that there is an error in the code. Please contact us. Name of the problematic diagram:&#39;</span><span class="p">,</span> <span class="n">name_diagram</span><span class="p">)</span></div>
+
+            
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+<span class="c1">#################################################################################################################################</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Frog.html">7. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

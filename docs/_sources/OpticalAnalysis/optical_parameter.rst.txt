@@ -1,0 +1,274 @@
+.. _optical_parameter_page:
+
+==========================
+Optical Parameter
+==========================
+
+.. contents:: Table of Contents
+    :depth: 3
+    :local:
+
+
+In this page we will present in more details what can be done in |frog| regarding optical properties calculation. Some of the informations are shared with other pages, so first let's see a global overview of what can be done and how.
+
+What can I do? 
+===============
+
+First of all, here are the optical property available:
+
+
+.. csv-table:: Optical property available 
+        :header: Name, user-accessibility, CPU-demanding
+        :widths: 15, 15, 15
+        
+        :ref:`Dipole moment<optical_property_dipole_quadrupole_init>`, NYA, NYA
+        :ref:`Quadrupole moment<optical_property_polarizability_init>`, NYA, NYA
+        :ref:`Polarizability<optical_property_dipole_quadrupole_init>`, easy, few-large 
+        :ref:`First Hyperpolarizability<optical_property_hyperpolarizability_init>`, easy, few-very large 
+        :ref:`Second Hyperpolarizability<optical_property_second_hyperpolarizability_init>`, medium, large-very large 
+        
+For all these property, you can compute them at the QM level using |dalton| or used fixed value. At lease, two reasons can lead you to compute QM-level optical properties:
+
+    + Environment effects: 
+
+In condensed phase, the environment surronding a molecule will creat an electrostatic field. This electrostatic field impacts the molecule electronic degree of freedom, and therefore its optical responses. You also may have electronic delocalisation accross molecules. In these cases, the optical response of each molecule can be unique: they depends on there environment.
+    
+    + Molecule geometrical deformation: 
+
+For large enough molecule, the geometrical conformation can affect the molecular optical response. Therefore, even in vacuum, these optical properties can be distributions.
+   
+Thus, all of these property can be computed at the QM level using several environment description. All these possibilities are presented in the :ref:`electrostatic emmbeding scheme page<electrostatic_embedding_page>`.  
+
+.. csv-table:: Environment description 
+        :header: Name, description, user-accessibility, CPU-demanding
+        :widths: 15, 30, 15, 15
+        
+        :ref:`Vacuum<electrostatic_embedding_vacuum_scheme>`, No effect of the neighborgs, easy, few-medium 
+        :ref:`PE<electrostatic_embedding_PE_scheme>`, Neigborgs effect only threw electrostatic field, medium-hard, medium-large
+        :ref:`PE+QM<electrostatic_embedding_PE_QM_scheme>`,  Neigborgs effect can be by electrostatic field or QM, hard, large-very large 
+        
+Regarding the QM calculation by itself, it is presented in :ref:`this page<qm_box_page>`. 
+
+For all these property, you can record them in the molecular or laboratory frame. Using the molecular frame, you have the effect of the neigborhood and the geometrical deformation that can be study. Within the laboratory frame, you have also these effect, plus the orientation of the molecule in the laboratory frame. The laboratory frame is closer to the experimental observation while the molecular frame is more easy to understand. To go from one frame to another, the 'molecular rotational matrix' is used, see :ref:`here<from_mol_to_lab_page>`. 
+
+In the following Table is recorded the name used in |frog| for the optical property in the molecular and laboratory frame:
+
+.. csv-table:: Optical property names 
+        :header: Name, Molecular frame, Laboratory frame
+        :widths: 15, 15, 15
+        
+        "Dipole moment", NYA, NYA
+        "Quadrupole moment", NYA, NYA
+        "Polarizability", alpha, iota 
+        "First Hyperpolarizability", beta, chi 
+        "Second Hyperpolarizability", gamma, Gamma 
+
+
+Now, let's see how to required optical calculation and the way it is computed.
+
+..  _optical_property_calculation_subpage:
+
+Optical Property Calculation 
+============================
+
+---------------
+Generalities
+---------------
+
+For the polarizability or the hyperpolarizability, you can compute them at the QM level or not using :ref:`alpha_calculation_style<autodoc_opticalparameter_alpha_calculation_style>` or :ref:`beta_calculation_style<autodoc_opticalparameter_beta_calculation_style>`. 
+
+    + If the polarizability or hyperpolarizability is fixed for all the molecule of an MT, the attribute :ref:`L_alpha_ref<autodoc_opticalparameter_L_alpha_ref>` or :ref:`L_beta_ref<autodoc_opticalparameter_L_beta_ref>` should be set to give |frog| the reference value in the molecular frame.
+    + If you compute them at the QM level, the attribute :ref:`qmparameter<autodoc_opticalparameter_qmparameter>` should be also intizialised to controle how to perform the |dalton| runs. For more informations about the qmparameter, see the :ref:`electrostatic emmbeding scheme page<electrostatic_embedding_page>` and :ref:`the page about the QM box properties<qm_box_page>`. 
+    + If you are using electrostatic emmebedded scheme in the QM calculation, you may wants to track the electrostatic field generated by the neighborhood: see :ref:`this page<electrostatic_embedding_feedback>`
+    + If you need to compute QM calculations, some attribute of the GP have to be set, see :ref:`this page for general overview<qm_management_page>` and :ref:`this one for details<gp_qm_management_page>` 
+     
+
+..  _optical_property_dipole_quadrupole_init:
+
+---------------------
+Dipole and Quadrupole
+---------------------
+
+Today, the dipola and quadrupole are accessible within the QM calculation results. No automatic reading is available in Frog. 
+
+
+..  _optical_property_polarizability_init:
+
+---------------------
+Polarizability
+---------------------
+
+To get the polarizability, first you have to defined at least one diagram :ref:`alpha<autodoc_diagram_alpha>` or :ref:`iota<autodoc_diagram_iota>` for the molecular or laboratory frame respectively. Then, you have to set the Optical Parameter attributes :ref:`alpha_calculation_style<autodoc_opticalparameter_alpha_calculation_style>` using the `read_optic_properties_input` function to define how the polarizability should be computed. 
+
+If you want to compute the polarizability at the QM level, set OpticalProperty.alpha_calculation_style to 'QM'. In this case, the attribute :ref:`qmparameter<autodoc_opticalparameter_qmparameter>` should also be provided along with many GP parameters. The polarizability are computed using the frequency-dependent response theory within |dalton|. You may defined several frequency using the attribute REF.  
+
+
+.. todo:: mettre des examples? 
+
+
+..  _optical_property_hyperpolarizability_init:
+
+--------------------------
+First-Hyperpolarizability
+--------------------------
+
+
+To get the polarizability, first you have to defined at least one diagram :ref:`beta<autodoc_diagram_beta>` or :ref:`chi<autodoc_diagram_chi>` for the molecular or laboratory frame respectively. Then, you have to set the Optical Parameter attributes :ref:`beta_calculation_style<autodoc_opticalparameter_beta_calculation_style>` using the `read_optic_properties_input` function to define how the polarizability should be computed. 
+
+If you want to compute the hyperpolarizability at the QM level, set OpticalProperty.beta_calculation_style to 'QM'. In this case, the attribute :ref:`qmparameter<autodoc_opticalparameter_qmparameter>` should also be provided along with many GP parameters. The hyperpolarizability are computed using the frequency-dependent response theory within |dalton|. You may defined several frequency using the attribute REF. 
+
+.. todo:: mettre des examples? 
+
+..  _optical_property_second_hyperpolarizability_init:
+
+---------------------------
+Second-Hyperpolarizability
+---------------------------
+
+Today, the second-hyperpolarizability within an electrostatic emmebbeding is not computed by |dalton|. Therefore, to get its value you have to do it using a finite field methode. In short, several QM calculation are performed for the same molecule with varying electrostatic field shone in top of the one generated by the environment. The first hyperpolarizability is recorded for every electrostatic field: the second-hyperpolarizability is defined to be the slope:
+
+.. math::
+    
+    \gamma (2 \omega; \omega, \omega, 0)_{ijkl} = \frac{ \delta \beta (2 \omega; \omega, \omega)_{ijk}}{\delta \bold{E}_l}
+
+
+A tutorial to compute it is available HERE. 
+
+If you want to compute the second hyperpolarizability in the vacuum phase, it is possible in |dalton|. However, since |frog| has been specifically designed to deal with electrostatic emmebedded QM calculation, no automatic procedure is available to deal with this case. However, you can:
+    
+    1) Initialized all the QM calculation in the vacuum phase using |frog| and creat the submission file.
+    
+    2) Change the dalton.dal file for the molecule you want to have the second-hyperpolarizability -- see the well-written |dalton| documentation.
+    
+    3) Run the QM calculation, and extract by yourself the second-hyperpolarizability. 
+    
+.. note:: If you really want to have the second-hyperpolarizability in the vaccum phase automatically, please contact us.
+
+
+
+..  _optical_property_which_molecule_should_be_qm_treated_subpage:
+
+Which molecule should be QM-treated?
+=====================================
+
+Finaly, an important aspect to the calculation of optical property at the QM level is the numerical cost. Depending on the system you are dealing with, you may compute the response of only some molecules according to several parameters:
+
+    + The Molecule Type
+
+This is already done by default since you define for each type of molecule what analysis should be perform!
+
+    + The Molecule position
+
+Historically, we have in mind 2D interfaces like liquid-gas. In this case, the main interest is given to the molecule close to the interface. Therefore, to compute at the QM level the response of molecule only if they respect some geometrical-based conditions, use the :ref:`OpticalParameter.where_to_run_QM<autodoc_opticalparameter_where_to_run_QM>` attribute. 
+
+    + The molecule number
+
+If you want to sample the optical property of only few molecule in time, you may want to use the :ref:`OpticalParameter.selection_tool<autodoc_opticalparameter_selection_tool>` attribute. This attribute allows you to select only some molecules to reduce further the number of QM calculations. 
+
+.. note:: All of these selection can be made together. Only the molecules respecting all the condtions will undergo a QM calculation. 
+
+
+
+In the following is presented in more details the Optical Parameter object. You will find also more details about the possible attribute and options. 
+
+Optical Parameter object:
+==========================
+
+
+---------------
+Initialization
+---------------
+
+The Optical Parameter object is defined in the :ref:`MoleculeTypeParameter<autodoc_mt_mtparameter>` object of an MoleculeType: myMT.mtparameter.optparameter. It contains the parameters needed to deal with optical analysis. These parameters are initialized using the MT function: 
+
+
+.. autofunction:: Frog.class_Molecule.MoleculeType.read_optic_properties_input
+   :noindex:
+
+
+All the attribute of this object are the same for all the time steps, except 2 attributes:
+
+    + OpticalParameter.L_QM_todo: contains the QM calculation to perform for each time step
+    + OpticalParameter.qmparameter: some attributes may change depending on the emmebbeding style used. 
+
+
+Now here is the list of all the attributes available in the Optical Parameter. Note that some of them are not user defined -- meaning that they depend on the option you have chosen, but is not directly set by the MoleculeType.read_optic_properties_input function. 
+
+------------
+Attributes
+------------
+
+
+
+.. _autodoc_opticalparameter_alpha_calculation_style:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.alpha_calculation_style
+    :noindex:
+
+| 
+
+.. _autodoc_opticalparameter_L_alpha_ref:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.L_alpha_ref
+    :noindex:
+
+| 
+
+.. _autodoc_opticalparameter_beta_calculation_style:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.beta_calculation_style
+    :noindex:
+
+| 
+
+.. _autodoc_opticalparameter_L_beta_ref:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.L_beta_ref
+    :noindex:
+
+| 
+
+.. _autodoc_opticalparameter_where_to_run_QM:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.where_to_run_QM
+    :noindex:
+
+| 
+
+.. _autodoc_opticalparameter_selection_tool:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.selection_tool
+    :noindex:
+
+| 
+
+.. _autodoc_opticalparameter_L_molecule_tracked:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.L_molecule_tracked
+    :noindex:
+
+|
+
+.. _autodoc_opticalparameter_qmparameter:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.qmparameter
+    :noindex:
+
+|
+
+.. _autodoc_opticalparameter_IS_run_QM:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.IS_run_QM
+    :noindex:
+
+| 
+
+.. _autodoc_opticalparameter_L_QM_todo:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.L_QM_todo
+    :noindex:
+
+| 
+
+.. _autodoc_opticalparameter_pe_level:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.pe_level
+    :noindex:
+
+|
+
+.. _autodoc_opticalparameter_compute_electric_field_PE:
+.. autoattribute:: Frog.class_OpticalParameter.OpticalParameter.compute_electric_field_PE
+    :noindex:
+
+|
+    

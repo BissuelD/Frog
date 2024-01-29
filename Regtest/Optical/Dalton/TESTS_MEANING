@@ -1,0 +1,16 @@
+# test_vdalton_before_2020.py
+Test: dalton version < 2020, total charge, max scf cycle 
+
+# test_vdalton_after_2020.py
+Test: dalton version > 2020, total charge, max scf cycle
+
+# test_static_electric_field_mol
+Test: statis electric field expressed in the molecular frame
+
+# test_static_electric_field_lab
+Test: statis electric field expressed in the laboratory frame
+
+# test_dalton_run_option
+Test: the dalton option for the QM run. 
+
+#END 

@@ -1,0 +1,32 @@
+.. _MLF_Water_TIP4P2005_O_page:
+
+    
+    
+====================
+Water: TIP4P2005 - O
+====================
+
+To call this Molecule Type description in |frog|, use: ::
+
+    myMT = frog_class.MoleculeType(GP, 'Water_TIP4P2005_O', where_are_molecules)
+
+.. note:: If you want to do the same little variation on a Molecule Type description (like changing the 'mean position' localisation or 'molecular orientation', just copy past the original library file, change the name an the function desired. You have to recompile the code in order to update the path so that |frog| can find where is located the new file. See :ref:`here<how_to_create_mt_page>` for more details. 
+
+Description
+------------
+
+The mean position of the molecule is localised in the Oxygen position. 
+
+
+Test performed
+--------------
+
+
+
+Module
+------
+.. automodule:: Frog.Molecules.Water_TIP4P2005
+    :noindex:
+    :members:
+    :undoc-members:
+    :show-inheritance:

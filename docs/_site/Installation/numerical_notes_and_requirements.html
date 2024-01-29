@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>1.3. Numerical notes and requirements &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2. Tutorials" href="../Tutorials/tutorial_index.html" />
+    <link rel="prev" title="1.2. Use of Gitlab on Cameleon as a beta tester" href="frog_on_gitlab.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="numerical-notes-and-requirements">
+<span id="numerical-notes-and-requirements-page"></span><h1><span class="section-number">1.3. </span>Numerical notes and requirements<a class="headerlink" href="#numerical-notes-and-requirements" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#os-compatibility" id="id3">OS compatibility</a></p></li>
+<li><p><a class="reference internal" href="#python-packages-and-version" id="id4">Python packages and version</a></p></li>
+<li><p><a class="reference internal" href="#compatible-md-software" id="id5">Compatible MD software</a></p>
+<ul>
+<li><p><a class="reference internal" href="#lammps" id="id6">LAMMPS</a></p></li>
+<li><p><a class="reference internal" href="#namd" id="id7">NAMD</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#compatible-qm-software" id="id8">Compatible QM software</a></p></li>
+<li><p><a class="reference internal" href="#parallelisation-of-frog-execution" id="id9">Parallelisation of FROG execution</a></p></li>
+<li><p><a class="reference internal" href="#ram-disk-space-and-writing-reading-procedure" id="id10">RAM, Disk space and writing-reading procedure</a></p>
+<ul>
+<li><p><a class="reference internal" href="#ram" id="id11">RAM</a></p></li>
+<li><p><a class="reference internal" href="#disk-space" id="id12">Disk space:</a></p></li>
+<li><p><a class="reference internal" href="#writing-reading-procedure" id="id13">Writing-reading procedure:</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<section id="os-compatibility">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink"><span class="section-number">1.3.1. </span>OS compatibility</a><a class="headerlink" href="#os-compatibility" title="Link to this heading">¶</a></h2>
+<p>FROG has been designed to run on an UNIX environment. Tests on Debian and Ubuntu have been performed. No particular reason would lead to crashes for other UNIX version. However, please contact us if it is so.</p>
+<p>Preliminary tests were performed on iOS: no problems were detected until the Python environment was created with the correct packages.</p>
+<p>No test has been made yet on Windows environment.</p>
+</section>
+<section id="python-packages-and-version">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink"><span class="section-number">1.3.2. </span>Python packages and version</a><a class="headerlink" href="#python-packages-and-version" title="Link to this heading">¶</a></h2>
+<p>FROG is written in Python3. It uses very standard libraries: os, sys, shutil, copy, datetime, time, pickle, importlib, multiprocessing, functools, itertools and numpy.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The numpy version tested is 1.16.2. Using other versions might lead to crashes. As mentioned above, the package MDAnalysis is also used – tested version: 0.20.1.</p>
+</div>
+</section>
+<section id="compatible-md-software">
+<span id="id1"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink"><span class="section-number">1.3.3. </span>Compatible MD software</a><a class="headerlink" href="#compatible-md-software" title="Link to this heading">¶</a></h2>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> works with the same topology during the whole simulation. No test has been made for MD simulation with varying number of particles nor chemical reactions. Therefore, the time step corresponding to the topology file does not matter as long as it is relevant with the trajectory encoding.</p>
+<p>In order to use the MD trajectory files, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> uses the python module <a class="reference external" href="https://www.mdanalysis.org/">MDAnalysis</a>. Therefore, FROG should be able to work with as many MD softwares as MDAnalysis can handle. However, here are the known successful attends until now: LAMMPS and NAMD. Below are listed how you should write the topology/trajectory line in these MD softwares. Please do not hesitate to let us know yours!</p>
+<section id="lammps">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink"><span class="section-number">1.3.3.1. </span>LAMMPS</a><a class="headerlink" href="#lammps" title="Link to this heading">¶</a></h3>
+<p>Trajectory and topology files are a combination of .dcd and .data formats.
+In the FROG input file, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>GP.MD_file_type = ’LAMMPS’
+</pre></div>
+</div>
+<p>In LAMMPS, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dump</span> <span class="n">dumpdcd</span> <span class="nb">all</span> <span class="n">dcd</span> <span class="n">your_dump_frequency</span> <span class="n">mytrajectory_file</span><span class="o">.</span><span class="n">dcd</span>
+<span class="n">write_data</span> <span class="n">mytopology_file</span><span class="o">.</span><span class="n">data</span>
+</pre></div>
+</div>
+<p>to write the trajectory during your MD run and the topology at the end of the simulation respectively.
+See also <a class="reference external" href="https://lammps.sandia.gov/doc/dump.html">https://lammps.sandia.gov/doc/dump.html</a> and <a class="reference external" href="https://lammps.sandia.gov/doc/write_data.html">https://lammps.sandia.gov/doc/write_data.html</a></p>
+</section>
+<section id="namd">
+<h3><a class="toc-backref" href="#id7" role="doc-backlink"><span class="section-number">1.3.3.2. </span>NAMD</a><a class="headerlink" href="#namd" title="Link to this heading">¶</a></h3>
+<p>Trajectory and topology files are a combination of .dcd and .psf formats.
+In the FROG input file, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>GP.MD_file_type = ’LAMMPS’
+</pre></div>
+</div>
+<p>In NAMD, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DCDfile</span> <span class="n">trajectoryfilename</span>
+<span class="n">DCDfreq</span> <span class="n">X</span>
+</pre></div>
+</div>
+<p>to write the trajectory during your MD run.
+See also <a class="reference external" href="https://www.ks.uiuc.edu/Research/namd/2.9/ug/node12.html">https://www.ks.uiuc.edu/Research/namd/2.9/ug/node12.html</a> .</p>
+</section>
+</section>
+<section id="compatible-qm-software">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink"><span class="section-number">1.3.4. </span>Compatible QM software</a><a class="headerlink" href="#compatible-qm-software" title="Link to this heading">¶</a></h2>
+<p>Only <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/>  V.2018 and V.2020 has been tried until now. No other QM software would be tested soon as the whole electrostatic emmebbeding procedure has been built around the PE formalisme of <img class="math" src="../_images/math/bfbb549f164cd99497fd208261b9b26d457ce62e.png" alt="\texttt{DALTON}"/>.</p>
+</section>
+<section id="parallelisation-of-frog-execution">
+<span id="parralelization-frog-procedure-subpage"></span><h2><a class="toc-backref" href="#id9" role="doc-backlink"><span class="section-number">1.3.5. </span>Parallelisation of FROG execution</a><a class="headerlink" href="#parallelisation-of-frog-execution" title="Link to this heading">¶</a></h2>
+<p>To speed up the execution of <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> , the parallelization is made over the time steps to treat. Each cores will have equal number of time steps to treat during the first and the third part of the run. In the <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> input file, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">nbr_parra</span> <span class="o">=</span> <span class="n">N</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>the python function “Pool” of the package “multiprocessing” is used to parralelize over “N” cores.</p>
+</div>
+<p>Of course, the easiest way for you to know how many cores you should use is to test by yourself. However, here are some advice that can help you guess:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The more cores you use, the less time step per cores should be performed during the first and the third part. Therefore, if your calculation requires a lot of ‘structural’ analysis, the more core, the less total time.</p></li>
+<li><p>The third part run in parrallele for every time step to load the QM result. During the merging part, <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> first merge the result over the set of time step per core, then over the cores. For instance, if there are 4 cores with 6 time steps per cores (total of 24 time step). Each cores will merge the result over the 6 time step they had to treat, leading to 4 temporary files containing the result of 6 time step each. Then, 1 core will merge the 4 temporary file. Thus, if the merging procedure may benefite from a balance parralelization. However, this part should not be time-consuming.</p></li>
+<li><p>Be aware that <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> may be quickly RAM-consuming. Therefore, you may benefite from using a serveur with large RAM. If not, it may be quicker to run over fewer GP.nbr_parra, but where every working core have enough RAM available.</p></li>
+<li><p>Using GP.MD_cut_trajectory = True helps to reduce the RAM needed. You should use this option if you run <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> in parrallele or with an initial large trajectory file.</p></li>
+<li><p>A botleneck can appear if many writting/reading operation is required (for instance when writing the dalton inputs in the first part) when runnning over many cores.</p></li>
+</ul>
+</div></blockquote>
+<p>Here are some examples of parralelization analysis.. The run consist on structural analysis only. The first part is the most time-consuming part.  In the following figure is the total runing time in function of the number of cores used:</p>
+<a class="reference internal image-reference" href="../_images/parralelization_cores.png"><img alt="../_images/parralelization_cores.png" class="align-center" src="../_images/parralelization_cores.png" style="width: 600px;" /></a>
+<p>Note that each serveur contains 32 cores. Until 32 cores, only one serveur have been required where all the RAM has been reserved for <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/>. Two total number of time step has been tested: 92 or 920. The difference in normalized total run time (with respect to the value obtain with 1 cores) is negligeable for these 2 time step.</p>
+<p>In this case, the total running time is inversly proportional to the number of core until 12 cores (the dashed line). However, after this point, the time needed for one core to treat one frame increases. The total running time still decreases until a plateau. Two problems can lead to such a result: not enough RAM available, or an overload writting-reading procedure.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The point at 64, 96, 128 and 160 cores have been made with 2, 3, 4 and 5 serveur of 32 cores each. No clear amelioration is visible. Therefore, today you may consider that <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> cannot benefit from running in parralelle over multiple serveur. Please note that it is not the case for the QM part, from which <img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> has been specifically designed to deal with QM calculation over multiple cores and serveurs.</p>
+</div>
+</section>
+<section id="ram-disk-space-and-writing-reading-procedure">
+<h2><a class="toc-backref" href="#id10" role="doc-backlink"><span class="section-number">1.3.6. </span>RAM, Disk space and writing-reading procedure</a><a class="headerlink" href="#ram-disk-space-and-writing-reading-procedure" title="Link to this heading">¶</a></h2>
+<section id="ram">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink"><span class="section-number">1.3.6.1. </span>RAM</a><a class="headerlink" href="#ram" title="Link to this heading">¶</a></h3>
+<p><img class="math" src="../_images/math/64ce76395a21d936e0f8a927bf1facabfed5a750.png" alt="\texttt{FROG}"/> can be quickly RAM-consuming. Indeed, the RAM most demanding part is the molecular information for all the molecules at a given time, and maybe the diagram if huge numbers of discretization points are asked. If parralelization over an important number of core is required, the total RAM used is:</p>
+<blockquote>
+<div><p>&lt; size of one frame &gt; × &lt; nbr of cores used by FROG &gt;</p>
+</div></blockquote>
+<p>Therefore, you may benefite from using a computer/serveur with large RAM.</p>
+<p>Another important point is the trajectory file. If you are dealing with a trajectory with a lot of time step, you should use the option GP.MD_cut_trajectory = True . It will create a trajectory for every time step. This reduces dramatically the RAM needed to open the trajectory. Moreover, it prevent you from multiple access probleme if you are running in parralelle (several cores would use the same trajectry file if GP.MD_cut_trajectory = False).</p>
+</section>
+<section id="disk-space">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink"><span class="section-number">1.3.6.2. </span>Disk space:</a><a class="headerlink" href="#disk-space" title="Link to this heading">¶</a></h3>
+<p>There are two main occupancies of the disk by FROG : the molecular informations (orientation, polarizability…) for every time step that are contained in MT files and the QM files/outputs.</p>
+<p>The MT files are generated for each time step required and during the merging procedure deleted them?. Their size depends on the number of molecules and on the discretization asked for diagrams. The number of input files for the QM simulation can be very large quickly. All of these files are light  (few hundred of bytes) apart from the environmental one (.pot and .xyz if asked) which can become large. We recommend to pay attention to the localization of these file: you may want to keep them to avoid redoing the QM simulations but they may take a lot of space. Today, no cleaning procedure regarding the QM input files has been implemented on FROG.</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>Add a cleaning procedure?</p>
+</div>
+</section>
+<section id="writing-reading-procedure">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink"><span class="section-number">1.3.6.3. </span>Writing-reading procedure:</a><a class="headerlink" href="#writing-reading-procedure" title="Link to this heading">¶</a></h3>
+<p>Be aware that if many servers are used at the same time to perform the QM run, the writing/reading process of files can very quickly become more time-consuming then the calculation itself. Therefore, we strongly recommend to write the QM input files in a disk well connected to the CPU – data-transfer speaking.</p>
+<p>In the FROG input file, use to define the path to where the QM input/output should be placed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">dir_torun_QM</span>
+</pre></div>
+</div>
+<p>Moreover, you can initialize the temporary files where DALTON will put some (large) files used for the QM run. In the FROG input file, use to define the path to these temporary files:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">GP</span><span class="o">.</span><span class="n">scratch_dir</span>
+</pre></div>
+</div>
+<p>We recommend to use a /tmp or /scratch or any other disk space with a strong/robust data writing/reading procedure with the CPU. If you can use the RAM of the server it is even better. An example is shown in the tutorial.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="how_to_install_frog.html">1. How to Install Frog?</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="installation.html">1.1. Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frog_on_gitlab.html">1.2. Use of Gitlab on Cameleon as a beta tester</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1.3. Numerical notes and requirements</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Tutorials/tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Installation/numerical_notes_and_requirements.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

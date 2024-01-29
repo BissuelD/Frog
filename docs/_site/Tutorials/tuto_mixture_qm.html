@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Mixture QM &#8212; Frog 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=039e1c02" />
+    <link rel="stylesheet" type="text/css" href="../_static/_static/css/s4defs-roles.css" />
+    <script src="../_static/documentation_options.js?v=8d563738"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <blockquote>
+<div></div></blockquote>
+<section id="mixture-qm">
+<span id="tuto-mixture-qm-page"></span><h1>Mixture QM<a class="headerlink" href="#mixture-qm" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
+<p class="topic-title">Table of Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#requirement" id="id1">Requirement</a></p></li>
+<li><p><a class="reference internal" href="#ask-for-qm-based-properties" id="id2">Ask for QM based properties</a></p></li>
+<li><p><a class="reference internal" href="#qm-description-for-the-target-molecule" id="id3">QM description for the target molecule:</a></p></li>
+<li><p><a class="reference internal" href="#the-effect-of-the-environment-on-the-qm-calculation" id="id4">The effect of the environment on the QM calculation:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#electrostatic-embedding" id="id5">Electrostatic embedding:</a></p>
+<ul>
+<li><p><a class="reference internal" href="#electrostatic-description-of-a-single-molecule" id="id6">Electrostatic description of a single molecule:</a></p></li>
+<li><p><a class="reference internal" href="#built-the-environment" id="id7">Built the environment:</a></p></li>
+<li><p><a class="reference internal" href="#keep-track-of-the-electrostatic-embedding-pe-option-of-the-electrostatic-field" id="id8">Keep track of the electrostatic embedding: ‘PE’ option of the electrostatic field</a></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Ne pas utiliser ce wiki/tuto pour l instant, je dois relire</p>
+</div>
+<p>In this tutorial we will explain some of Frog functionalities around the
+electrostatic environment. In previous tutorial, we have presented how
+Frog can built an environment around molecule in order to compute H-bond
+or Radial Distribution Function (RDF). These functionalities only
+require the molecular positions given by the MD trajectory. Here, we
+will go a steps further by adding an electrostatic description to any
+molecule present in the simulation. These electrostatic descriptions
+goes along with the definition of a Molecule Type (MT) and is define in
+its molecular module.</p>
+<p>For instance, for the MT ‘’Water_TIP4P2005’’, the electrostatic
+description is the same as the one of the force field TIP4P/2005: the
+Hydrogen atoms carry a +0.5564 e charge an the Oxygen atoms carry no
+charge. Instead, the -1.1128] e negative charge is located at the dipole
+moment position: 0.1546 Angstrom away from the Oxygen atom location in
+the dipole direction. (comprehensible?)</p>
+<p>Therefore, when attributing MT to the molecule of the simulation, the
+electrostatic medium is also built. Thus, for a given molecule, finding
+its neighbors also provide information about its electrostatic
+environment, for instance the electrostatic field it feel. Moreover,
+using this setup, Frog can prepare QM simulation file where a single
+molecule is embedded in an electrostatic environment.</p>
+<p>An important point to keep in mind is that the electrostatic description
+is not related to the MD files (contrarily to the molecule’s position)
+but to the MT defines in Frog. You can find the electrostatic
+description for a MT by looking to its molecular module function
+<code class="docutils literal notranslate"><span class="pre">electrostatic_description</span></code>.</p>
+<p>We will see how to prepare the parameter file to setup the electrostatic
+field analysis and QM calculation in an embedded environment. Then, we
+will see how to launch the QM simulation and finally how to make sure
+the run have been performed well. This tutorial will be made using a
+mixture of water-methanol in the bulk phase.</p>
+<section id="requirement">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Requirement</a><a class="headerlink" href="#requirement" title="Link to this heading">¶</a></h2>
+<p>First some requirements. You should have the files:</p>
+<ul class="simple">
+<li><p>The parameter file: <em>parameters*example</em>mixture_environment.py*</p></li>
+<li><p>The file to launch Frog: <em>RUN*ME</em>FROG.py*</p></li>
+<li><p>The trajectory file <em>mixture_bulk.dcd</em> and the relative topology
+<em>system.data</em> (in the Mixture_MD directory of the trajectory
+tutorial repository)</p></li>
+<li><p>The template script to launch the QM calculation on a cluster
+<em>template*run</em>dalton_parr.sh*</p></li>
+<li><p>The directory <em>QM*calculation</em>results* which contains the QM
+results in case you do not want to perform the QM calculations.</p></li>
+<li><p>The notebook to read the datas: <em>NAME</em></p></li>
+</ul>
+<p>Here we will note explain in details the General Parameter
+initialization procedure, see the tutorial How to launch FROG for more
+details. Moreover, we will no go in the details of how to defines
+several MT, see the tutorial Mixture and the structural analysis.</p>
+<p>QM calculation should be performed in this run. However, you may not
+want to perform these calculations and just use the results to see the
+global Frog procedure. In this case, you will have to change the name of
+the directory <em>QM*calculation</em>results* to fool Frog. Details will be
+given later on.</p>
+<p>Note that, we do not recommend to use exactly this QM description to
+compute hyperpolarizability – due to the poor basis set use. This
+example is made to be quick to perform, consider using a much larger
+base set if you want to have reliable results.</p>
+</section>
+<section id="ask-for-qm-based-properties">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Ask for QM based properties</a><a class="headerlink" href="#ask-for-qm-based-properties" title="Link to this heading">¶</a></h2>
+<p>We will take later in details about the definition of the GP in
+<em>parameters*example</em>mixture_environment.py* , so let’s skip this
+part first and focus on the ‘’Water*TIP4P2005’’ MT. As for the tutorial
+Mixture and the structural analysis, the MD simulation contains 2 types
+of molecule: water and methanol which we will describe using the
+‘’Water*TIP4P2005’’ and ‘’Methanol*OPLSAA’’ MT. The analysis required
+are the electric field in both ‘’PE’’ and ‘’on*fly’’ option and the
+polarizability (alpha and iota) and hyperpolarizability (beta and chi)
+in the molecular and laboratory frame. For these analysis, we have to
+define how to compute them since they are ‘’optical’’ properties. In
+this tutorial, we will see how to compute them using QM calculation
+threw the software Dalton.</p>
+<p>Let’s have a look at the line:</p>
+<p><code class="docutils literal notranslate"><span class="pre">moleculetype.read_optic_properties_input(GP,</span> <span class="pre">alpha_calculation_style='QM',</span> <span class="pre">L_alpha_ref=False,</span> <span class="pre">beta_calculation_style='QM',</span> <span class="pre">L_beta_ref=False,</span> <span class="pre">where_to_run_QM=where_to_run_QM,</span> <span class="pre">qmparameter=qmparameter,</span> <span class="pre">selection_tool=traking_molecules)</span></code></p>
+<p>In order to compute the individual polarizability/hyperpolarizability
+using a QM calculation, we have to set <code class="docutils literal notranslate"><span class="pre">alpha_calculation_style='QM'</span></code>
+and <code class="docutils literal notranslate"><span class="pre">beta_calculation_style='QM'</span></code>. The <code class="docutils literal notranslate"><span class="pre">L_alpha_ref=False</span></code> and
+<code class="docutils literal notranslate"><span class="pre">L_beta_ref=False</span></code> optional argument should be set to their default
+value: False (or not defined). In this case, two optinal argument should
+be set: <code class="docutils literal notranslate"><span class="pre">where_to_run_QM</span></code> and <code class="docutils literal notranslate"><span class="pre">qmparameter</span></code>.</p>
+<p>Because the number of QM calculations and the CPU time needed to run
+them, can grow very dramatically,<code class="docutils literal notranslate"><span class="pre">where_to_run_QM</span></code> defined what
+molecule of this MT should be treated using this QM method threw a space
+selection. For instance, using:
+<code class="docutils literal notranslate"><span class="pre">where_to_run_QM</span> <span class="pre">=</span> <span class="pre">['Plane_xy',</span> <span class="pre">400,</span> <span class="pre">[107,</span> <span class="pre">52,</span> <span class="pre">389,</span> <span class="pre">253]]</span></code> select only
+the molecules at a certain position with respect to the <em>z</em> laboratory
+axis at any time. Here, it discretize the space into 400 <em>xy</em>-slice:
+only the molecule position with the slice number 107, 52, 389 or 253 are
+treated using this QM method. The other molecule of this MT are skipped
+and do not contribute to the relevant diagrams. This space-selection can
+be very handfull to tackle interfaces or systems which you already know
+a particular zone of interest. In order to not use any space selection,
+use: <code class="docutils literal notranslate"><span class="pre">where_to_run_QM</span> <span class="pre">=</span> <span class="pre">['All']</span></code>.</p>
+<p>In top of this space-selection, you can add another one using the
+optional argument <code class="docutils literal notranslate"><span class="pre">selection_tool</span></code>. In this example, we will only
+considere the molecule number 1 and 50 using:
+<code class="docutils literal notranslate"><span class="pre">traking_molecules</span> <span class="pre">=</span> <span class="pre">['traking_molecules',</span> <span class="pre">[1,</span> <span class="pre">50]]</span></code> . Please note
+that for a molecule to be treated, it has to respect the space selection
+and the <code class="docutils literal notranslate"><span class="pre">selection_tool</span></code>.</p>
+<p>Now that we have define which molecule of this MT will be treated by a
+QM method, let’s define this QM description using the Frog object
+<code class="docutils literal notranslate"><span class="pre">qmparameter</span></code>. This object has special properties/function and should
+be initialized by calling <code class="docutils literal notranslate"><span class="pre">frog_class.QMParameter()</span></code>. There is two
+main information hold by this object: how to describe the molecule and
+how to describe its environment.</p>
+</section>
+<section id="qm-description-for-the-target-molecule">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">QM description for the target molecule:</a><a class="headerlink" href="#qm-description-for-the-target-molecule" title="Link to this heading">¶</a></h2>
+<p>The ‘’QM description’’ of a molecule of a MT is done threw the function
+<code class="docutils literal notranslate"><span class="pre">qm_target_description</span></code> in its molecular file. For instance for the
+‘’Water_TIP4P2005’’ MT:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">qm_target_description</span><span class="p">(</span><span class="n">qmparameter</span><span class="p">,</span> <span class="n">qmdescription</span><span class="p">,</span> <span class="n">L_pos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    QM description for the Water TIP4P2005 MT.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">qmparameter</span><span class="o">.</span><span class="n">type_basis</span> <span class="o">!=</span> <span class="s1">&#39;Global basis&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;WARNING: No other way to defined basis have been defined yet for this molecule. Possible value: &lt; Global basis &gt;. We can also defined basis for each atoms (TODO).&#39;</span><span class="p">)</span>
+<span class="n">qmdescription</span><span class="o">.</span><span class="n">L_atom_type</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]]]</span>
+
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L_pos</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L_pos</span><span class="p">:</span>
+    <span class="n">L_pos</span> <span class="o">=</span> <span class="n">typical_geometry</span><span class="p">()</span>
+
+<span class="n">qmdescription</span><span class="o">.</span><span class="n">L_coordinate</span> <span class="o">=</span> <span class="n">L_pos</span>
+
+<span class="k">return</span><span class="p">(</span><span class="n">qmdescription</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This MT QM description contains two information: the position of the
+atom <code class="docutils literal notranslate"><span class="pre">qmdescription.L_coordinate</span></code> and their type
+<code class="docutils literal notranslate"><span class="pre">qmdescription.L_atom_type</span></code>. Note that there is no restriction with
+respect to this definition with respect to the number/position of the
+atom. The most natural use should be to keep the atom position from the
+MD trajectory and there charge as done in this example. For more
+information about how to implement a new QM description, please see the
+Tutorial: How to create a new Molecular Type.</p>
+<p>The description available in the molecular module is thus very light:
+almost everything except the atomic position/charge should be defined in
+the <code class="docutils literal notranslate"><span class="pre">qmparameter</span></code> object in the input file.</p>
+<p>First, what is the theory framework, for instance DFT:
+<code class="docutils literal notranslate"><span class="pre">qmparameter.theory_lv</span> <span class="pre">=</span> <span class="pre">'DFT'</span></code>. In this case, you should also define
+the functional used: <code class="docutils literal notranslate"><span class="pre">qmparameter.functional</span> <span class="pre">=</span> <span class="pre">'Camb3lyp'</span></code> for
+example. Please note that the functional should be written in the exact
+same way as the one of .dal input of Dalton (juste after the WAVE
+FUNCTIONS and DFT lines), see the Dalton documentation to see what
+functional are available. Then, what type of basis and basis should be
+used. For instance the same basis for all the atom
+<code class="docutils literal notranslate"><span class="pre">qmparameter.type_basis</span> <span class="pre">=</span> <span class="pre">'Global</span> <span class="pre">basis'</span></code> and a small basis:
+<code class="docutils literal notranslate"><span class="pre">qmparameter.global_basis_value</span> <span class="pre">=</span> <span class="pre">'cc-pVDZ'</span></code>. As for the functional
+available, see the dalton main documentation for more information about
+the basis available. Please note that the hyperpolarizability is
+<strong>very</strong> sensitive to the basis set.</p>
+<p>You can add more physical attributes for the QM calculation, like a non
+zero charge or a permanent electric field. Please see the main
+documentation for more information.</p>
+<p>Then, you have to define at which frequency the polarizability and
+hyperpolarizability will be computed. Use the attribute
+<code class="docutils literal notranslate"><span class="pre">qmparameter.polarizability_response</span></code> and <code class="docutils literal notranslate"><span class="pre">qmparameter.shg_response</span></code>
+to set the frequency <strong>in atomic unit</strong>.</p>
+<p>Important note: if the polarizability and the hyperpolarizability are
+computed threw QM method (<code class="docutils literal notranslate"><span class="pre">alpha_calculation_style='QM'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">beta_calculation_style='QM'</span></code>), you the frequency available for the
+polarizability depend on the one of the hyperpolarizability. The
+frequency available are the one of the hyperpolarizability plus their
+double. For instance <code class="docutils literal notranslate"><span class="pre">qmparameter.shg_response</span> <span class="pre">=</span> <span class="pre">[0.0,</span> <span class="pre">0.05686]</span></code> will
+allow you to compute the polarizability frequency at 0 and 0.05686
+atomic unit plus the one at 0.11372 atomic unit.</p>
+<p>For every frequency required, a new diagram will be generated: you can
+thus see the impact of the frequency on these ‘’optical’’ properties.</p>
+</section>
+<section id="the-effect-of-the-environment-on-the-qm-calculation">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">The effect of the environment on the QM calculation:</a><a class="headerlink" href="#the-effect-of-the-environment-on-the-qm-calculation" title="Link to this heading">¶</a></h2>
+<p>Now that we have define how one molecule of this MT behaves
+quantum-mechanically-speaking and at which frequency compute the optical
+properties, let’s define how the environment should impact the molecule
+properties. Indeed, the aim of Frog is to compute (expensive) molecular
+property in the liquid phase at the quantum level. To take into account
+the neighbors in a single molecule QM calculation, the first possibility
+is to consider the electrostatic field environment.</p>
+<section id="electrostatic-embedding">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Electrostatic embedding:</a><a class="headerlink" href="#electrostatic-embedding" title="Link to this heading">¶</a></h3>
+<p>This is done by: <code class="docutils literal notranslate"><span class="pre">qmparameter.calculation_style</span> <span class="pre">=</span> <span class="pre">'PE'</span></code>. PE stands for
+Polarizable Environment as in the Dalton framework. In this example, we
+will treat only the first order of interaction: the electrostatic
+components (point charge, dipole, quadrupole…) affect the QM
+properties of the molecule, but there molecular values are independent
+of the neighborhood and the QM properties – no neighbors interaction
+nor QM to neighbors influence threw neighbor polarizations. This is done
+by <code class="docutils literal notranslate"><span class="pre">qmparameter.pe_level</span> <span class="pre">=</span> <span class="pre">1</span></code>. For a given molecule of this MT, the
+surrounding of <strong>all</strong> the molecule up to a certain distance; set by
+<code class="docutils literal notranslate"><span class="pre">qmparameter.max_pe_distance_neigh</span> <span class="pre">=</span> <span class="pre">10</span></code> in angstrom, is computed.
+This local neighborhood can be printed out using
+<code class="docutils literal notranslate"><span class="pre">qmparameter.write_xyz_environment</span> <span class="pre">=</span> <span class="pre">True</span></code>. For all the molecule of
+this surrounding, their electrostatic description are calculated and
+added. The QM calculation will then be performed with a
+<strong>heterogeneous</strong> electric field due to the molecule neighborhood.</p>
+<p>As explain previously, an analysis which require an electrostatic
+embedding implies that all the MT provide an electrostatic description
+– contrarily to H-bond for instance where only the target and partner
+molecules are considerated. In other words, since this analysis implies
+potentially all the MT, all the MT should be able to contribute if
+needed. Note that if you want to avoid a particular MT to contribute,
+you can modify its electrostatic description and cancels all the charges
+– see the following paragraph.</p>
+<section id="electrostatic-description-of-a-single-molecule">
+<h4><a class="toc-backref" href="#id6" role="doc-backlink">Electrostatic description of a single molecule:</a><a class="headerlink" href="#electrostatic-description-of-a-single-molecule" title="Link to this heading">¶</a></h4>
+<p>It is given by the function <code class="docutils literal notranslate"><span class="pre">electrostatic_description</span></code> in the
+molecular library file. For instance, for the ‘’Methanol*OPLSAA’’ MT,
+the function `electrostatic*description` in the molecular module
+<em>Methanol_OPLSAA.py</em> (located as all the molecular module in the
+repository: /source/Molecules) Electrostatic description:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">electrostatic_description</span><span class="p">(</span><span class="n">pe_order</span><span class="p">,</span> <span class="n">electro_neigh</span><span class="p">,</span> <span class="n">L_pos</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Electrostatic description of the Methanol_OPLSAA molecule type. These charges are the same as the usual OPLS/AA force field. The charge are given in e units.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">L_pos</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">L_pos</span><span class="p">:</span> <span class="c1"># needed during Frog initialization.</span>
+        <span class="n">L_pos</span> <span class="o">=</span> <span class="n">typical_geometry</span><span class="p">()</span> <span class="c1"># test geometry</span>
+
+    <span class="n">electro_neigh</span><span class="o">.</span><span class="n">multipole_order</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">electro_neigh</span><span class="o">.</span><span class="n">polarization_order</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_type</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">]</span>
+    <span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_localization_site</span> <span class="o">=</span> <span class="n">L_pos</span>
+    <span class="n">electro_neigh</span><span class="o">.</span><span class="n">L_charge_order_0</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.683</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.418</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mf">0.145</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">]]</span> <span class="c1">#Warning: contrarily to the rest of the code/python uses, the site are label from 1 (no 0!)</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">electro_neigh</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that the expected topology of the methanol molecule in this case
+is: Oxygen atom, the hydrogen linked to the Oxygen, Carbone atom, the 3
+last Hydrogen atoms linked to the Carbon.</p>
+<p>You can describe the electrostatic properties of a MT using several
+multipolar order. The order 0 is point charges, 1 is dipoles and 2
+quadrupoles. The maximal order used is encoded in the
+<code class="docutils literal notranslate"><span class="pre">electro_neigh.multipole_order</span></code> variable. In this example, only point
+charge are used.</p>
+<p>TODO: polarization order.</p>
+<p>In order to place in space the charges, dipoles or quadrupoles generic
+‘’sites’’ are defined using the attribute
+<code class="docutils literal notranslate"><span class="pre">electro_neigh.L_localization_type</span></code> and
+<code class="docutils literal notranslate"><span class="pre">electro_neigh.L_localization_site</span></code>. The first attribute contains
+strings with the ‘’name’’ of these site. Note that these name have no
+physical impact: they are used only if an .xyz file is required to have
+a look at a neighborhood. The second attribute contains the list of the
+position of these site. In many cases you can just use the atom
+position, but you can also define news one based on the molecule’s
+position. It is important to point out that the number of site can be
+anything: there is no constrain with respect to the number of atom.</p>
+<p>Once you have define the sites, you can attribute charges/dipole
+moments/quadrupole moments to any of them. Note that you can define a
+charge, dipole and a quadrupole to the same site or none. In this
+example, <code class="docutils literal notranslate"><span class="pre">electro_neigh.L_charge_order_0</span></code> defines the charge for every
+sites (which is the same as the atomic position here). Here, the charge
+will be the same as the one given by the OPLS/AA force field for the
+methanol molecule: -0.683 for the oxygen atom, 0.418 for the Hydrogen
+linked to the Oxygen, 0.145 for the Carbon atom and 0.04 for the three
+Hydrogen linked to the Carbone atom. For more information about how to
+implement a new electrostatic description, please see the Tutorial: How
+to create a new Molecular Type.</p>
+<p>Note: if you want to avoid the contribution of a certain MT, you can set
+all the charges to zero. In this way, you will still see the molecule in
+the .xyz neighborhood file, but with no physical impact on the QM
+results.</p>
+</section>
+<section id="built-the-environment">
+<h4><a class="toc-backref" href="#id7" role="doc-backlink">Built the environment:</a><a class="headerlink" href="#built-the-environment" title="Link to this heading">¶</a></h4>
+<p>The main information to built the environment of a molecule is the
+maximal distance authorized defined by
+<code class="docutils literal notranslate"><span class="pre">qmparameter.max_pe_distance_neigh</span></code> - in angstrom from the molecule
+‘’mean position’’ to the neighbors ‘’mean position’’. You can also add
+more specific condition, see the main documentation. We will just pay
+attention to the case where this maximal distance is larger then some
+box dimension. In this case, the periodic boundary condition will be
+used in order to duplicate the neigbors in the given authorized
+direction. For instance, is the</p>
+<p>GP.env<em>authorised</em>pbc_condition</p>
+<p>You can add more options to defined</p>
+</section>
+<section id="keep-track-of-the-electrostatic-embedding-pe-option-of-the-electrostatic-field">
+<h4><a class="toc-backref" href="#id8" role="doc-backlink">Keep track of the electrostatic embedding: ‘PE’ option of the electrostatic field</a><a class="headerlink" href="#keep-track-of-the-electrostatic-embedding-pe-option-of-the-electrostatic-field" title="Link to this heading">¶</a></h4>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../index.html">
+    <img class="logo" src="../_static/frog_logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation/how_to_install_frog.html">1. How to Install Frog?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial_index.html">2. Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../GlobalParameter/gp_index.html">3. Global Parameter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MoleculeType/mt_index.html">4. Molecule Type</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Diagram/diagram_index.html">5. Diagram</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../OpticalAnalysis/optical_analysis_index.html">6. Optical Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Mathematics/mathematical_index.html">7. Mathematical and Numerical Index</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Frog.html">8. Frog package</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Guillaume Le Breton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.2.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/Tutorials/tuto_mixture_qm.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
