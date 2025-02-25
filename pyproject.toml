@@ -1,0 +1,20 @@
+[project]
+name = "frog"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mdanalysis>=2.8.0",
+    "numpy>=2.2.3",
+    "pip>=25.0.1",
+    "pytim>=1.0.2",
+    "scikit-image>=0.25.2",
+    "setuptools>=75.8.1",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "ipython>=8.32.0",
+]
