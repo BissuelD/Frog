@@ -7,3 +7,9 @@ _templates
 _build
 dist
 **/*.p
+**/*.dcd
+**/*.pqr
+**/*.pdb
+**/Molecule_times
+**/2D_40
+**/frog_log.txt
